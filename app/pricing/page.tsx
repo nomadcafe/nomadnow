@@ -182,49 +182,50 @@ export default function PricingPage() {
       {/* Pricing cards */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
         <div className="grid md:grid-cols-2 gap-6 items-stretch">
-          {/* Basic */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-7 sm:p-8 flex flex-col">
+          {/* Basic — featured. Most users start here in a paid-only model, so it
+              gets the dark "look at me" treatment and the Most popular badge. */}
+          <div className="relative rounded-2xl border-2 border-gray-900 bg-gray-900 text-white p-7 sm:p-8 flex flex-col shadow-xl shadow-gray-900/20">
+            <span className="absolute -top-3 right-6 inline-flex items-center gap-1 bg-amber-300 text-gray-900 text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full">
+              Most popular
+            </span>
             <div className="mb-6">
-              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 mb-2">Basic</h2>
+              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-400 mb-2">Basic</h2>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl sm:text-5xl font-semibold tracking-tight">$2.8</span>
-                <span className="text-gray-500">/mo</span>
+                <span className="text-gray-400">/mo</span>
               </div>
-              <p className="mt-2 text-sm text-gray-600">Get on the map. Everything you need for a public nomad card.</p>
+              <p className="mt-2 text-sm text-gray-300">Get on the map. Everything you need for a public nomad card.</p>
             </div>
             <ul className="space-y-3 mb-8 flex-1">
               {BASIC_BULLETS.map((b) => (
-                <li key={b} className="flex items-start gap-2.5 text-[15px] text-gray-800">
-                  <Check className="text-gray-700 mt-0.5 shrink-0" />
+                <li key={b} className="flex items-start gap-2.5 text-[15px] text-gray-100">
+                  <Check className="text-amber-300 mt-0.5 shrink-0" />
                   <span>{b}</span>
                 </li>
               ))}
             </ul>
             <Link
               href="/login?plan=basic"
-              className="block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
+              className="block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
             >
               Start with Basic
             </Link>
           </div>
 
           {/* Pro */}
-          <div className="relative rounded-2xl border-2 border-gray-900 bg-gray-900 text-white p-7 sm:p-8 flex flex-col shadow-xl shadow-gray-900/20">
-            <span className="absolute -top-3 right-6 inline-flex items-center gap-1 bg-amber-300 text-gray-900 text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full">
-              Most popular
-            </span>
+          <div className="rounded-2xl border border-gray-200 bg-white p-7 sm:p-8 flex flex-col">
             <div className="mb-6">
-              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-400 mb-2">Pro</h2>
+              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 mb-2">Pro</h2>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl sm:text-5xl font-semibold tracking-tight">$9.8</span>
-                <span className="text-gray-400">/mo</span>
+                <span className="text-gray-500">/mo</span>
               </div>
-              <p className="mt-2 text-sm text-gray-300">Own your nomad brand. Custom domain, unlimited links, advanced analytics.</p>
+              <p className="mt-2 text-sm text-gray-600">Own your nomad brand. Custom domain, unlimited links, advanced analytics.</p>
             </div>
             <ul className="space-y-3 mb-8 flex-1">
               {PRO_BULLETS.map(({ label, soon }) => (
-                <li key={label} className="flex items-start gap-2.5 text-[15px] text-gray-100">
-                  <Check className="text-amber-300 mt-0.5 shrink-0" />
+                <li key={label} className="flex items-start gap-2.5 text-[15px] text-gray-800">
+                  <Check className="text-gray-700 mt-0.5 shrink-0" />
                   <span>
                     {label}
                     {soon && <SoonPill />}
@@ -234,7 +235,7 @@ export default function PricingPage() {
             </ul>
             <Link
               href="/login?plan=pro"
-              className="block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
+              className="block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
             >
               Go Pro
             </Link>
