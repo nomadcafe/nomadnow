@@ -1,4 +1,7 @@
 -- Users table
+-- Subscription / billing state is stored 1:1 on `users` — see columns at the
+-- bottom of this CREATE. Stripe webhooks at /api/billing/webhook keep these
+-- in sync.
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   handle TEXT UNIQUE NOT NULL,
@@ -16,11 +19,18 @@ CREATE TABLE IF NOT EXISTS users (
   timezone TEXT, -- Current timezone
   visited_countries TEXT[], -- Array of country codes (e.g., ['TH', 'JP', 'PT'])
   profile_type TEXT DEFAULT 'creator', -- 'creator' | 'nomad' | 'both'
+  -- Stripe billing state (kept on users for 1:1 simplicity — see migration 0003)
+  stripe_customer_id TEXT UNIQUE,
+  plan TEXT,                     -- 'basic' | 'pro' | NULL (no active subscription)
+  subscription_status TEXT,      -- mirrors Stripe subscription.status
+  subscription_id TEXT UNIQUE,
+  current_period_end TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX idx_users_handle ON users(handle);
+CREATE INDEX idx_users_stripe_customer_id ON users(stripe_customer_id);
 
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (

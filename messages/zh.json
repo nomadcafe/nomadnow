@@ -312,7 +312,29 @@
       "delayHint": "为保护隐私,数据落后实时显示。0 = 即时。"
     },
     "saved": "设置已保存",
-    "saveError": "保存设置失败"
+    "saveError": "保存设置失败",
+    "billing": {
+      "title": "订阅与计费",
+      "description": "管理订阅、更新付款方式、取消订阅。",
+      "currentPlan": "当前套餐",
+      "planBasic": "Basic",
+      "planPro": "Pro",
+      "planNone": "没有有效套餐",
+      "manage": "管理订阅",
+      "subscribe": "选个套餐",
+      "renewsOn": "{date} 续费",
+      "endsOn": "{date} 前可用",
+      "status": {
+        "active": "有效",
+        "past_due": "支付逾期",
+        "trialing": "试用中",
+        "canceled": "已取消",
+        "incomplete": "未完成",
+        "unpaid": "未支付",
+        "paused": "已暂停"
+      },
+      "portalError": "无法打开订阅管理页面,请稍后再试。"
+    }
   },
   "card": {
     "verified": "已认证",
@@ -409,6 +431,12 @@
     "emptyTitle": "这里还没有游民",
     "emptyBody": "把 {country} 加进你的访问国家清单,搜索「{country}」的人就能在这里看到你。",
     "backToMap": "← 返回全球地图"
+  },
+  "profileExpired": {
+    "title": "这张卡片已不再可用。",
+    "body": "卡片主人订阅已结束。Handle 保留 30 天,以备他们回来。",
+    "cta": "做自己的卡片",
+    "browse": "看看其他游民"
   },
   "profileNotFound": {
     "availableBadge": "可用",

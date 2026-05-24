@@ -1,8 +1,10 @@
 import React from 'react'
 import { NomadCard } from '@/components/NomadCard'
 import { ProfileNotFound } from '@/components/ProfileNotFound'
+import { ProfileExpired } from '@/components/ProfileExpired'
 import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
+import { deriveBillingState } from '@/lib/billing'
 import { getCountryName } from '@/lib/countries'
 
 async function getProfileData(handle: string) {
@@ -121,6 +123,14 @@ export default async function ProfilePage({
   }
 
   const { user, settings, nomadLinks } = profileData
+
+  // Subscription gate. If the owner canceled and the paid period has elapsed,
+  // we hide the card entirely — keeps the paid-only model honest. Active and
+  // past_due subs render normally (we accept past_due as grace).
+  const billing = deriveBillingState(user)
+  if (billing.isExpired) {
+    return <ProfileExpired handle={handle} />
+  }
 
   const currentLocation = user.current_city || user.location
   const visitedNames: string[] = (user.visited_countries ?? [])

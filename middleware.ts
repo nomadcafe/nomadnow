@@ -13,7 +13,10 @@ export async function middleware(request: NextRequest) {
     const isPublicRead =
       pathname.startsWith('/api/profile') ||
       pathname.startsWith('/api/health') ||
-      pathname.startsWith('/api/users/check-handle')
+      pathname.startsWith('/api/users/check-handle') ||
+      // Stripe webhooks come from a fixed pool of IPs; rate-limiting could
+      // drop legitimate billing events during traffic spikes.
+      pathname === '/api/billing/webhook'
 
     if (!isPublicRead) {
       const ip =

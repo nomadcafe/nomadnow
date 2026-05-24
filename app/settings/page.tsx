@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/Toast'
@@ -38,14 +38,29 @@ function normalizeTheme(value: unknown): ThemeKey {
   return 'classic'
 }
 
+interface BillingDisplayState {
+  plan: 'basic' | 'pro' | null
+  status: string | null
+  currentPeriodEnd: string | null
+}
+
 export default function SettingsPage() {
   const t = useTranslations('settings')
   const tCommon = useTranslations('common')
+  const tBilling = useTranslations('settings.billing')
+  const tBillingStatus = useTranslations('settings.billing.status')
+  const locale = useLocale()
   const router = useRouter()
   const { toasts, showSuccess, showError, removeToast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [handle, setHandle] = useState<string>('')
+  const [billing, setBilling] = useState<BillingDisplayState>({
+    plan: null,
+    status: null,
+    currentPeriodEnd: null,
+  })
+  const [portalLoading, setPortalLoading] = useState(false)
   const [settings, setSettings] = useState<ProfileSettings>({
     layout_template: 'centered',
     theme_color: 'classic',
@@ -67,10 +82,17 @@ export default function SettingsPage() {
 
       const { data: profile } = await supabase
         .from('users')
-        .select('handle')
+        .select('handle, plan, subscription_status, current_period_end')
         .eq('id', user.id)
         .maybeSingle()
       if (profile?.handle) setHandle(profile.handle as string)
+      if (profile) {
+        setBilling({
+          plan: (profile.plan as 'basic' | 'pro' | null) ?? null,
+          status: (profile.subscription_status as string | null) ?? null,
+          currentPeriodEnd: (profile.current_period_end as string | null) ?? null,
+        })
+      }
 
       try {
         const response = await fetch('/api/settings')
@@ -126,6 +148,39 @@ export default function SettingsPage() {
       showError(error instanceof Error ? error.message : t('saveError'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true)
+    try {
+      const res = await fetch('/api/billing/portal', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.url) {
+        window.location.href = data.url
+        return
+      }
+      showError(data.error || tBilling('portalError'))
+    } catch {
+      showError(tBilling('portalError'))
+    } finally {
+      setPortalLoading(false)
+    }
+  }
+
+  // Renders the renewal/end-of-period line under the plan label. Active subs
+  // see "renews on X"; canceled subs (still inside their paid period) see
+  // "access ends on X" so they know exactly when the page goes dark.
+  const formatPeriodEnd = (iso: string | null): string | null => {
+    if (!iso) return null
+    try {
+      return new Date(iso).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    } catch {
+      return null
     }
   }
 
@@ -200,6 +255,72 @@ export default function SettingsPage() {
           </header>
 
           <div className="space-y-10">
+            {/* Billing */}
+            <Section
+              title={tBilling('title')}
+              description={tBilling('description')}
+            >
+              <div className="rounded-xl border border-gray-200 bg-white p-5">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                      {tBilling('currentPlan')}
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {billing.plan === 'pro'
+                        ? tBilling('planPro')
+                        : billing.plan === 'basic'
+                        ? tBilling('planBasic')
+                        : tBilling('planNone')}
+                      {billing.status && (
+                        <span
+                          className={`ml-2 inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full align-middle ${
+                            billing.status === 'active' || billing.status === 'trialing'
+                              ? 'bg-green-50 text-green-700 border border-green-100'
+                              : billing.status === 'canceled'
+                              ? 'bg-gray-100 text-gray-700'
+                              : 'bg-amber-50 text-amber-700 border border-amber-100'
+                          }`}
+                        >
+                          {(() => {
+                            try {
+                              return tBillingStatus(billing.status)
+                            } catch {
+                              return billing.status
+                            }
+                          })()}
+                        </span>
+                      )}
+                    </div>
+                    {billing.currentPeriodEnd && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {billing.status === 'canceled'
+                          ? tBilling('endsOn', { date: formatPeriodEnd(billing.currentPeriodEnd) ?? '' })
+                          : tBilling('renewsOn', { date: formatPeriodEnd(billing.currentPeriodEnd) ?? '' })}
+                      </div>
+                    )}
+                  </div>
+                  {billing.plan ? (
+                    <button
+                      type="button"
+                      onClick={openBillingPortal}
+                      disabled={portalLoading}
+                      className="text-sm font-medium px-4 py-2 rounded-full border border-gray-300 hover:border-gray-900 transition disabled:opacity-60 disabled:cursor-wait"
+                    >
+                      {portalLoading ? tCommon('loading') : tBilling('manage')}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/pricing"
+                      className="text-sm font-medium px-4 py-2 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition"
+                    >
+                      {tBilling('subscribe')}
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </Section>
+
             {/* Layout */}
             <Section
               title={t('layout.title')}
