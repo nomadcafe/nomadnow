@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { Logo } from '@/components/Logo'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
 import { THEMES, THEME_KEYS, type ThemeKey } from '@/lib/themes'
 import {
@@ -37,6 +39,8 @@ function normalizeTheme(value: unknown): ThemeKey {
 }
 
 export default function SettingsPage() {
+  const t = useTranslations('settings')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const { toasts, showSuccess, showError, removeToast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -111,7 +115,7 @@ export default function SettingsPage() {
         throw new Error(data.error || 'Failed to save settings')
       }
 
-      showSuccess('Settings saved')
+      showSuccess(t('saved'))
       if (handle) {
         setTimeout(() => {
           router.push(`/${handle}`)
@@ -119,7 +123,7 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Error saving settings:', error)
-      showError(error instanceof Error ? error.message : 'Failed to save settings')
+      showError(error instanceof Error ? error.message : t('saveError'))
     } finally {
       setSaving(false)
     }
@@ -170,33 +174,36 @@ export default function SettingsPage() {
         <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
             <Logo />
-            {handle ? (
-              <Link href={`/${handle}`} className="text-sm text-gray-500 hover:text-gray-900 transition">
-                View profile
-              </Link>
-            ) : (
-              <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition">
-                Cancel
-              </Link>
-            )}
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher />
+              {handle ? (
+                <Link href={`/${handle}`} className="text-sm text-gray-500 hover:text-gray-900 transition">
+                  {t('navView')}
+                </Link>
+              ) : (
+                <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition">
+                  {tCommon('cancel')}
+                </Link>
+              )}
+            </div>
           </div>
         </nav>
 
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 pb-32">
           <header className="mb-10">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-              Settings.
+              {t('title')}
             </h1>
             <p className="text-gray-600">
-              Customize your profile layout, theme, and what&apos;s shown.
+              {t('subtitle')}
             </p>
           </header>
 
           <div className="space-y-10">
             {/* Layout */}
             <Section
-              title="Layout"
-              description="Choose how your profile is arranged."
+              title={t('layout.title')}
+              description={t('layout.description')}
             >
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {(['centered', 'card', 'grid', 'minimal'] as const).map((template) => {
@@ -211,7 +218,7 @@ export default function SettingsPage() {
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className="text-sm font-medium text-gray-900 capitalize">{template}</div>
+                      <div className="text-sm font-medium text-gray-900">{t(`layout.${template}`)}</div>
                     </button>
                   )
                 })}
@@ -220,8 +227,8 @@ export default function SettingsPage() {
 
             {/* Theme */}
             <Section
-              title="Theme"
-              description="A complete look — background, type, buttons, accent."
+              title={t('theme.title')}
+              description={t('theme.description')}
             >
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 {THEME_KEYS.map((key) => (
@@ -234,7 +241,7 @@ export default function SettingsPage() {
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-3">
-                Preview any theme live at{' '}
+                {t('theme.previewHint')}
                 <a
                   href={`/preview?theme=${settings.theme_color || 'classic'}`}
                   target="_blank"
@@ -249,8 +256,8 @@ export default function SettingsPage() {
 
             {/* Sections */}
             <Section
-              title="Sections"
-              description="Toggle visibility and reorder."
+              title={t('sections.title')}
+              description={t('sections.description')}
             >
               <div className="space-y-2">
                 {(() => {
@@ -281,14 +288,14 @@ export default function SettingsPage() {
                             disabled={isRequired}
                             onChange={() => toggleSection(section.id)}
                             className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900/30 disabled:cursor-not-allowed"
-                            aria-label={`Show ${section.label}`}
+                            aria-label={`${t('sections.show')} ${section.label}`}
                           />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
                               {section.label}
                               {isRequired && (
                                 <span className="text-[10px] uppercase tracking-wider text-gray-400 font-normal">
-                                  required
+                                  {tCommon('required')}
                                 </span>
                               )}
                             </div>
@@ -299,7 +306,7 @@ export default function SettingsPage() {
                               onClick={() => moveSection(section.id, 'up')}
                               disabled={isFirst}
                               className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                              aria-label="Move up"
+                              aria-label={t('sections.moveUp')}
                             >
                               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -309,7 +316,7 @@ export default function SettingsPage() {
                               onClick={() => moveSection(section.id, 'down')}
                               disabled={isLast}
                               className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                              aria-label="Move down"
+                              aria-label={t('sections.moveDown')}
                             >
                               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -325,8 +332,8 @@ export default function SettingsPage() {
 
             {/* Branding */}
             <Section
-              title="Branding"
-              description='Whether to show the "Make yours" CTA to visitors on your card.'
+              title={t('branding.title')}
+              description={t('branding.description')}
             >
               <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-gray-300 transition">
                 <input
@@ -337,10 +344,10 @@ export default function SettingsPage() {
                 />
                 <div className="flex-1">
                   <div className="text-sm font-medium text-gray-900">
-                    Hide &ldquo;Make yours&rdquo; CTA on my card
+                    {t('branding.hideLabel')}
                   </div>
                   <div className="text-xs text-gray-500 mt-0.5">
-                    Removes the floating button that invites visitors to create their own card. Your profile stays the same.
+                    {t('branding.hideHint')}
                   </div>
                 </div>
               </label>
@@ -348,24 +355,24 @@ export default function SettingsPage() {
 
             {/* Privacy */}
             <Section
-              title="Privacy"
-              description="Who can see what, and with how much delay."
+              title={t('privacy.title')}
+              description={t('privacy.description')}
             >
               <div className="space-y-4">
-                <Field label="Profile visibility">
+                <Field label={t('privacy.visibilityLabel')}>
                   <select
                     value={settings.visibility || 'public'}
                     onChange={(e) => setSettings((prev) => ({ ...prev, visibility: e.target.value as 'public' | 'private' }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
                   >
-                    <option value="public">Public — anyone can view</option>
-                    <option value="private">Private — only you</option>
+                    <option value="public">{t('privacy.visibilityPublic')}</option>
+                    <option value="private">{t('privacy.visibilityPrivate')}</option>
                   </select>
                 </Field>
 
                 <Field
-                  label="Reveal delay (days)"
-                  hint="Lag data behind real time for privacy. 0 = immediate."
+                  label={t('privacy.delayLabel')}
+                  hint={t('privacy.delayHint')}
                 >
                   <input
                     type="number"
@@ -390,7 +397,7 @@ export default function SettingsPage() {
                 href={`/${handle}`}
                 className="px-5 py-3 text-gray-600 hover:text-gray-900 rounded-full font-medium transition text-sm"
               >
-                Cancel
+                {tCommon('cancel')}
               </Link>
             )}
             <button
@@ -401,10 +408,10 @@ export default function SettingsPage() {
               {saving ? (
                 <>
                   <LoadingSpinner size="sm" />
-                  <span>Saving…</span>
+                  <span>{tCommon('saving')}</span>
                 </>
               ) : (
-                <span>Save changes</span>
+                <span>{tCommon('save')}</span>
               )}
             </button>
           </div>

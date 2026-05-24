@@ -1,0 +1,392 @@
+{
+  "common": {
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "取消",
+    "loading": "加载中…",
+    "next": "下一步",
+    "back": "返回",
+    "delete": "删除",
+    "yes": "是",
+    "no": "否",
+    "soon": "即将推出",
+    "required": "必填",
+    "optional": "可选",
+    "from": "起"
+  },
+  "languageSwitcher": {
+    "label": "语言",
+    "english": "English",
+    "japanese": "日本語",
+    "chinese": "中文"
+  },
+  "nav": {
+    "map": "地图",
+    "explore": "发现",
+    "pricing": "价格",
+    "signin": "登录",
+    "getCard": "创建卡片",
+    "viewProfile": "查看主页"
+  },
+  "footer": {
+    "tagline": "为不在一处定居的人准备的 bio 链接。",
+    "copyright": "© 2026 Nomad.now",
+    "credit": "由一直在路上的人,为一直在路上的人打造。"
+  },
+  "metadata": {
+    "title": "Nomad.now — 你的数字游民人生,一个链接装得下",
+    "description": "你在哪、你去过哪、你在做什么。一条链接。",
+    "ogDescription": "你在哪、你去过哪、你在做什么。",
+    "pricingTitle": "价格 — Nomad.now",
+    "pricingDescription": "简单直接的定价。两个套餐,没有免费档,没有广告,没有抽成。"
+  },
+  "home": {
+    "eyebrow": "为数字游民设计的 bio 链接",
+    "heroLine1": "你在哪。",
+    "heroLine2": "你去过哪。",
+    "heroLine3": "你在做什么。",
+    "heroSub1": "一个链接装下整个数字游民人生。当地实时时间、你踏足过的每个国家、你正在做的事。全都在 ",
+    "heroSub2": "。",
+    "heroPriceNote": "每月 $2.80 起",
+    "heroSetupNote": "1 分钟即可上线",
+    "live": {
+      "eyebrow": "正在进行中",
+      "title": "卡片上的时间,跟着你走。",
+      "description": "这些是这些城市真实的当地时间。在某个用户的卡片上,它们就是这样每分钟跳动着。"
+    },
+    "feature1": {
+      "label": "旅行",
+      "title": "随你成长的地图。",
+      "body": "不是一排国旗 emoji。一张真正的世界地图 — 一眼可看,可作图分享,而且会随你不断前行,永远是你的。",
+      "stat1": "195 国之 10",
+      "stat2": "3 大洲"
+    },
+    "feature2": {
+      "label": "时间",
+      "title": "无论你在哪,时钟跟随你。",
+      "body": "你的当地时间每分钟在卡片上刷新。地球另一端的协作者不再为「你现在能联系吗」而困扰。",
+      "currentlyIn": "现在位于"
+    },
+    "feature3": {
+      "label": "状态",
+      "title": "告诉别人你正在接什么。",
+      "body": "三次点击就能在「接合作」「自由职业」「全职」「休息中」之间切换。永远在卡片首屏可见,永远不会过时。",
+      "slowTravel": "慢旅行模式"
+    },
+    "comparison": {
+      "title": "为什么不直接用 Linktree?",
+      "subtitle": "因为你不只住一个地方。",
+      "footnote": "Linktree 在 2025 年底涨价 67%。我们不会。",
+      "row1": "旅行地图",
+      "row2": "实时当地时间",
+      "row3": "国家追踪",
+      "row4": "无广告无抽成",
+      "row5": "自定义域名",
+      "row6": "无限链接"
+    },
+    "darkCta": {
+      "line1": "一条链接。",
+      "line2": "无论你在哪。",
+      "body": "1 分钟搭好,一辈子带着走。",
+      "cta": "创建卡片",
+      "note": "每月 $2.80 起 · 随时可取消"
+    },
+    "previewCard": {
+      "name": "田中健二",
+      "role": "产品设计师",
+      "city": "曼谷",
+      "countries": "国",
+      "since": "起",
+      "verified": "已认证",
+      "open": "可约"
+    }
+  },
+  "pricing": {
+    "headline": "两个套餐。没广告。没抽成。",
+    "subhead": "我们不提供免费档 — 这样平台才能保持干净、无广告、为游民而生而不是为广告主而生。",
+    "mostPopular": "最受欢迎",
+    "perMonth": "/月",
+    "basic": {
+      "label": "Basic",
+      "tagline": "登上地图。一张公开游民卡片所需的一切。",
+      "cta": "选择 Basic"
+    },
+    "pro": {
+      "label": "Pro",
+      "tagline": "拥有你的游民品牌。自定义域名、无限链接、高级分析。",
+      "cta": "升级 Pro"
+    },
+    "footnote": "美元价格。按月计费。随时可取消 — 卡片在当期结束前保持在线。",
+    "compareTitle": "套餐对比",
+    "compare": {
+      "feature": "功能",
+      "basic": "Basic",
+      "pro": "Pro"
+    },
+    "sections": {
+      "yourCard": "你的卡片",
+      "distribution": "传播",
+      "insights": "数据洞察",
+      "automation": "自动化",
+      "support": "支持"
+    },
+    "features": {
+      "publicProfile": "nomad.now 上的 handle(premium .now 域名)",
+      "worldMap": "去过国家的世界地图",
+      "liveTimezone": "当前城市 + 实时时区",
+      "ogImage": "自动生成分享图(OG)",
+      "themesBasic": "4 套预设",
+      "themesPro": "4 套预设 + 自定义",
+      "linksLabel": "带品牌图标的链接(10 个平台)",
+      "linksBasic": "1 条链接",
+      "linksPro": "无限",
+      "verifiedBadge": "认证徽章",
+      "footerLabel": "「Made on nomad.now」页脚",
+      "footerOptional": "可选",
+      "listingFeatured": "优先展示位",
+      "listingDefault": "出现在 /map 和 /in/{country}",
+      "embedBasic": "带品牌水印",
+      "embedPro": "不带品牌水印",
+      "embed": "嵌入到你的站点",
+      "customDomain": "自定义域名(yourdomain.com)",
+      "viewsClicks": "页面访问 + 链接点击",
+      "visitorAnalytics": "访客地理 + 来源",
+      "funnel": "点击漏斗",
+      "drafts": "多张草稿卡片",
+      "autoSync": "当前城市自动同步(Strava / Wise)",
+      "emailLabel": "邮件支持",
+      "emailBasic": "标准",
+      "emailPro": "优先"
+    },
+    "basicBullets": {
+      "premiumDomain": "你的 handle 在 nomad.now —— 一个 premium .now 域名",
+      "publicProfile": "公开主页",
+      "worldMap": "去过国家的世界地图",
+      "liveTimezone": "当前城市 + 实时时区",
+      "oneLink": "1 条链接(10 个品牌图标可选)",
+      "themes": "4 套内置主题",
+      "analytics": "基础分析",
+      "ogImage": "自动生成分享图",
+      "footer": "可关闭「Made on nomad.now」页脚"
+    },
+    "proBullets": {
+      "everythingInBasic": "包含 Basic 全部内容",
+      "customDomain": "自定义域名",
+      "unlimitedLinks": "无限链接",
+      "customTheme": "自定义主题色 + 背景",
+      "verifiedBadge": "认证徽章",
+      "featured": "在 /map 和 /in/{country} 优先展示",
+      "analytics": "访客分析(地理 + 来源)",
+      "drafts": "多张草稿卡片",
+      "autoSync": "从 Strava / Wise 同步当前城市",
+      "embed": "无水印嵌入挂件",
+      "support": "邮件支持优先处理"
+    },
+    "faqTitle": "常见问题",
+    "faq": {
+      "noFree": {
+        "q": "为什么没有免费套餐?",
+        "a": "免费套餐会逼我们在某处塞广告或抽手续费 —— 这两样都不适合一张你会分享给人脉的卡片。$2.8 让我们能维持运营而不牺牲产品。"
+      },
+      "cancel": {
+        "q": "随时可以取消吗?",
+        "a": "可以。卡片在当前计费周期结束前保持在线。之后页面会显示「不再可用」 —— 你的 handle 保留 30 天,以备你改变主意。"
+      },
+      "data": {
+        "q": "取消后我的数据怎么办?",
+        "a": "取消前可以在设置里把所有内容(主页、链接、去过国家)导出为 JSON。取消后我们保留数据 90 天,以备你重新订阅。"
+      },
+      "switch": {
+        "q": "Basic 和 Pro 之间可以切换吗?",
+        "a": "升级随时可以 —— 按比例计费。降级在当前周期结束时生效。"
+      },
+      "fees": {
+        "q": "你们收取交易手续费吗?",
+        "a": "不收。我们没替你卖任何数字商品,所以没什么可抽的。卡片是你的。"
+      }
+    },
+    "finalCta": {
+      "title": "占下你的 handle。",
+      "body": "nomad.now/{handle} —— 在别人抢走之前。",
+      "cta": "开始"
+    }
+  },
+  "login": {
+    "title": "登录。",
+    "subtitle": "Magic link —— 不需要密码。",
+    "emailLabel": "邮箱",
+    "emailPlaceholder": "you@example.com",
+    "submit": "发送登录链接",
+    "submitting": "发送中…",
+    "sentTitle": "请查收邮箱。",
+    "sentBody": "我们已发送登录链接到 {email}。点击链接继续。",
+    "tryAnother": "换一个邮箱",
+    "errorGeneric": "无法发送登录链接,请稍后再试。"
+  },
+  "createCard": {
+    "navCancel": "取消",
+    "title": "占下你的卡片。",
+    "subtitle": "三个字段即可开始。其他都是可选,稍后可改。",
+    "handle": "Handle",
+    "handlePrefix": "nomad.now/",
+    "handlePlaceholder": "yourhandle",
+    "handleAvailable": "可用 —— 在被人抢之前占下",
+    "handleInvalid": "2–50 个字符: 字母、数字、_ 或 -",
+    "handleTaken": "这个 handle 已被占用",
+    "handleHint": "之后不可修改。",
+    "handleError": "Handle 不可用",
+    "handleCheckError": "检查可用性时出错",
+    "name": "姓名",
+    "namePlaceholder": "田中健二",
+    "currentCity": "现在位于",
+    "currentCityPlaceholder": "曼谷",
+    "currentCityHint": "实时显示在你的卡片上。换地方时记得更新。",
+    "expand": "更多自定义(可选)",
+    "collapse": "收起",
+    "role": "职业",
+    "status": "状态",
+    "bio": "一句话简介",
+    "bioPlaceholder": "为远程生活打造工具。",
+    "hometown": "出生地",
+    "hometownPlaceholder": "大阪",
+    "avatarUrl": "头像 URL",
+    "avatarPlaceholder": "https://example.com/avatar.jpg",
+    "linksLabel": "链接",
+    "linksHint": "Basic —— 1 条链接",
+    "linkTypeOther": "其他",
+    "addLink": "+ 添加链接",
+    "linkUrlPlaceholder": "https://…",
+    "linkLabelPlaceholder": "标签",
+    "removeLink": "删除链接",
+    "proHintPrefix": "想要更多? ",
+    "proHintLink": "Pro 解锁无限链接",
+    "proHintSuffix": "。",
+    "visitedCountries": "你去过的国家",
+    "visitedCountriesHint": "会画在卡片地图上。一次想不起来全部没关系,以后随时可加。",
+    "submit": "占下我的卡片",
+    "submitting": "占用中…",
+    "submitNote": "每月 $2.80 起。随时可取消 —— 卡片在当期结束前保持在线。",
+    "successToast": "卡片已创建! 正在跳转…",
+    "errorHandle": "请选一个可用的 handle",
+    "errorName": "姓名必填",
+    "errorTooManyLinks": "Basic 套餐最多 {cap} 条链接 —— 升级 Pro 解锁无限",
+    "errorGeneric": "创建卡片失败"
+  },
+  "settings": {
+    "navView": "查看主页",
+    "title": "设置。",
+    "subtitle": "自定义主页布局、主题、显示内容。",
+    "layout": {
+      "title": "布局",
+      "description": "选择主页如何排列。",
+      "centered": "居中",
+      "card": "卡片",
+      "grid": "网格",
+      "minimal": "极简"
+    },
+    "theme": {
+      "title": "主题",
+      "description": "完整的视觉风格 —— 背景、字体、按钮、强调色。",
+      "previewHint": "实时预览任意主题: "
+    },
+    "sections": {
+      "title": "分节",
+      "description": "切换显示与重新排序。",
+      "moveUp": "上移",
+      "moveDown": "下移",
+      "show": "显示"
+    },
+    "branding": {
+      "title": "品牌水印",
+      "description": "是否向访客显示「Make yours」浮动按钮。",
+      "hideLabel": "在我的卡片上隐藏「Make yours」浮动按钮",
+      "hideHint": "移除引导访客创建自己卡片的浮动按钮。你的主页本身不变。"
+    },
+    "privacy": {
+      "title": "隐私",
+      "description": "谁能看到什么,以及延迟多久。",
+      "visibilityLabel": "主页可见性",
+      "visibilityPublic": "公开 —— 任何人可见",
+      "visibilityPrivate": "私密 —— 仅自己可见",
+      "delayLabel": "数据延迟(天)",
+      "delayHint": "为保护隐私,数据落后实时显示。0 = 即时。"
+    },
+    "saved": "设置已保存",
+    "saveError": "保存设置失败"
+  },
+  "card": {
+    "verified": "已认证",
+    "shareTitle": "分享这张卡片",
+    "copyLink": "复制链接",
+    "copied": "已复制!",
+    "fromHometown": "来自 {city}",
+    "countryOne": "国",
+    "countryMany": "国",
+    "memberSince": "加入时间",
+    "workStatus": {
+      "available": "开放合作",
+      "freelancing": "自由职业",
+      "busy": "忙碌中",
+      "fulltime": "全职"
+    },
+    "linkTypes": {
+      "website": "网站",
+      "instagram": "Instagram",
+      "twitter": "X",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "threads": "Threads",
+      "substack": "Substack",
+      "telegram": "Telegram",
+      "other": "链接"
+    }
+  },
+  "makeYoursCTA": {
+    "cta": "做你自己的",
+    "aria": "创建你自己的 Nomad Card"
+  },
+  "roles": {
+    "Designer": "设计师",
+    "Developer": "开发者",
+    "Writer": "写作者",
+    "Product Manager": "产品经理",
+    "Marketer": "营销人",
+    "Consultant": "顾问",
+    "Entrepreneur": "创业者",
+    "Photographer": "摄影师",
+    "Content Creator": "内容创作者",
+    "Engineer": "工程师",
+    "Founder": "创始人",
+    "Other": "其他"
+  },
+  "explore": {
+    "title": "发现",
+    "subtitle": "真实的人,真实的地方,实时进行中。",
+    "empty": "还没有主页。"
+  },
+  "map": {
+    "title": "游民地图",
+    "subtitle": "看看大家现在都在哪。"
+  },
+  "inCountry": {
+    "title": "{country} 的游民",
+    "subtitle": "目前在这里或正在路过的人。",
+    "empty": "这里还没人。当第一个吧。"
+  },
+  "profileNotFound": {
+    "availableBadge": "可用",
+    "reservedBadge": "已保留",
+    "availableBody": "这个 handle 还没人占。在别人之前占下它。",
+    "availableCta": "占下 @{handle}",
+    "availableNote": "每月 $2.80 起 · 1 分钟即可上线",
+    "reservedBody": "这个 handle 已被保留 —— 通常因为它与系统页面或品牌保护名称冲突。",
+    "reservedCta": "选个别的 handle",
+    "invalidTitle": "无效的 handle",
+    "invalidBody": "Handle 只能使用字母、数字、连字符和下划线 —— 1 到 50 个字符。",
+    "invalidPick": "选个 handle",
+    "invalidExplore": "发现游民",
+    "footer": "© 2026 Nomad.now · 为不在一处定居的人准备的 bio 链接。"
+  }
+}

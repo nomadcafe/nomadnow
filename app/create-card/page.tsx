@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
 import { Logo } from '@/components/Logo'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { debounce } from '@/lib/debounce'
 
 type HandleStatus = 'idle' | 'checking' | 'available' | 'unavailable' | 'invalid'
@@ -24,20 +26,20 @@ type LinkType =
   | 'telegram'
   | 'other'
 
-// Listed in the order shown in the dropdown — Website first since it's the
-// most common, then social platforms grouped by audience overlap.
-const LINK_TYPE_OPTIONS: { value: LinkType; label: string }[] = [
-  { value: 'website', label: 'Website' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'twitter', label: 'X' },
-  { value: 'linkedin', label: 'LinkedIn' },
-  { value: 'github', label: 'GitHub' },
-  { value: 'youtube', label: 'YouTube' },
-  { value: 'tiktok', label: 'TikTok' },
-  { value: 'threads', label: 'Threads' },
-  { value: 'substack', label: 'Substack' },
-  { value: 'telegram', label: 'Telegram' },
-  { value: 'other', label: 'Other' },
+// Slug-only; labels resolve through i18n at render time. Order matches the
+// dropdown — Website first since it's the most common.
+const LINK_TYPE_SLUGS: LinkType[] = [
+  'website',
+  'instagram',
+  'twitter',
+  'linkedin',
+  'github',
+  'youtube',
+  'tiktok',
+  'threads',
+  'substack',
+  'telegram',
+  'other',
 ]
 
 interface NomadLink {
@@ -46,6 +48,8 @@ interface NomadLink {
   url: string
 }
 
+// Roles persist as their English label (canonical DB value). Translation
+// happens at display time via the `roles.*` namespace.
 const ROLES = [
   'Designer',
   'Developer',
@@ -57,18 +61,17 @@ const ROLES = [
   'Photographer',
   'Content Creator',
   'Other',
-]
+] as const
 
-const WORK_STATUSES = [
-  { value: 'available', label: 'Open to collaboration' },
-  { value: 'freelancing', label: 'Freelancing' },
-  { value: 'busy', label: 'Busy' },
-  { value: 'fulltime', label: 'Full-time' },
-]
+const WORK_STATUS_KEYS = ['available', 'freelancing', 'busy', 'fulltime'] as const
 
 const STORAGE_KEY = 'nomad-card-draft'
 
 export default function CreateCardPage() {
+  const t = useTranslations('createCard')
+  const tStatus = useTranslations('card.workStatus')
+  const tRole = useTranslations('roles')
+  const tLinkType = useTranslations('card.linkTypes')
   const router = useRouter()
   const { toasts, showSuccess, showError, removeToast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -157,7 +160,7 @@ export default function CreateCardPage() {
       const handleRegex = /^[a-zA-Z0-9_-]+$/
       if (!handleRegex.test(handle) || handle.length < 2 || handle.length > 50) {
         setHandleStatus('invalid')
-        setHandleError('2–50 characters: letters, numbers, _ or -')
+        setHandleError(t('handleInvalid'))
         return
       }
 
@@ -171,13 +174,14 @@ export default function CreateCardPage() {
           setHandleError('')
         } else {
           setHandleStatus('unavailable')
-          setHandleError('This handle is already taken')
+          setHandleError(t('handleTaken'))
         }
       } catch {
         setHandleStatus('idle')
-        setHandleError('Error checking availability')
+        setHandleError(t('handleCheckError'))
       }
     }, 500),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
@@ -216,17 +220,17 @@ export default function CreateCardPage() {
     e.preventDefault()
 
     if (!formData.handle.trim() || handleStatus !== 'available') {
-      showError('Please pick an available handle')
+      showError(t('errorHandle'))
       return
     }
     if (!formData.display_name.trim()) {
-      showError('Name is required')
+      showError(t('errorName'))
       return
     }
 
     const validLinks = links.filter((link) => link.url.trim())
     if (validLinks.length > BASIC_LINK_CAP) {
-      showError(`Basic plan allows ${BASIC_LINK_CAP} link — upgrade to Pro for unlimited`)
+      showError(t('errorTooManyLinks', { cap: BASIC_LINK_CAP }))
       return
     }
 
@@ -253,7 +257,7 @@ export default function CreateCardPage() {
 
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create nomad card')
+        throw new Error(data.error || t('errorGeneric'))
       }
 
       if (validLinks.length > 0) {
@@ -274,12 +278,12 @@ export default function CreateCardPage() {
       }
 
       clearDraft()
-      showSuccess('Card created! Redirecting…')
+      showSuccess(t('successToast'))
       setTimeout(() => {
         router.push(`/${formData.handle.trim().toLowerCase()}`)
       }, 1200)
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to create nomad card')
+      showError(error instanceof Error ? error.message : t('errorGeneric'))
     } finally {
       setLoading(false)
     }
@@ -298,19 +302,22 @@ export default function CreateCardPage() {
         <nav className="border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur z-50">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
             <Logo />
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition">
-              Cancel
-            </Link>
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher />
+              <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition">
+                {t('navCancel')}
+              </Link>
+            </div>
           </div>
         </nav>
 
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <header className="mb-8 sm:mb-10">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-              Claim your card.
+              {t('title')}
             </h1>
             <p className="text-gray-600">
-              Three fields to start. Everything else is optional and editable later.
+              {t('subtitle')}
             </p>
           </header>
 
@@ -320,11 +327,11 @@ export default function CreateCardPage() {
               {/* Handle */}
               <div>
                 <label htmlFor="handle" className="block text-sm font-medium text-gray-900 mb-1.5">
-                  Handle <span className="text-gray-400">*</span>
+                  {t('handle')} <span className="text-gray-400">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-sm font-mono">nomad.now/</span>
+                    <span className="text-gray-400 text-sm font-mono">{t('handlePrefix')}</span>
                   </div>
                   <input
                     type="text"
@@ -343,7 +350,7 @@ export default function CreateCardPage() {
                         ? 'border-red-500 focus:ring-red-500/30'
                         : 'border-gray-300 focus:ring-gray-900/15 focus:border-gray-900'
                     }`}
-                    placeholder="yourhandle"
+                    placeholder={t('handlePlaceholder')}
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                     {handleStatus === 'checking' && <LoadingSpinner size="sm" />}
@@ -360,20 +367,20 @@ export default function CreateCardPage() {
                   </div>
                 </div>
                 {handleStatus === 'available' && (
-                  <p className="mt-1.5 text-xs text-green-600">Available — claim it before someone else does</p>
+                  <p className="mt-1.5 text-xs text-green-600">{t('handleAvailable')}</p>
                 )}
                 {(handleStatus === 'unavailable' || handleStatus === 'invalid') && (
-                  <p className="mt-1.5 text-xs text-red-600">{handleError || 'Handle is not available'}</p>
+                  <p className="mt-1.5 text-xs text-red-600">{handleError || t('handleError')}</p>
                 )}
                 {handleStatus === 'idle' && (
-                  <p className="mt-1.5 text-xs text-gray-500">Cannot be changed later.</p>
+                  <p className="mt-1.5 text-xs text-gray-500">{t('handleHint')}</p>
                 )}
               </div>
 
               {/* Name */}
               <div>
                 <label htmlFor="display_name" className="block text-sm font-medium text-gray-900 mb-1.5">
-                  Name <span className="text-gray-400">*</span>
+                  {t('name')} <span className="text-gray-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -384,14 +391,14 @@ export default function CreateCardPage() {
                   required
                   maxLength={100}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                  placeholder="Kenji Tanaka"
+                  placeholder={t('namePlaceholder')}
                 />
               </div>
 
               {/* Current city */}
               <div>
                 <label htmlFor="current_city" className="block text-sm font-medium text-gray-900 mb-1.5">
-                  Currently in
+                  {t('currentCity')}
                 </label>
                 <input
                   type="text"
@@ -401,9 +408,9 @@ export default function CreateCardPage() {
                   onChange={handleChange}
                   maxLength={100}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                  placeholder="Bangkok"
+                  placeholder={t('currentCityPlaceholder')}
                 />
-                <p className="mt-1.5 text-xs text-gray-500">Shown live on your card. Change when you move.</p>
+                <p className="mt-1.5 text-xs text-gray-500">{t('currentCityHint')}</p>
               </div>
             </div>
 
@@ -425,7 +432,7 @@ export default function CreateCardPage() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-                {showMore ? 'Hide extras' : 'Customize more (optional)'}
+                {showMore ? t('collapse') : t('expand')}
               </button>
 
               {showMore && (
@@ -434,7 +441,7 @@ export default function CreateCardPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="role" className="block text-sm font-medium text-gray-900 mb-1.5">
-                        Role
+                        {t('role')}
                       </label>
                       <select
                         id="role"
@@ -445,13 +452,13 @@ export default function CreateCardPage() {
                       >
                         <option value="">—</option>
                         {ROLES.map((role) => (
-                          <option key={role} value={role}>{role}</option>
+                          <option key={role} value={role}>{tRole(role)}</option>
                         ))}
                       </select>
                     </div>
                     <div>
                       <label htmlFor="work_status" className="block text-sm font-medium text-gray-900 mb-1.5">
-                        Status
+                        {t('status')}
                       </label>
                       <select
                         id="work_status"
@@ -460,8 +467,8 @@ export default function CreateCardPage() {
                         onChange={handleChange}
                         className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
                       >
-                        {WORK_STATUSES.map((status) => (
-                          <option key={status.value} value={status.value}>{status.label}</option>
+                        {WORK_STATUS_KEYS.map((status) => (
+                          <option key={status} value={status}>{tStatus(status)}</option>
                         ))}
                       </select>
                     </div>
@@ -470,7 +477,7 @@ export default function CreateCardPage() {
                   {/* Bio */}
                   <div>
                     <label htmlFor="bio" className="block text-sm font-medium text-gray-900 mb-1.5">
-                      One-line bio
+                      {t('bio')}
                     </label>
                     <textarea
                       id="bio"
@@ -480,7 +487,7 @@ export default function CreateCardPage() {
                       maxLength={200}
                       rows={2}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 resize-none transition"
-                      placeholder="Building tools for remote life."
+                      placeholder={t('bioPlaceholder')}
                     />
                     <p className="mt-1 text-xs text-gray-400 text-right">{formData.bio.length}/200</p>
                   </div>
@@ -488,7 +495,7 @@ export default function CreateCardPage() {
                   {/* Hometown */}
                   <div>
                     <label htmlFor="hometown" className="block text-sm font-medium text-gray-900 mb-1.5">
-                      From
+                      {t('hometown')}
                     </label>
                     <input
                       type="text"
@@ -498,14 +505,14 @@ export default function CreateCardPage() {
                       onChange={handleChange}
                       maxLength={100}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                      placeholder="Osaka"
+                      placeholder={t('hometownPlaceholder')}
                     />
                   </div>
 
                   {/* Avatar */}
                   <div>
                     <label htmlFor="avatar_url" className="block text-sm font-medium text-gray-900 mb-1.5">
-                      Avatar URL
+                      {t('avatarUrl')}
                     </label>
                     <input
                       type="url"
@@ -514,14 +521,14 @@ export default function CreateCardPage() {
                       value={formData.avatar_url}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                      placeholder="https://example.com/avatar.jpg"
+                      placeholder={t('avatarPlaceholder')}
                     />
                   </div>
 
                   {/* Links */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                      Link <span className="text-gray-400">(Basic — 1 link)</span>
+                      {t('linksLabel')} <span className="text-gray-400">({t('linksHint')})</span>
                     </label>
                     <div className="space-y-2">
                       {links.map((link, index) => (
@@ -531,16 +538,16 @@ export default function CreateCardPage() {
                             onChange={(e) => handleLinkChange(index, 'type', e.target.value)}
                             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 bg-white"
                           >
-                            {LINK_TYPE_OPTIONS.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                {opt.label}
+                            {LINK_TYPE_SLUGS.map((slug) => (
+                              <option key={slug} value={slug}>
+                                {slug === 'other' ? t('linkTypeOther') : tLinkType(slug)}
                               </option>
                             ))}
                           </select>
                           {link.type === 'other' && (
                             <input
                               type="text"
-                              placeholder="Label"
+                              placeholder={t('linkLabelPlaceholder')}
                               value={link.label || ''}
                               onChange={(e) => handleLinkChange(index, 'label', e.target.value)}
                               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 flex-1"
@@ -548,7 +555,7 @@ export default function CreateCardPage() {
                           )}
                           <input
                             type="url"
-                            placeholder="https://…"
+                            placeholder={t('linkUrlPlaceholder')}
                             value={link.url}
                             onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
                             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 flex-1"
@@ -557,7 +564,7 @@ export default function CreateCardPage() {
                             type="button"
                             onClick={() => removeLink(index)}
                             className="px-2 py-2 text-gray-400 hover:text-red-600 transition"
-                            aria-label="Remove link"
+                            aria-label={t('removeLink')}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -571,16 +578,16 @@ export default function CreateCardPage() {
                           onClick={addLink}
                           className="text-sm text-gray-600 hover:text-gray-900 font-medium transition"
                         >
-                          + Add link
+                          {t('addLink')}
                         </button>
                       )}
                       {links.length >= BASIC_LINK_CAP && (
                         <p className="text-xs text-gray-500">
-                          Want more?{' '}
+                          {t('proHintPrefix')}
                           <Link href="/pricing" className="underline hover:text-gray-900">
-                            Pro unlocks unlimited links
+                            {t('proHintLink')}
                           </Link>
-                          .
+                          {t('proHintSuffix')}
                         </p>
                       )}
                     </div>
@@ -589,14 +596,14 @@ export default function CreateCardPage() {
                   {/* Visited countries */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                      Countries you&apos;ve been to
+                      {t('visitedCountries')}
                     </label>
                     <CountrySelector
                       selectedCountries={visitedCountries}
                       onChange={setVisitedCountries}
                     />
                     <p className="mt-1.5 text-xs text-gray-500">
-                      Plotted on the map on your card. Add the rest later if you don&apos;t remember them all now.
+                      {t('visitedCountriesHint')}
                     </p>
                   </div>
                 </div>
@@ -613,11 +620,11 @@ export default function CreateCardPage() {
                 {loading ? (
                   <>
                     <LoadingSpinner size="sm" />
-                    <span>Claiming…</span>
+                    <span>{t('submitting')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Claim my card</span>
+                    <span>{t('submit')}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -625,7 +632,7 @@ export default function CreateCardPage() {
                 )}
               </button>
               <p className="mt-3 text-center text-xs text-gray-500">
-                From $2.80 / month. Cancel any time — your card stays live to the end of the period.
+                {t('submitNote')}
               </p>
             </div>
           </form>
