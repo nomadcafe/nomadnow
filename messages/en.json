@@ -207,7 +207,7 @@
     },
     "finalCta": {
       "title": "Claim your handle.",
-      "body": "nomad.now/{handle} — pick one before someone else does.",
+      "body": "nomad.now/<handle>yourhandle</handle> — pick one before someone else does.",
       "cta": "Get started"
     }
   },
@@ -219,7 +219,7 @@
     "submit": "Send magic link",
     "submitting": "Sending…",
     "sentTitle": "Check your inbox.",
-    "sentBody": "We sent a sign-in link to {email}. Click it to continue.",
+    "sentBody": "We sent a sign-in link to <highlight>{email}</highlight>. Click it to continue.",
     "tryAnother": "Try another email",
     "errorGeneric": "Could not send the magic link. Please try again."
   },

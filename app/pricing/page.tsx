@@ -356,7 +356,10 @@ export default async function PricingPage() {
           </h2>
           <p className="text-gray-600 mb-8">
             {t.rich('finalCta.body', {
-              handle: () => <span className="font-mono">yourhandle</span>,
+              // Tag form: next-intl invokes this with the chunks between
+              // <handle>…</handle> in the message so the URL example stays
+              // localisable while keeping the monospace styling.
+              handle: (chunks) => <span className="font-mono">{chunks}</span>,
             })}
           </p>
           <PlanCheckoutButton

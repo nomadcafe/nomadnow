@@ -207,7 +207,7 @@
     },
     "finalCta": {
       "title": "ハンドルを確保しよう。",
-      "body": "nomad.now/{handle} — 誰かに取られる前に。",
+      "body": "nomad.now/<handle>yourhandle</handle> — 誰かに取られる前に。",
       "cta": "始める"
     }
   },
@@ -219,7 +219,7 @@
     "submit": "マジックリンクを送信",
     "submitting": "送信中…",
     "sentTitle": "受信トレイをチェック。",
-    "sentBody": "{email} にログインリンクを送りました。クリックして続行してください。",
+    "sentBody": "<highlight>{email}</highlight> にログインリンクを送りました。クリックして続行してください。",
     "tryAnother": "別のメールアドレスを試す",
     "errorGeneric": "マジックリンクを送信できませんでした。もう一度お試しください。"
   },
