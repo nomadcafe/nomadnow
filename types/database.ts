@@ -33,6 +33,9 @@ export interface ProfileSettings {
   theme_color?: string
   enabled_sections?: string[]
   section_order?: string[]
+  // When true, the floating "Make yours" CTA / nomad.now branding is hidden on the
+  // public profile. Available to all paid plans (see /pricing).
+  hide_branding?: boolean
   created_at: string
   updated_at: string
 }
