@@ -25,23 +25,31 @@ interface BillingRow {
 }
 
 export function deriveBillingState(row: BillingRow | null | undefined): BillingState {
-  if (!row || !row.plan) {
+  if (!row) {
     return { plan: null, status: null, isActive: false, isExpired: false }
   }
+
+  const plan = (row.plan as Plan | null) ?? null
   const status = row.subscription_status ?? null
   const periodEnd = row.current_period_end ? new Date(row.current_period_end).getTime() : null
   const now = Date.now()
 
-  const withinPeriod = periodEnd === null || periodEnd > now
-  const isActive = withinPeriod && (status === null || ACTIVE_STATUSES.has(status))
+  // Expired: the subscription was canceled and the paid period has lapsed.
+  // We can't gate this on `plan` because the webhook clears `plan` to null
+  // once the period ends — then this would be indistinguishable from a user
+  // who never subscribed at all. `subscription_status` is the source of truth
+  // for "was once a customer".
   const isExpired = status === 'canceled' && periodEnd !== null && periodEnd <= now
 
-  return {
-    plan: row.plan as Plan,
-    status,
-    isActive,
-    isExpired,
-  }
+  // Active: a plan is set AND status indicates payment is current AND the
+  // paid period hasn't ended yet. past_due is intentionally accepted as a
+  // grace state — Stripe retries failed charges for ~a week, and locking
+  // users out immediately would punish a temporarily declined card.
+  const withinPeriod = periodEnd === null || periodEnd > now
+  const isActive =
+    !!plan && withinPeriod && (status === null || ACTIVE_STATUSES.has(status))
+
+  return { plan, status, isActive, isExpired }
 }
 
 // Fetches billing state for an authenticated user from the DB. Pass a
