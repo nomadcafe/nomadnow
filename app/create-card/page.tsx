@@ -11,7 +11,34 @@ import { Logo } from '@/components/Logo'
 import { debounce } from '@/lib/debounce'
 
 type HandleStatus = 'idle' | 'checking' | 'available' | 'unavailable' | 'invalid'
-type LinkType = 'instagram' | 'linkedin' | 'website' | 'twitter' | 'other'
+type LinkType =
+  | 'website'
+  | 'instagram'
+  | 'twitter'
+  | 'linkedin'
+  | 'github'
+  | 'youtube'
+  | 'tiktok'
+  | 'threads'
+  | 'substack'
+  | 'telegram'
+  | 'other'
+
+// Listed in the order shown in the dropdown — Website first since it's the
+// most common, then social platforms grouped by audience overlap.
+const LINK_TYPE_OPTIONS: { value: LinkType; label: string }[] = [
+  { value: 'website', label: 'Website' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'twitter', label: 'X' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'github', label: 'GitHub' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'threads', label: 'Threads' },
+  { value: 'substack', label: 'Substack' },
+  { value: 'telegram', label: 'Telegram' },
+  { value: 'other', label: 'Other' },
+]
 
 interface NomadLink {
   type: LinkType
@@ -500,11 +527,11 @@ export default function CreateCardPage() {
                             onChange={(e) => handleLinkChange(index, 'type', e.target.value)}
                             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 bg-white"
                           >
-                            <option value="instagram">Instagram</option>
-                            <option value="linkedin">LinkedIn</option>
-                            <option value="website">Website</option>
-                            <option value="twitter">Twitter</option>
-                            <option value="other">Other</option>
+                            {LINK_TYPE_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
                           </select>
                           {link.type === 'other' && (
                             <input

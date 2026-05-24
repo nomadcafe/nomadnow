@@ -4,7 +4,19 @@ import { createServerSupabase, requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 
 const createNomadLinkSchema = z.object({
-  type: z.enum(['instagram', 'linkedin', 'website', 'twitter', 'other']),
+  type: z.enum([
+    'website',
+    'instagram',
+    'twitter',
+    'linkedin',
+    'github',
+    'youtube',
+    'tiktok',
+    'threads',
+    'substack',
+    'telegram',
+    'other',
+  ]),
   label: z.string().optional(),
   url: z.string().url('Invalid URL'),
   order_index: z.number().int().min(0).max(2),

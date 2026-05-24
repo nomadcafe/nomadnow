@@ -122,7 +122,7 @@ CREATE INDEX idx_social_metrics_captured_at ON social_metrics(captured_at);
 CREATE TABLE IF NOT EXISTS nomad_links (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  type TEXT NOT NULL, -- 'instagram' | 'linkedin' | 'website' | 'twitter' | 'other'
+  type TEXT NOT NULL, -- website | instagram | twitter | linkedin | github | youtube | tiktok | threads | substack | telegram | other
   label TEXT, -- Custom label if type is 'other'
   url TEXT NOT NULL,
   order_index INTEGER DEFAULT 0, -- For ordering (0, 1, 2)

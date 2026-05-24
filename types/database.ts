@@ -40,7 +40,18 @@ export interface ProfileSettings {
 export interface NomadLink {
   id: string
   user_id: string
-  type: 'instagram' | 'linkedin' | 'website' | 'twitter' | 'other'
+  type:
+    | 'website'
+    | 'instagram'
+    | 'twitter'
+    | 'linkedin'
+    | 'github'
+    | 'youtube'
+    | 'tiktok'
+    | 'threads'
+    | 'substack'
+    | 'telegram'
+    | 'other'
   label?: string
   url: string
   order_index: number
