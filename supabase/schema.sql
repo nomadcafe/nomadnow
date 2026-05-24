@@ -1,0 +1,214 @@
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  handle TEXT UNIQUE NOT NULL,
+  display_name TEXT,
+  avatar_url TEXT,
+  country TEXT,
+  bio TEXT,
+  website TEXT,
+  location TEXT,
+  -- Nomad Card fields
+  role TEXT, -- 'Designer', 'Developer', 'Writer', etc.
+  hometown TEXT, -- User's hometown
+  current_city TEXT, -- Current location (overrides location for nomad card)
+  work_status TEXT DEFAULT 'available', -- 'available' | 'busy' | 'fulltime' | 'freelancing'
+  timezone TEXT, -- Current timezone
+  visited_countries TEXT[], -- Array of country codes (e.g., ['TH', 'JP', 'PT'])
+  profile_type TEXT DEFAULT 'creator', -- 'creator' | 'nomad' | 'both'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_handle ON users(handle);
+
+-- Projects table
+CREATE TABLE IF NOT EXISTS projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  summary TEXT,
+  tags TEXT[],
+  started_at DATE,
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, slug)
+);
+
+CREATE INDEX idx_projects_user_id ON projects(user_id);
+CREATE INDEX idx_projects_status ON projects(status);
+
+-- Revenues table (monthly granularity)
+CREATE TABLE IF NOT EXISTS revenues (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  month DATE NOT NULL,
+  mrr_cents INTEGER DEFAULT 0,
+  oneoff_cents INTEGER DEFAULT 0,
+  currency CHAR(3) DEFAULT 'USD',
+  verified BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(project_id, month)
+);
+
+CREATE INDEX idx_revenues_project_id ON revenues(project_id);
+CREATE INDEX idx_revenues_month ON revenues(month);
+
+-- Milestones table
+CREATE TABLE IF NOT EXISTS milestones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  happened_at DATE NOT NULL,
+  title TEXT NOT NULL,
+  note TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_milestones_project_id ON milestones(project_id);
+CREATE INDEX idx_milestones_happened_at ON milestones(happened_at);
+
+-- Profile settings table
+CREATE TABLE IF NOT EXISTS profile_settings (
+  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  visibility TEXT DEFAULT 'public',
+  range_mode TEXT DEFAULT 'exact', -- 'exact' | 'range' | 'hidden'
+  delay_days INTEGER DEFAULT 0,
+  -- Layout and theme settings
+  layout_template TEXT DEFAULT 'centered', -- 'centered' | 'card' | 'grid' | 'minimal'
+  theme_color TEXT DEFAULT 'blue', -- 'blue' | 'purple' | 'green' | 'pink' | 'orange'
+  -- Content visibility settings (JSON array of enabled sections)
+      enabled_sections JSONB DEFAULT '["header", "revenue", "projects", "chart", "milestones"]'::jsonb,
+      -- Section order (JSON array defining display order)
+      section_order JSONB DEFAULT '["header", "revenue", "projects", "chart", "milestones"]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Social accounts table
+CREATE TABLE IF NOT EXISTS social_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  platform TEXT NOT NULL, -- 'x' | 'bluesky'
+  handle TEXT NOT NULL,
+  external_id TEXT,
+  url TEXT,
+  is_verified BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, platform)
+);
+
+CREATE INDEX idx_social_accounts_user_id ON social_accounts(user_id);
+CREATE INDEX idx_social_accounts_platform ON social_accounts(platform);
+
+-- Social metrics snapshots table (for historical tracking + caching)
+CREATE TABLE IF NOT EXISTS social_metrics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  social_account_id UUID NOT NULL REFERENCES social_accounts(id) ON DELETE CASCADE,
+  captured_at TIMESTAMPTZ DEFAULT NOW(),
+  followers_count INTEGER,
+  following_count INTEGER,
+  posts_count INTEGER,
+  source TEXT DEFAULT 'user_report' -- 'user_report' | 'api'
+);
+
+CREATE INDEX idx_social_metrics_account_id ON social_metrics(social_account_id);
+CREATE INDEX idx_social_metrics_captured_at ON social_metrics(captured_at);
+
+-- Nomad links table (for Nomad Card - max 3 links)
+CREATE TABLE IF NOT EXISTS nomad_links (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- 'instagram' | 'linkedin' | 'website' | 'twitter' | 'other'
+  label TEXT, -- Custom label if type is 'other'
+  url TEXT NOT NULL,
+  order_index INTEGER DEFAULT 0, -- For ordering (0, 1, 2)
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, order_index)
+);
+
+CREATE INDEX idx_nomad_links_user_id ON nomad_links(user_id);
+
+-- Enable Row Level Security (RLS) - public read, owner-only write via auth.uid()
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE revenues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE milestones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profile_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nomad_links ENABLE ROW LEVEL SECURITY;
+
+-- Ownership model:
+--   users.id MUST equal auth.uid() at insert time. Enforced by RLS, not FK,
+--   so the service_role key can still seed/admin freely.
+-- Per-table policies live in supabase/migrations/0001_auth_and_rls.sql for upgrade
+-- paths; the canonical fresh-install policies are inlined below.
+
+-- users
+CREATE POLICY "users_select_public" ON users FOR SELECT USING (true);
+CREATE POLICY "users_insert_self" ON users FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "users_update_self" ON users FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+CREATE POLICY "users_delete_self" ON users FOR DELETE USING (auth.uid() = id);
+
+-- projects
+CREATE POLICY "projects_select_public" ON projects FOR SELECT USING (true);
+CREATE POLICY "projects_insert_owner" ON projects FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "projects_update_owner" ON projects FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "projects_delete_owner" ON projects FOR DELETE USING (auth.uid() = user_id);
+
+-- revenues (owned via project)
+CREATE POLICY "revenues_select_public" ON revenues FOR SELECT USING (true);
+CREATE POLICY "revenues_insert_owner" ON revenues FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM projects WHERE projects.id = revenues.project_id AND projects.user_id = auth.uid())
+);
+CREATE POLICY "revenues_update_owner" ON revenues FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM projects WHERE projects.id = revenues.project_id AND projects.user_id = auth.uid())
+);
+CREATE POLICY "revenues_delete_owner" ON revenues FOR DELETE USING (
+  EXISTS (SELECT 1 FROM projects WHERE projects.id = revenues.project_id AND projects.user_id = auth.uid())
+);
+
+-- milestones (owned via project)
+CREATE POLICY "milestones_select_public" ON milestones FOR SELECT USING (true);
+CREATE POLICY "milestones_insert_owner" ON milestones FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM projects WHERE projects.id = milestones.project_id AND projects.user_id = auth.uid())
+);
+CREATE POLICY "milestones_update_owner" ON milestones FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM projects WHERE projects.id = milestones.project_id AND projects.user_id = auth.uid())
+);
+CREATE POLICY "milestones_delete_owner" ON milestones FOR DELETE USING (
+  EXISTS (SELECT 1 FROM projects WHERE projects.id = milestones.project_id AND projects.user_id = auth.uid())
+);
+
+-- profile_settings
+CREATE POLICY "profile_settings_select_public" ON profile_settings FOR SELECT USING (true);
+CREATE POLICY "profile_settings_insert_self" ON profile_settings FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "profile_settings_update_self" ON profile_settings FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "profile_settings_delete_self" ON profile_settings FOR DELETE USING (auth.uid() = user_id);
+
+-- social_accounts
+CREATE POLICY "social_accounts_select_public" ON social_accounts FOR SELECT USING (true);
+CREATE POLICY "social_accounts_insert_self" ON social_accounts FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "social_accounts_update_self" ON social_accounts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "social_accounts_delete_self" ON social_accounts FOR DELETE USING (auth.uid() = user_id);
+
+-- social_metrics (owned via social_account)
+CREATE POLICY "social_metrics_select_public" ON social_metrics FOR SELECT USING (true);
+CREATE POLICY "social_metrics_insert_owner" ON social_metrics FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM social_accounts WHERE social_accounts.id = social_metrics.social_account_id AND social_accounts.user_id = auth.uid())
+);
+CREATE POLICY "social_metrics_delete_owner" ON social_metrics FOR DELETE USING (
+  EXISTS (SELECT 1 FROM social_accounts WHERE social_accounts.id = social_metrics.social_account_id AND social_accounts.user_id = auth.uid())
+);
+
+-- nomad_links
+CREATE POLICY "nomad_links_select_public" ON nomad_links FOR SELECT USING (true);
+CREATE POLICY "nomad_links_insert_self" ON nomad_links FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_links_update_self" ON nomad_links FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_links_delete_self" ON nomad_links FOR DELETE USING (auth.uid() = user_id);
+
