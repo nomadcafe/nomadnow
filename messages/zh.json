@@ -207,7 +207,7 @@
     },
     "finalCta": {
       "title": "占下你的 handle。",
-      "body": "nomad.now/{handle} —— 在别人抢走之前。",
+      "body": "nomad.now/<handle>yourhandle</handle> —— 在别人抢走之前。",
       "cta": "开始"
     }
   },
@@ -219,7 +219,7 @@
     "submit": "发送登录链接",
     "submitting": "发送中…",
     "sentTitle": "请查收邮箱。",
-    "sentBody": "我们已发送登录链接到 {email}。点击链接继续。",
+    "sentBody": "我们已发送登录链接到 <highlight>{email}</highlight>。点击链接继续。",
     "tryAnother": "换一个邮箱",
     "errorGeneric": "无法发送登录链接,请稍后再试。"
   },

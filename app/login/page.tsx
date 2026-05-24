@@ -57,7 +57,10 @@ function LoginForm() {
         </div>
         <div className="text-sm text-gray-500">
           {t.rich('sentBody', {
-            email: () => <span className="font-mono text-gray-700">{email}</span>,
+            // `email` is a runtime variable (substituted into {email}); the
+            // <highlight> tag wraps it so we can style only the address.
+            email,
+            highlight: (chunks) => <span className="font-mono text-gray-700">{chunks}</span>,
           })}
         </div>
         <button
