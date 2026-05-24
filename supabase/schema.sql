@@ -149,8 +149,8 @@ ALTER TABLE nomad_links ENABLE ROW LEVEL SECURITY;
 -- Ownership model:
 --   users.id MUST equal auth.uid() at insert time. Enforced by RLS, not FK,
 --   so the service_role key can still seed/admin freely.
--- Per-table policies live in supabase/migrations/0001_auth_and_rls.sql for upgrade
--- paths; the canonical fresh-install policies are inlined below.
+-- Per-table policies are inlined below — this file is canonical for fresh
+-- installs. Incremental schema changes live in supabase/migrations/.
 
 -- users
 CREATE POLICY "users_select_public" ON users FOR SELECT USING (true);
