@@ -2,8 +2,10 @@ import React from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { Logo } from '@/components/Logo'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { OptimizedImage } from '@/components/OptimizedImage'
 import {
   codeForSlug,
@@ -55,8 +57,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { country: slug } = await params
   const code = codeForSlug(slug)
+  const t = await getTranslations('inCountry')
   if (!code) {
-    return { title: 'Country not found — Nomad.now' }
+    return { title: t('metaTitleNotFound') }
   }
   const name = getCountryName(code)
   const flag = getCountryFlag(code)
@@ -65,20 +68,20 @@ export async function generateMetadata({
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://nomad.now')
   const ogImage = `${baseUrl}/og/in/${slug}`
   return {
-    title: `Nomads who've been to ${name} — Nomad.now`,
-    description: `Digital nomads who have set foot in ${name} ${flag}. See where remote workers travel, what they do, and where they're going next.`,
+    title: t('metaTitle', { country: name }),
+    description: t('metaDescription', { country: name, flag }),
     alternates: { canonical: `https://nomad.now/in/${slug}` },
     openGraph: {
-      title: `${flag} Nomads in ${name}`,
-      description: `Digital nomads who have set foot in ${name}.`,
+      title: t('metaOgTitle', { country: name, flag }),
+      description: t('metaOgDescription', { country: name }),
       type: 'website',
       siteName: 'Nomad.now',
-      images: [{ url: ogImage, width: 1200, height: 630, alt: `Nomads in ${name}` }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: t('metaOgTitle', { country: name, flag }) }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${flag} Nomads in ${name}`,
-      description: `Digital nomads who have set foot in ${name}.`,
+      title: t('metaOgTitle', { country: name, flag }),
+      description: t('metaOgDescription', { country: name }),
       images: [ogImage],
     },
     keywords: [
@@ -111,8 +114,12 @@ export default async function InCountryPage({
   const name = getCountryName(code)
   const flag = getCountryFlag(code)
   const nomads = await getNomadsInCountry(code)
+  const t = await getTranslations('inCountry')
+  const tNav = await getTranslations('nav')
+  const tFooter = await getTranslations('footer')
 
   // JSON-LD for a place-collection page so search engines understand the entity.
+  // Kept in English for crawler stability — they don't care about UI locale.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -146,16 +153,17 @@ export default async function InCountryPage({
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/map" className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition">
-              Map
+              {tNav('map')}
             </Link>
             <Link href="/explore" className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition">
-              Explore
+              {tNav('explore')}
             </Link>
+            <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/create-card"
               className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
             >
-              Get your card
+              {tNav('getCard')}
             </Link>
           </div>
         </div>
@@ -164,7 +172,7 @@ export default async function InCountryPage({
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* Breadcrumbs — also lighter SEO. */}
         <nav className="text-xs text-gray-500 mb-6 flex items-center gap-2" aria-label="Breadcrumb">
-          <Link href="/map" className="hover:text-gray-900 transition">Map</Link>
+          <Link href="/map" className="hover:text-gray-900 transition">{t('breadcrumbMap')}</Link>
           <span aria-hidden>›</span>
           <span className="text-gray-700">{name}</span>
         </nav>
@@ -172,17 +180,17 @@ export default async function InCountryPage({
         <header className="mb-10 sm:mb-14 max-w-3xl">
           <div className="text-6xl sm:text-7xl mb-5 leading-none" aria-hidden>{flag}</div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tighter leading-[1.05] mb-3">
-            Nomads in <span className="text-gray-400">{name}</span>.
+            {t.rich('title', {
+              country: name,
+              gray: (chunks) => <span className="text-gray-400">{chunks}</span>,
+            })}
           </h1>
           <p className="text-lg text-gray-600 max-w-xl">
-            {nomads.length === 0 ? (
-              <>Nobody&apos;s claimed a card here yet. Be the first.</>
-            ) : (
-              <>
-                <span className="font-semibold text-gray-900 tabular-nums">{nomads.length}</span>{' '}
-                {nomads.length === 1 ? 'nomad has' : 'nomads have'} set foot in {name}.
-              </>
-            )}
+            {nomads.length === 0
+              ? t('subtitleEmpty')
+              : nomads.length === 1
+              ? t('subtitleHasOne', { count: nomads.length, country: name })
+              : t('subtitleHasMany', { count: nomads.length, country: name })}
           </p>
         </header>
 
@@ -230,16 +238,15 @@ export default async function InCountryPage({
         ) : (
           <div className="rounded-3xl border border-dashed border-gray-200 p-10 sm:p-14 bg-gray-50/40 text-center">
             <div className="text-5xl mb-4" aria-hidden>{flag}</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No nomads here yet</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('emptyTitle')}</h2>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Add {name} to your visited countries and you&apos;ll show up here for everyone
-              searching for &ldquo;{name}&rdquo;.
+              {t('emptyBody', { country: name })}
             </p>
             <Link
               href="/create-card"
               className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition"
             >
-              Get your card
+              {tNav('getCard')}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -252,18 +259,19 @@ export default async function InCountryPage({
             href="/map"
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition"
           >
-            ← Back to the global map
+            {t('backToMap')}
           </Link>
         </section>
       </main>
 
       <footer className="border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <p>© 2026 Nomad.now</p>
-          <div className="flex items-center gap-6">
-            <Link href="/map" className="hover:text-gray-900 transition">Map</Link>
-            <Link href="/explore" className="hover:text-gray-900 transition">Explore</Link>
-            <Link href="/create-card" className="hover:text-gray-900 transition">Get your card</Link>
+          <p>{tFooter('copyright')}</p>
+          <div className="flex items-center gap-6 flex-wrap">
+            <Link href="/map" className="hover:text-gray-900 transition">{tNav('map')}</Link>
+            <Link href="/explore" className="hover:text-gray-900 transition">{tNav('explore')}</Link>
+            <Link href="/create-card" className="hover:text-gray-900 transition">{tNav('getCard')}</Link>
+            <LanguageSwitcher />
           </div>
         </div>
       </footer>

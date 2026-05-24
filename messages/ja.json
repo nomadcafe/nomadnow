@@ -362,18 +362,53 @@
     "Other": "その他"
   },
   "explore": {
-    "title": "見つける",
-    "subtitle": "リアルな人、リアルな場所、リアルタイムで。",
-    "empty": "まだプロフィールがありません。"
+    "metaTitle": "ノマドを見つける — Nomad.now",
+    "metaDescription": "デジタルノマドが今どこにいるか、何を作っているか、どこに行ってきたかを見てみよう。",
+    "metaOgDescription": "デジタルノマドが今どこにいるかを見る。",
+    "title": "ノマドを見つける。",
+    "subtitle": "今どこにいるか。どこに行ってきたか。何を作っているか。",
+    "searchPlaceholder": "名前、ハンドル、自己紹介、都市で検索…",
+    "sortPrefix": "並び替え:",
+    "sortRecent": "新しい順",
+    "sortCountries": "訪問国が多い順",
+    "sortAlpha": "A → Z",
+    "emptyTitle": "まだノマドがいません",
+    "emptyDescription": "最初にカードを確保して地図に登場しよう。",
+    "paginationOf": "{from}–{to} / {total} 人のノマド"
   },
   "map": {
-    "title": "ノマド地図",
-    "subtitle": "今、みんながどこにいるかを見る。"
+    "metaTitle": "ノマド地図 — みんなが行ってきた場所",
+    "metaDescription": "Nomad.now のデジタルノマドが踏み入れた国すべてを、活発さでランキング。リモートワークの生きた星座図。",
+    "metaOgDescription": "デジタルノマドが訪れた国すべて。リモートワークの生きた星座図。",
+    "eyebrow": "ノマド地図",
+    "title": "みんなが行ってきた、すべての国。",
+    "subtitle": "プラットフォームのノマドたちが踏み入れた場所のライブ星座図。点が大きいほど多くの人。国をクリックして誰が行ったか見てみよう。",
+    "statNomads": "登録ノマド",
+    "statCountries": "カバー国数",
+    "statVisits": "訪問記録",
+    "emptyTitle": "まだ地図上にノマドがいません",
+    "emptyDescription": "最初にカードを確保して国を地図に載せよう。",
+    "topTitle": "みんなが向かう場所。",
+    "browseAll": "すべてのノマドを見る →",
+    "nomadCountOne": "{count} 人のノマド",
+    "nomadCountMany": "{count} 人のノマド",
+    "ctaTitle": "あなたの訪問国を地図に。",
+    "ctaBody": "行ってきた国を選ぼう。地図、カード、シェア画像に表示されます。"
   },
   "inCountry": {
-    "title": "{country} のノマド",
-    "subtitle": "現在ここを拠点にしている、あるいは通過中の人々。",
-    "empty": "まだ誰もいません。一番乗りに。"
+    "metaTitleNotFound": "国が見つかりません — Nomad.now",
+    "metaTitle": "{country} に行ってきたノマド — Nomad.now",
+    "metaDescription": "{country} {flag} に踏み入れたデジタルノマド。リモートワーカーがどこへ旅し、何をしているか、次はどこへ行くのか。",
+    "metaOgTitle": "{flag} {country} のノマド",
+    "metaOgDescription": "{country} に踏み入れたデジタルノマド。",
+    "breadcrumbMap": "マップ",
+    "title": "<gray>{country}</gray> のノマド。",
+    "subtitleEmpty": "まだ誰もここでカードを確保していません。一番乗りに。",
+    "subtitleHasOne": "{count} 人のノマドが {country} に行ってきました。",
+    "subtitleHasMany": "{count} 人のノマドが {country} に行ってきました。",
+    "emptyTitle": "まだノマドがいません",
+    "emptyBody": "{country} を訪問国に追加すると、「{country}」を検索した人にここで表示されます。",
+    "backToMap": "← グローバル地図に戻る"
   },
   "profileNotFound": {
     "availableBadge": "利用可能",
