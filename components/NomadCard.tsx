@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { User, NomadLink } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
 import { WorldMap } from './WorldMap'
@@ -21,25 +22,29 @@ interface NomadCardProps {
   hideMakeYoursCTA?: boolean
 }
 
-// Display name shown on the card row. Keeps the raw `type` string (which is
-// also the persisted DB value) decoupled from how we render it — e.g. the
-// legacy `twitter` slug now shows as "X" without needing a DB migration.
-const LINK_LABELS: Record<string, string> = {
-  website: 'Website',
-  instagram: 'Instagram',
-  twitter: 'X',
-  linkedin: 'LinkedIn',
-  github: 'GitHub',
-  youtube: 'YouTube',
-  tiktok: 'TikTok',
-  threads: 'Threads',
-  substack: 'Substack',
-  telegram: 'Telegram',
-}
+// Slugs we localise via the `card.linkTypes.*` namespace. The DB still stores
+// the slug (e.g. `twitter`) and we keep brand wordmarks identical across
+// locales, so most labels resolve to a Latin-letter string anyway.
+const LOCALISED_LINK_SLUGS = [
+  'website',
+  'instagram',
+  'twitter',
+  'linkedin',
+  'github',
+  'youtube',
+  'tiktok',
+  'threads',
+  'substack',
+  'telegram',
+] as const
 
-export const getLinkLabel = (type: string, customLabel?: string | null) => {
-  if (type === 'other') return customLabel || 'Link'
-  return LINK_LABELS[type] || type.charAt(0).toUpperCase() + type.slice(1)
+function useLinkLabel() {
+  const t = useTranslations('card.linkTypes')
+  return (type: string, customLabel?: string | null): string => {
+    if (type === 'other') return customLabel || t('other')
+    if ((LOCALISED_LINK_SLUGS as readonly string[]).includes(type)) return t(type)
+    return type.charAt(0).toUpperCase() + type.slice(1)
+  }
 }
 
 export const getLinkIcon = (type: string) => {
@@ -115,12 +120,7 @@ export const getLinkIcon = (type: string) => {
   }
 }
 
-const workStatusLabels: Record<string, string> = {
-  available: 'Open to collaboration',
-  freelancing: 'Freelancing',
-  busy: 'Busy',
-  fulltime: 'Full-time',
-}
+const WORK_STATUS_KEYS = ['available', 'freelancing', 'busy', 'fulltime'] as const
 
 function useLocalTime(timezone?: string) {
   const [time, setTime] = useState<string | null>(null)
@@ -172,12 +172,30 @@ export function NomadCard({
   sectionOrder,
   hideMakeYoursCTA = false,
 }: NomadCardProps) {
+  const t = useTranslations('card')
+  const tStatus = useTranslations('card.workStatus')
+  const tRole = useTranslations('roles')
+  const getLinkLabel = useLinkLabel()
   const [copied, setCopied] = useState(false)
   const theme = getTheme(themeKey)
   const displayLocation = user.current_city || user.location
   const localTime = useLocalTime(user.timezone)
   const visitedCount = user.visited_countries?.length ?? 0
   const memberSince = formatMemberSince(user.created_at)
+
+  // Roles are stored in DB as their English label (the select in /create-card
+  // posts that string). Map back to a localised label when the slug matches;
+  // otherwise (custom role text) show the raw value.
+  const localisedRole = (raw?: string) => {
+    if (!raw) return raw
+    try {
+      const v = tRole(raw)
+      // next-intl returns the key itself when missing; treat that as fallback.
+      return v === raw ? raw : v
+    } catch {
+      return raw
+    }
+  }
 
   const order = reconcileSectionOrder(user.profile_type, sectionOrder)
   const enabled = reconcileEnabledSections(user.profile_type, enabledSections)
@@ -248,7 +266,7 @@ export function NomadCard({
           {user.display_name || user.handle}
         </h1>
         {user.role && (
-          <p className={`text-base sm:text-lg font-medium ${theme.textMuted}`}>{user.role}</p>
+          <p className={`text-base sm:text-lg font-medium ${theme.textMuted}`}>{localisedRole(user.role)}</p>
         )}
       </div>
     ),
@@ -283,7 +301,7 @@ export function NomadCard({
             </p>
           )}
           {user.hometown && (
-            <p className={`text-sm mt-1 ${theme.textMuted}`}>From {user.hometown}</p>
+            <p className={`text-sm mt-1 ${theme.textMuted}`}>{t('fromHometown', { city: user.hometown })}</p>
           )}
         </div>
       )
@@ -326,7 +344,7 @@ export function NomadCard({
                 {visitedCount}
               </div>
               <div className={`text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
-                {visitedCount === 1 ? 'country' : 'countries'}
+                {visitedCount === 1 ? t('countryOne') : t('countryMany')}
               </div>
             </div>
           )}
@@ -334,7 +352,7 @@ export function NomadCard({
             <div className="text-center">
               <div className="text-2xl sm:text-3xl font-semibold">{memberSince}</div>
               <div className={`text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
-                member since
+                {t('memberSince')}
               </div>
             </div>
           )}
@@ -365,13 +383,15 @@ export function NomadCard({
               clipRule="evenodd"
             />
           </svg>
-          Verified
+          {t('verified')}
         </span>
         {user.work_status && (
           <span
             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${theme.pillNeutral}`}
           >
-            {workStatusLabels[user.work_status] || user.work_status}
+            {(WORK_STATUS_KEYS as readonly string[]).includes(user.work_status)
+              ? tStatus(user.work_status)
+              : user.work_status}
           </span>
         )}
       </div>
@@ -432,7 +452,7 @@ export function NomadCard({
 
           {/* Share — always last, not reorderable. */}
           <div className={`mt-8 pt-8 border-t ${theme.divider} text-center`}>
-            <p className={`text-sm mb-2 ${theme.textMuted}`}>Share this card</p>
+            <p className={`text-sm mb-2 ${theme.textMuted}`}>{t('shareTitle')}</p>
             <div className="flex items-center justify-center gap-2">
               <Link
                 href={`https://nomad.now/${user.handle}`}
@@ -443,8 +463,8 @@ export function NomadCard({
               <button
                 onClick={handleCopyLink}
                 className={`p-2 sm:p-2.5 transition relative touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center opacity-60 hover:opacity-100 ${theme.textMuted}`}
-                aria-label="Copy link"
-                title={copied ? 'Copied!' : 'Copy link'}
+                aria-label={t('copyLink')}
+                title={copied ? t('copied') : t('copyLink')}
               >
                 {copied ? (
                   <svg

@@ -1,12 +1,19 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { WorldMap } from '@/components/WorldMap'
 import { LiveCityRow } from '@/components/LiveCityRow'
 import { MarqueeBand } from '@/components/MarqueeBand'
 import { Logo } from '@/components/Logo'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 const previewVisited = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations('home')
+  const tNav = await getTranslations('nav')
+  const tFooter = await getTranslations('footer')
+  const tStatus = await getTranslations('card.workStatus')
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Nav */}
@@ -18,31 +25,32 @@ export default function Home() {
               href="/map"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
-              Map
+              {tNav('map')}
             </Link>
             <Link
               href="/explore"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
-              Explore
+              {tNav('explore')}
             </Link>
             <Link
               href="/pricing"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
-              Pricing
+              {tNav('pricing')}
             </Link>
             <Link
               href="/login"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
-              Sign in
+              {tNav('signin')}
             </Link>
+            <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/pricing"
               className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
             >
-              Get your card
+              {tNav('getCard')}
             </Link>
           </div>
         </div>
@@ -50,7 +58,6 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        {/* Warm sunset wash behind the hero — very subtle so the page stays calm */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10 opacity-70"
@@ -66,47 +73,45 @@ export default function Home() {
             <div className="lg:col-span-7">
               <div className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                The bio link for nomads
+                {t('eyebrow')}
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] font-semibold tracking-tighter leading-[0.95] mb-8">
-                Where you are.
+                {t('heroLine1')}
                 <br />
-                Where you&apos;ve been.
+                {t('heroLine2')}
                 <br />
-                <span className="text-gray-300">What you&apos;re building.</span>
+                <span className="text-gray-300">{t('heroLine3')}</span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-lg leading-relaxed">
-                One link for your whole nomad life. Live local time, every country
-                you&apos;ve set foot in, what you&apos;re working on. At{' '}
-                <span className="font-mono text-gray-800">nomad.now/yourhandle</span>.
+                {t('heroSub1')}
+                <span className="font-mono text-gray-800">nomad.now/yourhandle</span>
+                {t('heroSub2')}
               </p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                 <Link
                   href="/pricing"
                   className="group inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium text-base hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
                 >
-                  Get your card
+                  {tNav('getCard')}
                   <svg className="w-4 h-4 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
                 <div className="text-sm text-gray-500">
-                  From $2.80 / month
+                  {t('heroPriceNote')}
                   <br />
-                  1 minute to set up
+                  {t('heroSetupNote')}
                 </div>
               </div>
             </div>
 
             {/* Right: stacked card preview */}
             <div className="lg:col-span-5 relative h-[520px] sm:h-[560px]">
-              {/* Back card — visual depth */}
               <div
                 aria-hidden
                 className="absolute top-8 -right-4 sm:right-2 w-[88%] bg-white rounded-3xl border border-gray-200 shadow-xl shadow-gray-900/5 opacity-70"
                 style={{ transform: 'rotate(4deg)', height: '440px' }}
               />
-              {/* Front card */}
               <div
                 className="absolute top-0 left-0 right-0 sm:right-8 bg-white rounded-3xl border border-gray-200 shadow-2xl shadow-gray-900/10 p-6"
                 style={{ transform: 'rotate(-2deg)' }}
@@ -117,23 +122,23 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="text-center mb-2">
-                  <h2 className="text-lg font-semibold tracking-tight">Kenji Tanaka</h2>
-                  <p className="text-xs text-gray-600">Product Designer</p>
+                  <h2 className="text-lg font-semibold tracking-tight">{t('previewCard.name')}</h2>
+                  <p className="text-xs text-gray-600">{t('previewCard.role')}</p>
                 </div>
                 <p className="text-center text-xs mb-3">
                   <span className="inline-flex items-center gap-1">
-                    📍 <span className="font-medium">Bangkok</span>
+                    📍 <span className="font-medium">{t('previewCard.city')}</span>
                     <span className="text-gray-400 font-mono tabular-nums">· 14:35</span>
                   </span>
                 </p>
                 <div className="flex items-center justify-center gap-5 py-2 my-2 border-y border-gray-100">
                   <div className="text-center">
                     <div className="text-base font-semibold tabular-nums">10</div>
-                    <div className="text-[9px] uppercase tracking-wider text-gray-500">countries</div>
+                    <div className="text-[9px] uppercase tracking-wider text-gray-500">{t('previewCard.countries')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-base font-semibold">Mar 2024</div>
-                    <div className="text-[9px] uppercase tracking-wider text-gray-500">since</div>
+                    <div className="text-[9px] uppercase tracking-wider text-gray-500">{t('previewCard.since')}</div>
                   </div>
                 </div>
                 <div className="my-2">
@@ -141,10 +146,10 @@ export default function Home() {
                 </div>
                 <div className="flex items-center justify-center gap-1.5 mb-3">
                   <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-[10px] font-medium border border-green-100">
-                    ✓ Verified
+                    ✓ {t('previewCard.verified')}
                   </span>
                   <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-[10px] font-medium">
-                    Open
+                    {t('previewCard.open')}
                   </span>
                 </div>
                 <div className="space-y-1.5">
@@ -171,14 +176,14 @@ export default function Home() {
         <div className="flex items-end justify-between mb-8 sm:mb-10 flex-wrap gap-4">
           <div className="max-w-xl">
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-              Live, right now
+              {t('live.eyebrow')}
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.05]">
-              Time on your card moves with you.
+              {t('live.title')}
             </h2>
           </div>
           <p className="text-sm text-gray-500 max-w-xs">
-            These are real times in those cities. They&apos;ll tick every minute on someone&apos;s actual card.
+            {t('live.description')}
           </p>
         </div>
         <LiveCityRow />
@@ -188,24 +193,24 @@ export default function Home() {
       <section className="bg-gray-50/40 border-y border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-28 space-y-24 sm:space-y-32">
           <FeatureRow
-            label="Travel"
-            title="The map that grows with you."
-            body="Not a row of flag emojis. A real constellation — visible at a glance, sharable as an image, and yours forever as you keep moving."
+            label={t('feature1.label')}
+            title={t('feature1.title')}
+            body={t('feature1.body')}
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
                 <WorldMap visitedCodes={previewVisited} />
                 <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-                  <span>10 of 195 countries</span>
-                  <span className="font-mono">3 continents</span>
+                  <span>{t('feature1.stat1')}</span>
+                  <span className="font-mono">{t('feature1.stat2')}</span>
                 </div>
               </div>
             }
           />
 
           <FeatureRow
-            label="Time"
-            title="Wherever you are, your clock follows."
-            body="Your local time refreshes every minute on your card. Collaborators on the other side of the world stop wondering when you&apos;re reachable."
+            label={t('feature2.label')}
+            title={t('feature2.title')}
+            body={t('feature2.body')}
             reverse
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-10 shadow-sm text-center">
@@ -214,29 +219,29 @@ export default function Home() {
                   07:42
                 </div>
                 <div className="text-xs text-gray-400 uppercase tracking-wider mt-3">
-                  Currently in
+                  {t('feature2.currentlyIn')}
                 </div>
               </div>
             }
           />
 
           <FeatureRow
-            label="Status"
-            title="Tell people what you&apos;re open to."
-            body="Three taps to swap between open to collaboration, freelancing, full-time, or just resting. Visible above the fold, never out of date."
+            label={t('feature3.label')}
+            title={t('feature3.title')}
+            body={t('feature3.body')}
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-10 shadow-sm flex flex-col items-center gap-3">
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-100">
-                  ✓ Verified
+                  ✓ {t('previewCard.verified')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                  Open to collaboration
+                  {tStatus('available')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                  Freelancing
+                  {tStatus('freelancing')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-100">
-                  Slow travel mode
+                  {t('feature3.slowTravel')}
                 </span>
               </div>
             }
@@ -248,10 +253,10 @@ export default function Home() {
       <section>
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2 text-center">
-            Why not just Linktree?
+            {t('comparison.title')}
           </h2>
           <p className="text-gray-600 text-center mb-10">
-            Because you don&apos;t live in one place.
+            {t('comparison.subtitle')}
           </p>
           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             <div className="grid grid-cols-3 px-4 sm:px-6 py-3 border-b border-gray-100 text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -259,16 +264,16 @@ export default function Home() {
               <div className="text-center">Linktree</div>
               <div className="text-center">Nomad.now</div>
             </div>
-            {[
-              ['Travel map', false, true],
-              ['Live local time', false, true],
-              ['Country tracker', false, true],
-              ['No ads, no transaction fees', false, true],
-              ['Custom domain', true, 'soon'],
-              ['Unlimited links', true, true],
-            ].map(([label, a, b], i) => (
+            {([
+              [t('comparison.row1'), false, true],
+              [t('comparison.row2'), false, true],
+              [t('comparison.row3'), false, true],
+              [t('comparison.row4'), false, true],
+              [t('comparison.row5'), true, 'soon'],
+              [t('comparison.row6'), true, true],
+            ] as [string, boolean | 'soon', boolean | 'soon'][]).map(([label, a, b], i) => (
               <div
-                key={label as string}
+                key={label}
                 className={`grid grid-cols-3 px-4 sm:px-6 py-3.5 items-center text-sm ${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}
               >
                 <div className="font-medium text-gray-900">{label}</div>
@@ -282,7 +287,7 @@ export default function Home() {
             ))}
           </div>
           <p className="text-xs text-gray-500 text-center mt-4">
-            Linktree raised prices 67% in late 2025. We won&apos;t.
+            {t('comparison.footnote')}
           </p>
         </div>
       </section>
@@ -299,24 +304,24 @@ export default function Home() {
         />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-24 sm:py-32 text-center">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tighter leading-[1.05] mb-6">
-            One link.
+            {t('darkCta.line1')}
             <br />
-            <span className="text-gray-500">Wherever you are.</span>
+            <span className="text-gray-500">{t('darkCta.line2')}</span>
           </h2>
           <p className="text-lg text-gray-300 mb-10 max-w-md mx-auto">
-            Set it up in a minute. Carry it forever.
+            {t('darkCta.body')}
           </p>
           <Link
             href="/pricing"
             className="inline-flex items-center gap-2 bg-white text-gray-900 px-7 py-4 rounded-full font-medium text-base hover:bg-gray-100 transition shadow-xl shadow-black/40"
           >
-            Get your card
+            {t('darkCta.cta')}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </Link>
           <div className="mt-6 text-sm text-gray-500">
-            From $2.80 / month · Cancel any time
+            {t('darkCta.note')}
           </div>
         </div>
       </section>
@@ -328,20 +333,21 @@ export default function Home() {
               <Logo asLink={false} size="md" />
             </div>
             <p className="text-sm text-gray-500 max-w-xs">
-              The bio link for people who don&apos;t live in one place.
+              {tFooter('tagline')}
             </p>
           </div>
-          <div className="flex sm:justify-end items-center gap-6 text-sm text-gray-500">
-            <Link href="/map" className="hover:text-gray-900 transition">Map</Link>
-            <Link href="/explore" className="hover:text-gray-900 transition">Explore</Link>
-            <Link href="/pricing" className="hover:text-gray-900 transition">Pricing</Link>
-            <Link href="/login" className="hover:text-gray-900 transition">Sign in</Link>
+          <div className="flex sm:justify-end items-center gap-6 text-sm text-gray-500 flex-wrap">
+            <Link href="/map" className="hover:text-gray-900 transition">{tNav('map')}</Link>
+            <Link href="/explore" className="hover:text-gray-900 transition">{tNav('explore')}</Link>
+            <Link href="/pricing" className="hover:text-gray-900 transition">{tNav('pricing')}</Link>
+            <Link href="/login" className="hover:text-gray-900 transition">{tNav('signin')}</Link>
+            <LanguageSwitcher />
           </div>
         </div>
         <div className="border-t border-gray-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 text-xs text-gray-400 flex justify-between flex-wrap gap-2">
-            <span>© 2026 Nomad.now</span>
-            <span>Made for nomads, by people who keep moving.</span>
+            <span>{tFooter('copyright')}</span>
+            <span>{tFooter('credit')}</span>
           </div>
         </div>
       </footer>

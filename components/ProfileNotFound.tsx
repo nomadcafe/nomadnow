@@ -1,5 +1,9 @@
+'use client'
+
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Logo } from './Logo'
+import { LanguageSwitcher } from './LanguageSwitcher'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { handleSchema } from '@/lib/validation'
 
@@ -14,6 +18,8 @@ interface ProfileNotFoundProps {
 //   3. Handle is available → big "Claim this" CTA (this is the conversion path
 //      for anyone who clicked an aspirational / dead link)
 export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
+  const t = useTranslations('profileNotFound')
+  const tNav = useTranslations('nav')
   const lower = handle.toLowerCase()
   const validFormat = handleSchema.safeParse(lower).success
   const reserved = isReservedHandle(lower)
@@ -33,14 +39,15 @@ export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
               href="/explore"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
-              Explore
+              {tNav('explore')}
             </Link>
             <Link
               href="/map"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
-              Map
+              {tNav('map')}
             </Link>
+            <LanguageSwitcher className="hidden sm:inline-flex" />
           </div>
         </div>
       </nav>
@@ -51,26 +58,26 @@ export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
             <>
               <div className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                Available
+                {t('availableBadge')}
               </div>
               <h1 className="text-4xl sm:text-5xl font-semibold tracking-tighter leading-[1.05] mb-4">
                 <span className="text-gray-300">nomad.now/</span>
                 <span className="break-all">{lower}</span>
               </h1>
               <p className="text-gray-600 mb-10 text-lg leading-relaxed">
-                Nobody&apos;s claimed this handle yet. Take it before someone else does.
+                {t('availableBody')}
               </p>
               <Link
                 href={`/create-card?handle=${encodeURIComponent(lower)}`}
                 className="inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
               >
-                Claim @{lower}
+                {t('availableCta', { handle: lower })}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
               <div className="mt-5 text-xs text-gray-500">
-                Free, no subscription · 1 minute to set up
+                {t('availableNote')}
               </div>
             </>
           )}
@@ -79,22 +86,20 @@ export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
             <>
               <div className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 mb-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                Reserved
+                {t('reservedBadge')}
               </div>
               <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
                 <span className="text-gray-300">nomad.now/</span>
                 <span className="break-all">{lower}</span>
               </h1>
               <p className="text-gray-600 mb-8 leading-relaxed">
-                This handle is reserved — usually because it collides with a system
-                page (like <span className="font-mono text-gray-700">/login</span>) or
-                a brand-protected name.
+                {t('reservedBody')}
               </p>
               <Link
                 href="/create-card"
                 className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition"
               >
-                Pick a different handle
+                {t('reservedCta')}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
@@ -115,23 +120,22 @@ export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h1 className="text-3xl font-semibold tracking-tight mb-3">Not a valid handle</h1>
+              <h1 className="text-3xl font-semibold tracking-tight mb-3">{t('invalidTitle')}</h1>
               <p className="text-gray-600 mb-8 leading-relaxed">
-                Handles use letters, numbers, hyphens, and underscores only —
-                between 1 and 50 characters.
+                {t('invalidBody')}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   href="/create-card"
                   className="inline-flex items-center justify-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition"
                 >
-                  Pick a handle
+                  {t('invalidPick')}
                 </Link>
                 <Link
                   href="/explore"
                   className="inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-full font-medium border border-gray-200 hover:bg-gray-50 transition"
                 >
-                  Explore nomads
+                  {t('invalidExplore')}
                 </Link>
               </div>
             </>
@@ -141,7 +145,7 @@ export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
 
       <footer className="border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 text-center text-xs text-gray-400">
-          © 2026 Nomad.now · The bio link for people who don&apos;t live in one place.
+          {t('footer')}
         </div>
       </footer>
     </div>

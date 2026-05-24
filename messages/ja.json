@@ -1,0 +1,392 @@
+{
+  "common": {
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "キャンセル",
+    "loading": "読み込み中…",
+    "next": "次へ",
+    "back": "戻る",
+    "delete": "削除",
+    "yes": "あり",
+    "no": "なし",
+    "soon": "近日",
+    "required": "必須",
+    "optional": "任意",
+    "from": "から"
+  },
+  "languageSwitcher": {
+    "label": "言語",
+    "english": "English",
+    "japanese": "日本語",
+    "chinese": "中文"
+  },
+  "nav": {
+    "map": "マップ",
+    "explore": "見つける",
+    "pricing": "料金",
+    "signin": "ログイン",
+    "getCard": "カードを作る",
+    "viewProfile": "プロフィールを見る"
+  },
+  "footer": {
+    "tagline": "一箇所に住まない人のための bio リンク。",
+    "copyright": "© 2026 Nomad.now",
+    "credit": "動き続ける人たちのために、動き続ける人たちが作った。"
+  },
+  "metadata": {
+    "title": "Nomad.now — ノマドライフをひとつのリンクに",
+    "description": "今いる場所、行ってきた場所、作っているもの。ひとつのリンクで。",
+    "ogDescription": "今いる場所、行ってきた場所、作っているもの。",
+    "pricingTitle": "料金 — Nomad.now",
+    "pricingDescription": "わかりやすい料金。2 つのプラン、無料プランなし、広告なし、手数料なし。"
+  },
+  "home": {
+    "eyebrow": "ノマドのための bio リンク",
+    "heroLine1": "今いる場所。",
+    "heroLine2": "行ってきた場所。",
+    "heroLine3": "作っているもの。",
+    "heroSub1": "ノマドライフのすべてを、ひとつのリンクに。現地時間、訪れた国、進行中のプロジェクト。すべて ",
+    "heroSub2": " で。",
+    "heroPriceNote": "月額 $2.80 から",
+    "heroSetupNote": "1 分でセットアップ",
+    "live": {
+      "eyebrow": "今、ライブで",
+      "title": "カードの時計は、あなたと共に動く。",
+      "description": "これらは各都市の本当の時刻です。誰かのカード上でも毎分こうやって進んでいます。"
+    },
+    "feature1": {
+      "label": "旅",
+      "title": "あなたと共に育つ地図。",
+      "body": "国旗の絵文字を並べただけじゃない。一目で分かる地図、画像として共有でき、これからもずっとあなたのもの。",
+      "stat1": "195 カ国中 10 カ国",
+      "stat2": "3 大陸"
+    },
+    "feature2": {
+      "label": "時間",
+      "title": "どこにいても、あなたの時計はついてくる。",
+      "body": "現地時間は毎分カード上で更新されます。地球の反対側のコラボレーターも、あなたがいつ連絡可能か悩まなくて済みます。",
+      "currentlyIn": "現在地"
+    },
+    "feature3": {
+      "label": "ステータス",
+      "title": "今、何を受け付けているかを伝える。",
+      "body": "コラボ募集、フリーランス、フルタイム、休暇中。三回タップで切り替え。常にカード上部に表示され、古くなることがありません。",
+      "slowTravel": "スローたび"
+    },
+    "comparison": {
+      "title": "Linktree じゃダメ?",
+      "subtitle": "あなたは一箇所に住んでいないから。",
+      "footnote": "Linktree は 2025 年末に料金を 67% 値上げしました。私たちはしません。",
+      "row1": "旅の地図",
+      "row2": "現地時間表示",
+      "row3": "訪問国トラッカー",
+      "row4": "広告なし、手数料なし",
+      "row5": "カスタムドメイン",
+      "row6": "無制限リンク"
+    },
+    "darkCta": {
+      "line1": "ひとつのリンク。",
+      "line2": "あなたがどこにいても。",
+      "body": "1 分で始めて、ずっと持ち歩こう。",
+      "cta": "カードを作る",
+      "note": "月額 $2.80 から · いつでも解約可"
+    },
+    "previewCard": {
+      "name": "田中 健二",
+      "role": "プロダクトデザイナー",
+      "city": "バンコク",
+      "countries": "カ国",
+      "since": "から",
+      "verified": "認証済み",
+      "open": "対応中"
+    }
+  },
+  "pricing": {
+    "headline": "2 つのプラン。広告なし。手数料なし。",
+    "subhead": "無料プランは提供していません — 広告主のためじゃなく、ノマドのために作られたクリーンなサービスを保つために。",
+    "mostPopular": "人気",
+    "perMonth": "/月",
+    "basic": {
+      "label": "Basic",
+      "tagline": "ノマド地図に名乗りを上げる。公開カードに必要なすべて。",
+      "cta": "Basic を始める"
+    },
+    "pro": {
+      "label": "Pro",
+      "tagline": "ノマドブランドを所有する。カスタムドメイン、無制限リンク、詳細分析。",
+      "cta": "Pro へアップグレード"
+    },
+    "footnote": "USD 表示。月額課金。いつでも解約可 — 当該期間終了までカードは表示されます。",
+    "compareTitle": "プラン比較",
+    "compare": {
+      "feature": "機能",
+      "basic": "Basic",
+      "pro": "Pro"
+    },
+    "sections": {
+      "yourCard": "あなたのカード",
+      "distribution": "拡散",
+      "insights": "分析",
+      "automation": "自動化",
+      "support": "サポート"
+    },
+    "features": {
+      "publicProfile": "nomad.now のハンドル(プレミアム .now ドメイン)",
+      "worldMap": "訪問国の世界地図",
+      "liveTimezone": "現在の都市 + ライブタイムゾーン",
+      "ogImage": "自動生成シェア画像 (OG)",
+      "themesBasic": "4 プリセット",
+      "themesPro": "4 プリセット + カスタム",
+      "linksLabel": "ブランドアイコン付きリンク(10 プラットフォーム)",
+      "linksBasic": "1 リンク",
+      "linksPro": "無制限",
+      "verifiedBadge": "認証バッジ",
+      "footerLabel": "「Made on nomad.now」フッター",
+      "footerOptional": "オプション",
+      "listingFeatured": "おすすめ枠",
+      "listingDefault": "/map と /in/{country} に掲載",
+      "embedBasic": "ブランディングあり",
+      "embedPro": "ブランディングなし",
+      "embed": "サイト埋め込みウィジェット",
+      "customDomain": "カスタムドメイン (yourdomain.com)",
+      "viewsClicks": "ページ閲覧 + リンククリック",
+      "visitorAnalytics": "訪問者の地域 + リファラー",
+      "funnel": "クリック率ファネル",
+      "drafts": "複数の下書きカード",
+      "autoSync": "現在地自動同期 (Strava / Wise)",
+      "emailLabel": "メールサポート",
+      "emailBasic": "通常",
+      "emailPro": "優先"
+    },
+    "basicBullets": {
+      "premiumDomain": "nomad.now であなたのハンドル — プレミアム .now ドメイン",
+      "publicProfile": "公開プロフィールページ",
+      "worldMap": "訪問国の世界地図",
+      "liveTimezone": "現在の都市 + ライブタイムゾーン",
+      "oneLink": "1 リンク(10 のブランドアイコンから選択)",
+      "themes": "4 つの組み込みテーマ",
+      "analytics": "基本分析",
+      "ogImage": "自動生成シェア画像",
+      "footer": "「Made on nomad.now」フッターのオン/オフ"
+    },
+    "proBullets": {
+      "everythingInBasic": "Basic のすべて",
+      "customDomain": "カスタムドメイン",
+      "unlimitedLinks": "無制限リンク",
+      "customTheme": "カスタムテーマ色 + 背景",
+      "verifiedBadge": "認証バッジ",
+      "featured": "/map と /in/{country} のおすすめ枠",
+      "analytics": "訪問者分析(地域 + リファラー)",
+      "drafts": "複数の下書きカード",
+      "autoSync": "Strava / Wise から都市を自動同期",
+      "embed": "ブランディングなしの埋め込みウィジェット",
+      "support": "メールサポート優先対応"
+    },
+    "faqTitle": "よくある質問",
+    "faq": {
+      "noFree": {
+        "q": "なぜ無料プランがないのですか?",
+        "a": "無料プランにすると、広告や手数料をどこかに入れざるを得なくなります。どちらもネットワークに共有するプロフィールには馴染みません。$2.8 はプロダクトを妥協せず運営を続けるための価格です。"
+      },
+      "cancel": {
+        "q": "いつでも解約できますか?",
+        "a": "はい。現在の請求期間終了までカードは表示され続けます。その後は「利用できません」表示になります — ハンドルは気が変わった場合のために 30 日間保留されます。"
+      },
+      "data": {
+        "q": "解約したらデータはどうなりますか?",
+        "a": "解約前に設定からすべて(プロフィール、リンク、訪問国)を JSON でエクスポートできます。解約後 90 日間はデータを保持します。"
+      },
+      "switch": {
+        "q": "Basic と Pro を切り替えられますか?",
+        "a": "アップグレードはいつでも可能 — 日割り計算で請求されます。ダウングレードは現在の期間終了時に反映されます。"
+      },
+      "fees": {
+        "q": "取引手数料はかかりますか?",
+        "a": "いいえ。私たちはあなたに代わってデジタル商品を販売していないので、抜く対価がありません。カードはあなたのものです。"
+      }
+    },
+    "finalCta": {
+      "title": "ハンドルを確保しよう。",
+      "body": "nomad.now/{handle} — 誰かに取られる前に。",
+      "cta": "始める"
+    }
+  },
+  "login": {
+    "title": "ログイン。",
+    "subtitle": "マジックリンク — パスワード不要。",
+    "emailLabel": "メールアドレス",
+    "emailPlaceholder": "you@example.com",
+    "submit": "マジックリンクを送信",
+    "submitting": "送信中…",
+    "sentTitle": "受信トレイをチェック。",
+    "sentBody": "{email} にログインリンクを送りました。クリックして続行してください。",
+    "tryAnother": "別のメールアドレスを試す",
+    "errorGeneric": "マジックリンクを送信できませんでした。もう一度お試しください。"
+  },
+  "createCard": {
+    "navCancel": "キャンセル",
+    "title": "カードを確保。",
+    "subtitle": "始めるには 3 つの項目だけ。残りはすべて任意、後から編集可能。",
+    "handle": "ハンドル",
+    "handlePrefix": "nomad.now/",
+    "handlePlaceholder": "yourhandle",
+    "handleAvailable": "利用可能 — 誰かに取られる前に確保しよう",
+    "handleInvalid": "2〜50 文字: 英数字、_ または -",
+    "handleTaken": "このハンドルは既に使われています",
+    "handleHint": "後から変更できません。",
+    "handleError": "ハンドルが利用できません",
+    "handleCheckError": "利用可能か確認できませんでした",
+    "name": "名前",
+    "namePlaceholder": "田中 健二",
+    "currentCity": "現在地",
+    "currentCityPlaceholder": "バンコク",
+    "currentCityHint": "カード上にライブで表示されます。移動したら更新してください。",
+    "expand": "詳細設定(任意)",
+    "collapse": "詳細を隠す",
+    "role": "職種",
+    "status": "ステータス",
+    "bio": "一言自己紹介",
+    "bioPlaceholder": "リモートライフのためのツールを作っています。",
+    "hometown": "出身",
+    "hometownPlaceholder": "大阪",
+    "avatarUrl": "アバター URL",
+    "avatarPlaceholder": "https://example.com/avatar.jpg",
+    "linksLabel": "リンク",
+    "linksHint": "Basic — 1 リンク",
+    "linkTypeOther": "その他",
+    "addLink": "+ リンクを追加",
+    "linkUrlPlaceholder": "https://…",
+    "linkLabelPlaceholder": "ラベル",
+    "removeLink": "リンクを削除",
+    "proHintPrefix": "もっと欲しい? ",
+    "proHintLink": "Pro なら無制限リンク",
+    "proHintSuffix": "。",
+    "visitedCountries": "訪れた国",
+    "visitedCountriesHint": "カードの地図に表示されます。すべて思い出せない場合は、後から追加できます。",
+    "submit": "カードを確保",
+    "submitting": "確保中…",
+    "submitNote": "月額 $2.80 から。いつでも解約可 — 当該期間終了までカードは表示されます。",
+    "successToast": "カードを作成しました! リダイレクト中…",
+    "errorHandle": "利用可能なハンドルを選んでください",
+    "errorName": "名前は必須です",
+    "errorTooManyLinks": "Basic プランは {cap} リンクまで — Pro で無制限",
+    "errorGeneric": "カードを作成できませんでした"
+  },
+  "settings": {
+    "navView": "プロフィールを見る",
+    "title": "設定。",
+    "subtitle": "プロフィールのレイアウト、テーマ、表示内容をカスタマイズ。",
+    "layout": {
+      "title": "レイアウト",
+      "description": "プロフィールの配置を選択。",
+      "centered": "中央寄せ",
+      "card": "カード",
+      "grid": "グリッド",
+      "minimal": "ミニマル"
+    },
+    "theme": {
+      "title": "テーマ",
+      "description": "完成された見た目 — 背景、フォント、ボタン、アクセント。",
+      "previewHint": "テーマをライブプレビュー: "
+    },
+    "sections": {
+      "title": "セクション",
+      "description": "表示の切り替えと並び替え。",
+      "moveUp": "上へ",
+      "moveDown": "下へ",
+      "show": "表示"
+    },
+    "branding": {
+      "title": "ブランディング",
+      "description": "カードに訪問者向けの「カードを作る」CTA を表示するかどうか。",
+      "hideLabel": "「カードを作る」CTA を非表示",
+      "hideHint": "訪問者に自分のカードを作るよう促すフローティングボタンを削除します。プロフィール自体は変わりません。"
+    },
+    "privacy": {
+      "title": "プライバシー",
+      "description": "誰が何を、どのくらいの遅延で見られるか。",
+      "visibilityLabel": "プロフィールの公開設定",
+      "visibilityPublic": "公開 — 誰でも閲覧可",
+      "visibilityPrivate": "非公開 — 自分のみ",
+      "delayLabel": "公開遅延(日)",
+      "delayHint": "プライバシー保護のためデータを実時間から遅らせる。0 = 即時。"
+    },
+    "saved": "設定を保存しました",
+    "saveError": "設定を保存できませんでした"
+  },
+  "card": {
+    "verified": "認証済み",
+    "shareTitle": "このカードをシェア",
+    "copyLink": "リンクをコピー",
+    "copied": "コピーしました!",
+    "fromHometown": "出身: {city}",
+    "countryOne": "カ国",
+    "countryMany": "カ国",
+    "memberSince": "登録日",
+    "workStatus": {
+      "available": "コラボ募集中",
+      "freelancing": "フリーランス",
+      "busy": "多忙",
+      "fulltime": "フルタイム"
+    },
+    "linkTypes": {
+      "website": "ウェブサイト",
+      "instagram": "Instagram",
+      "twitter": "X",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "threads": "Threads",
+      "substack": "Substack",
+      "telegram": "Telegram",
+      "other": "リンク"
+    }
+  },
+  "makeYoursCTA": {
+    "cta": "カードを作る",
+    "aria": "自分の Nomad Card を作る"
+  },
+  "roles": {
+    "Designer": "デザイナー",
+    "Developer": "開発者",
+    "Writer": "ライター",
+    "Product Manager": "プロダクトマネージャー",
+    "Marketer": "マーケター",
+    "Consultant": "コンサルタント",
+    "Entrepreneur": "起業家",
+    "Photographer": "フォトグラファー",
+    "Content Creator": "コンテンツクリエイター",
+    "Engineer": "エンジニア",
+    "Founder": "ファウンダー",
+    "Other": "その他"
+  },
+  "explore": {
+    "title": "見つける",
+    "subtitle": "リアルな人、リアルな場所、リアルタイムで。",
+    "empty": "まだプロフィールがありません。"
+  },
+  "map": {
+    "title": "ノマド地図",
+    "subtitle": "今、みんながどこにいるかを見る。"
+  },
+  "inCountry": {
+    "title": "{country} のノマド",
+    "subtitle": "現在ここを拠点にしている、あるいは通過中の人々。",
+    "empty": "まだ誰もいません。一番乗りに。"
+  },
+  "profileNotFound": {
+    "availableBadge": "利用可能",
+    "reservedBadge": "予約済み",
+    "availableBody": "このハンドルはまだ誰も確保していません。誰かに取られる前に。",
+    "availableCta": "@{handle} を確保する",
+    "availableNote": "月額 $2.80 から · 1 分でセットアップ",
+    "reservedBody": "このハンドルは予約されています — 通常はシステムページやブランド保護された名前と衝突しているためです。",
+    "reservedCta": "別のハンドルを選ぶ",
+    "invalidTitle": "無効なハンドル",
+    "invalidBody": "ハンドルは英数字、ハイフン、アンダースコアのみ — 1〜50 文字です。",
+    "invalidPick": "ハンドルを選ぶ",
+    "invalidExplore": "ノマドを見つける",
+    "footer": "© 2026 Nomad.now · 一箇所に住まない人のための bio リンク。"
+  }
+}

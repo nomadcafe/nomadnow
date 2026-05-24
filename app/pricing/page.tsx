@@ -1,63 +1,77 @@
 import React from 'react'
 import Link from 'next/link'
+import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/Logo'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
-export const metadata = {
-  title: 'Pricing — Nomad.now',
-  description:
-    'Straightforward pricing for your nomad card. Two plans, no free tier, no ads, no transaction fees.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata')
+  return {
+    title: t('pricingTitle'),
+    description: t('pricingDescription'),
+  }
 }
 
+// Cell shapes — `true` = check, `false` = dash, string = text label, 'soon' is
+// derived from the soon flag (not the value) so a row can carry both a label
+// and a Soon pill.
+type Cell = boolean | string
+
 type Feature = {
-  label: string
-  basic: boolean | string
-  pro: boolean | string
-  // When true, the feature is on the roadmap rather than shipped. Renders a
-  // "Soon" pill so we don't oversell what's not live yet.
+  // Key into the pricing.features namespace. Keys are stable; the actual
+  // translated string is fetched at render time.
+  key: string
+  basic: Cell
+  // When basic value is a string, this is the i18n key for that label.
+  basicKey?: string
+  pro: Cell
+  proKey?: string
+  // Marks the Pro feature as roadmap-only so a "Soon" pill renders.
   soon?: boolean
 }
 
-const FEATURE_ROWS: { section: string; items: Feature[] }[] = [
+const FEATURE_ROWS: { sectionKey: string; items: Feature[] }[] = [
   {
-    section: 'Your card',
+    sectionKey: 'yourCard',
     items: [
-      { label: 'Handle on nomad.now (premium .now domain)', basic: true, pro: true },
-      { label: 'Visited countries world map', basic: true, pro: true },
-      { label: 'Current city + live timezone', basic: true, pro: true },
-      { label: 'Auto-generated share image (OG)', basic: true, pro: true },
-      { label: 'Built-in themes', basic: '4 presets', pro: '4 presets + custom' },
-      { label: 'Brand-icon links (10 platforms)', basic: '1 link', pro: 'Unlimited' },
-      { label: 'Verified badge', basic: false, pro: true },
-      { label: '"Made on nomad.now" footer', basic: 'Optional', pro: 'Optional' },
+      { key: 'publicProfile', basic: true, pro: true },
+      { key: 'worldMap', basic: true, pro: true },
+      { key: 'liveTimezone', basic: true, pro: true },
+      { key: 'ogImage', basic: true, pro: true },
+      { key: 'themes', basic: 'themesBasic', basicKey: 'themesBasic', pro: 'themesPro', proKey: 'themesPro' },
+      { key: 'linksLabel', basic: 'linksBasic', basicKey: 'linksBasic', pro: 'linksPro', proKey: 'linksPro' },
+      { key: 'verifiedBadge', basic: false, pro: true },
+      { key: 'footerLabel', basic: 'footerOptional', basicKey: 'footerOptional', pro: 'footerOptional', proKey: 'footerOptional' },
     ],
   },
   {
-    section: 'Distribution',
+    sectionKey: 'distribution',
     items: [
-      { label: 'Listed on /map and /in/{country}', basic: true, pro: 'Featured placement', soon: false },
-      { label: 'Embed widget on your site', basic: 'With branding', pro: 'No branding', soon: true },
-      { label: 'Custom domain (yourdomain.com)', basic: false, pro: true, soon: true },
+      { key: 'listingDefault', basic: true, pro: 'listingFeatured', proKey: 'listingFeatured' },
+      { key: 'embed', basic: 'embedBasic', basicKey: 'embedBasic', pro: 'embedPro', proKey: 'embedPro', soon: true },
+      { key: 'customDomain', basic: false, pro: true, soon: true },
     ],
   },
   {
-    section: 'Insights',
+    sectionKey: 'insights',
     items: [
-      { label: 'Page views + link clicks', basic: true, pro: true },
-      { label: 'Visitor geography + referrers', basic: false, pro: true, soon: true },
-      { label: 'Click-through funnel', basic: false, pro: true, soon: true },
+      { key: 'viewsClicks', basic: true, pro: true },
+      { key: 'visitorAnalytics', basic: false, pro: true, soon: true },
+      { key: 'funnel', basic: false, pro: true, soon: true },
     ],
   },
   {
-    section: 'Automation',
+    sectionKey: 'automation',
     items: [
-      { label: 'Multiple draft cards', basic: false, pro: true, soon: true },
-      { label: 'Auto-sync current city (Strava / Wise)', basic: false, pro: true, soon: true },
+      { key: 'drafts', basic: false, pro: true, soon: true },
+      { key: 'autoSync', basic: false, pro: true, soon: true },
     ],
   },
   {
-    section: 'Support',
+    sectionKey: 'support',
     items: [
-      { label: 'Email support', basic: 'Standard', pro: 'Priority' },
+      { key: 'emailLabel', basic: 'emailBasic', basicKey: 'emailBasic', pro: 'emailPro', proKey: 'emailPro' },
     ],
   },
 ]
@@ -78,20 +92,32 @@ function Dash({ className = '' }: { className?: string }) {
   )
 }
 
-function SoonPill() {
+function SoonPill({ label }: { label: string }) {
   return (
     <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200">
-      Soon
+      {label}
     </span>
   )
 }
 
-function CellValue({ value, soon, accent }: { value: boolean | string; soon?: boolean; accent?: boolean }) {
+function CellValue({
+  value,
+  label,
+  soon,
+  soonLabel,
+  accent,
+}: {
+  value: Cell
+  label?: string
+  soon?: boolean
+  soonLabel: string
+  accent?: boolean
+}) {
   if (value === true) {
     return (
       <span className="inline-flex items-center">
         <Check className={accent ? 'text-gray-900' : 'text-gray-700'} />
-        {soon && <SoonPill />}
+        {soon && <SoonPill label={soonLabel} />}
       </span>
     )
   }
@@ -100,60 +126,67 @@ function CellValue({ value, soon, accent }: { value: boolean | string; soon?: bo
   }
   return (
     <span className="inline-flex items-center text-sm text-gray-700">
-      <span>{value}</span>
-      {soon && <SoonPill />}
+      <span>{label ?? value}</span>
+      {soon && <SoonPill label={soonLabel} />}
     </span>
   )
 }
 
-const BASIC_BULLETS = [
-  'Your handle on nomad.now — a premium .now domain',
-  'Public profile page',
-  'Visited countries world map',
-  'Current city + live timezone',
-  '1 link (choose from 10 brand icons)',
-  '4 built-in themes',
-  'Basic analytics',
-  'Auto-generated share image',
-  'Optional "Made on nomad.now" footer',
+const BASIC_BULLET_KEYS = [
+  'premiumDomain',
+  'publicProfile',
+  'worldMap',
+  'liveTimezone',
+  'oneLink',
+  'themes',
+  'analytics',
+  'ogImage',
+  'footer',
+] as const
+
+const PRO_BULLET_KEYS: { key: string; soon?: boolean }[] = [
+  { key: 'everythingInBasic' },
+  { key: 'customDomain', soon: true },
+  { key: 'unlimitedLinks' },
+  { key: 'customTheme' },
+  { key: 'verifiedBadge' },
+  { key: 'featured' },
+  { key: 'analytics', soon: true },
+  { key: 'drafts', soon: true },
+  { key: 'autoSync', soon: true },
+  { key: 'embed', soon: true },
+  { key: 'support' },
 ]
 
-const PRO_BULLETS: { label: string; soon?: boolean }[] = [
-  { label: 'Everything in Basic' },
-  { label: 'Custom domain', soon: true },
-  { label: 'Unlimited links' },
-  { label: 'Custom theme color + background' },
-  { label: 'Verified badge' },
-  { label: 'Featured on /map and /in/{country}' },
-  { label: 'Visitor analytics (geo + referrers)', soon: true },
-  { label: 'Multiple draft cards', soon: true },
-  { label: 'Auto-sync city from Strava / Wise', soon: true },
-  { label: 'Embed widget without branding', soon: true },
-  { label: 'Priority email support' },
-]
+const FAQ_KEYS = ['noFree', 'cancel', 'data', 'switch', 'fees'] as const
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const t = await getTranslations('pricing')
+  const tCommon = await getTranslations('common')
+  const tNav = await getTranslations('nav')
+  const soonLabel = tCommon('soon').toUpperCase()
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
-      {/* Nav — mirrors the homepage so the page doesn't feel like a different product. */}
       <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/map" className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition">
-              Map
+              {tNav('map')}
             </Link>
             <Link href="/explore" className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition">
-              Explore
+              {tNav('explore')}
             </Link>
             <Link href="/login" className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition">
-              Sign in
+              {tNav('signin')}
             </Link>
+            <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/create-card"
               className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
             >
-              Get your card
+              {tNav('getCard')}
             </Link>
           </div>
         </div>
@@ -171,10 +204,10 @@ export default function PricingPage() {
         />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-10 text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight mb-4">
-            Two plans. No ads. No fees.
+            {t('headline')}
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
-            We don&apos;t offer a free tier — it&apos;s how we keep the platform clean, ad-free, and built for nomads instead of advertisers.
+            {t('subhead')}
           </p>
         </div>
       </header>
@@ -182,25 +215,24 @@ export default function PricingPage() {
       {/* Pricing cards */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
         <div className="grid md:grid-cols-2 gap-6 items-stretch">
-          {/* Basic — featured. Most users start here in a paid-only model, so it
-              gets the dark "look at me" treatment and the Most popular badge. */}
+          {/* Basic — featured. */}
           <div className="relative rounded-2xl border-2 border-gray-900 bg-gray-900 text-white p-7 sm:p-8 flex flex-col shadow-xl shadow-gray-900/20">
             <span className="absolute -top-3 right-6 inline-flex items-center gap-1 bg-amber-300 text-gray-900 text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full">
-              Most popular
+              {t('mostPopular')}
             </span>
             <div className="mb-6">
-              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-400 mb-2">Basic</h2>
+              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-400 mb-2">{t('basic.label')}</h2>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl sm:text-5xl font-semibold tracking-tight">$2.8</span>
-                <span className="text-gray-400">/mo</span>
+                <span className="text-gray-400">{t('perMonth')}</span>
               </div>
-              <p className="mt-2 text-sm text-gray-300">Get on the map. Everything you need for a public nomad card.</p>
+              <p className="mt-2 text-sm text-gray-300">{t('basic.tagline')}</p>
             </div>
             <ul className="space-y-3 mb-8 flex-1">
-              {BASIC_BULLETS.map((b) => (
-                <li key={b} className="flex items-start gap-2.5 text-[15px] text-gray-100">
+              {BASIC_BULLET_KEYS.map((key) => (
+                <li key={key} className="flex items-start gap-2.5 text-[15px] text-gray-100">
                   <Check className="text-amber-300 mt-0.5 shrink-0" />
-                  <span>{b}</span>
+                  <span>{t(`basicBullets.${key}`)}</span>
                 </li>
               ))}
             </ul>
@@ -208,27 +240,27 @@ export default function PricingPage() {
               href="/login?plan=basic"
               className="block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
             >
-              Start with Basic
+              {t('basic.cta')}
             </Link>
           </div>
 
           {/* Pro */}
           <div className="rounded-2xl border border-gray-200 bg-white p-7 sm:p-8 flex flex-col">
             <div className="mb-6">
-              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 mb-2">Pro</h2>
+              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 mb-2">{t('pro.label')}</h2>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl sm:text-5xl font-semibold tracking-tight">$9.8</span>
-                <span className="text-gray-500">/mo</span>
+                <span className="text-gray-500">{t('perMonth')}</span>
               </div>
-              <p className="mt-2 text-sm text-gray-600">Own your nomad brand. Custom domain, unlimited links, advanced analytics.</p>
+              <p className="mt-2 text-sm text-gray-600">{t('pro.tagline')}</p>
             </div>
             <ul className="space-y-3 mb-8 flex-1">
-              {PRO_BULLETS.map(({ label, soon }) => (
-                <li key={label} className="flex items-start gap-2.5 text-[15px] text-gray-800">
+              {PRO_BULLET_KEYS.map(({ key, soon }) => (
+                <li key={key} className="flex items-start gap-2.5 text-[15px] text-gray-800">
                   <Check className="text-gray-700 mt-0.5 shrink-0" />
                   <span>
-                    {label}
-                    {soon && <SoonPill />}
+                    {t(`proBullets.${key}`)}
+                    {soon && <SoonPill label={soonLabel} />}
                   </span>
                 </li>
               ))}
@@ -237,51 +269,61 @@ export default function PricingPage() {
               href="/login?plan=pro"
               className="block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
             >
-              Go Pro
+              {t('pro.cta')}
             </Link>
           </div>
         </div>
         <p className="text-center text-xs text-gray-500 mt-5">
-          Prices in USD. Billed monthly. Cancel any time — your card stays live to the end of the current period.
+          {t('footnote')}
         </p>
       </section>
 
       {/* Feature comparison table */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-center mb-8">
-          Compare plans
+          {t('compareTitle')}
         </h2>
         <div className="border border-gray-200 rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left text-sm font-medium text-gray-500 px-5 sm:px-6 py-4">Feature</th>
-                <th className="text-center text-sm font-medium text-gray-500 px-3 py-4 w-28 sm:w-36">Basic</th>
-                <th className="text-center text-sm font-medium text-gray-900 px-3 py-4 w-28 sm:w-36">Pro</th>
+                <th className="text-left text-sm font-medium text-gray-500 px-5 sm:px-6 py-4">{t('compare.feature')}</th>
+                <th className="text-center text-sm font-medium text-gray-500 px-3 py-4 w-28 sm:w-36">{t('compare.basic')}</th>
+                <th className="text-center text-sm font-medium text-gray-900 px-3 py-4 w-28 sm:w-36">{t('compare.pro')}</th>
               </tr>
             </thead>
             <tbody>
               {FEATURE_ROWS.map((section, sIdx) => (
-                <React.Fragment key={section.section}>
+                <React.Fragment key={section.sectionKey}>
                   <tr className="border-t border-gray-200">
                     <td colSpan={3} className="bg-gray-50/50 px-5 sm:px-6 py-2.5 text-xs font-medium uppercase tracking-wide text-gray-500">
-                      {section.section}
+                      {t(`sections.${section.sectionKey}`)}
                     </td>
                   </tr>
                   {section.items.map((item, iIdx) => (
                     <tr
-                      key={item.label}
+                      key={item.key}
                       className={iIdx === section.items.length - 1 && sIdx === FEATURE_ROWS.length - 1 ? '' : 'border-t border-gray-100'}
                     >
-                      <td className="px-5 sm:px-6 py-3.5 text-[15px] text-gray-800">{item.label}</td>
+                      <td className="px-5 sm:px-6 py-3.5 text-[15px] text-gray-800">{t(`features.${item.key}`)}</td>
                       <td className="px-3 py-3.5 text-center">
                         <span className="inline-flex justify-center">
-                          <CellValue value={item.basic} />
+                          <CellValue
+                            value={item.basic}
+                            label={item.basicKey ? t(`features.${item.basicKey}`) : undefined}
+                            soonLabel={soonLabel}
+                          />
                         </span>
                       </td>
                       <td className="px-3 py-3.5 text-center">
                         <span className="inline-flex justify-center">
-                          <CellValue value={item.pro} soon={item.soon} accent />
+                          <CellValue
+                            value={item.pro}
+                            label={item.proKey ? t(`features.${item.proKey}`) : undefined}
+                            soon={item.soon}
+                            soonLabel={soonLabel}
+                            accent
+                          />
                         </span>
                       </td>
                     </tr>
@@ -296,29 +338,12 @@ export default function PricingPage() {
       {/* FAQ */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-20">
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-center mb-8">
-          Common questions
+          {t('faqTitle')}
         </h2>
         <div className="space-y-5">
-          <Faq
-            q="Why is there no free plan?"
-            a="A free plan would force us to put ads or transaction fees somewhere — neither feels right for a profile you'd share to your network. $2.8 keeps the lights on without compromising the product."
-          />
-          <Faq
-            q="Can I cancel any time?"
-            a="Yes. Your card stays live until the end of the current billing period. After that the page returns a 'no longer available' notice — your handle is held for 30 days in case you change your mind."
-          />
-          <Faq
-            q="What happens to my data if I cancel?"
-            a="Export everything (profile, links, visited countries) as JSON from settings before cancelling. We keep your data for 90 days after cancellation in case you resubscribe."
-          />
-          <Faq
-            q="Can I switch between Basic and Pro?"
-            a="Upgrade anytime — billed prorated. Downgrade takes effect at the end of the current period."
-          />
-          <Faq
-            q="Do you charge transaction fees?"
-            a="No. We don't sell digital products on your behalf, so there's nothing to take a cut from. The card is your card."
-          />
+          {FAQ_KEYS.map((key) => (
+            <Faq key={key} q={t(`faq.${key}.q`)} a={t(`faq.${key}.a`)} />
+          ))}
         </div>
       </section>
 
@@ -326,16 +351,18 @@ export default function PricingPage() {
       <section className="border-t border-gray-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
-            Claim your handle.
+            {t('finalCta.title')}
           </h2>
           <p className="text-gray-600 mb-8">
-            nomad.now/<span className="font-mono">yourhandle</span> — pick one before someone else does.
+            {t.rich('finalCta.body', {
+              handle: () => <span className="font-mono">yourhandle</span>,
+            })}
           </p>
           <Link
             href="/login?plan=basic"
             className="inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
           >
-            <span>Get started</span>
+            <span>{t('finalCta.cta')}</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

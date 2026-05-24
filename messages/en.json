@@ -1,0 +1,392 @@
+{
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "next": "Next",
+    "back": "Back",
+    "delete": "Delete",
+    "yes": "yes",
+    "no": "no",
+    "soon": "soon",
+    "required": "required",
+    "optional": "optional",
+    "from": "From"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "english": "English",
+    "japanese": "日本語",
+    "chinese": "中文"
+  },
+  "nav": {
+    "map": "Map",
+    "explore": "Explore",
+    "pricing": "Pricing",
+    "signin": "Sign in",
+    "getCard": "Get your card",
+    "viewProfile": "View profile"
+  },
+  "footer": {
+    "tagline": "The bio link for people who don't live in one place.",
+    "copyright": "© 2026 Nomad.now",
+    "credit": "Made for nomads, by people who keep moving."
+  },
+  "metadata": {
+    "title": "Nomad.now — One page for your nomad life",
+    "description": "Where you are. Where you've been. What you're building. One link.",
+    "ogDescription": "Where you are. Where you've been. What you're building.",
+    "pricingTitle": "Pricing — Nomad.now",
+    "pricingDescription": "Straightforward pricing for your nomad card. Two plans, no free tier, no ads, no transaction fees."
+  },
+  "home": {
+    "eyebrow": "The bio link for nomads",
+    "heroLine1": "Where you are.",
+    "heroLine2": "Where you've been.",
+    "heroLine3": "What you're building.",
+    "heroSub1": "One link for your whole nomad life. Live local time, every country you've set foot in, what you're working on. At ",
+    "heroSub2": ".",
+    "heroPriceNote": "From $2.80 / month",
+    "heroSetupNote": "1 minute to set up",
+    "live": {
+      "eyebrow": "Live, right now",
+      "title": "Time on your card moves with you.",
+      "description": "These are real times in those cities. They'll tick every minute on someone's actual card."
+    },
+    "feature1": {
+      "label": "Travel",
+      "title": "The map that grows with you.",
+      "body": "Not a row of flag emojis. A real constellation — visible at a glance, sharable as an image, and yours forever as you keep moving.",
+      "stat1": "10 of 195 countries",
+      "stat2": "3 continents"
+    },
+    "feature2": {
+      "label": "Time",
+      "title": "Wherever you are, your clock follows.",
+      "body": "Your local time refreshes every minute on your card. Collaborators on the other side of the world stop wondering when you're reachable.",
+      "currentlyIn": "Currently in"
+    },
+    "feature3": {
+      "label": "Status",
+      "title": "Tell people what you're open to.",
+      "body": "Three taps to swap between open to collaboration, freelancing, full-time, or just resting. Visible above the fold, never out of date.",
+      "slowTravel": "Slow travel mode"
+    },
+    "comparison": {
+      "title": "Why not just Linktree?",
+      "subtitle": "Because you don't live in one place.",
+      "footnote": "Linktree raised prices 67% in late 2025. We won't.",
+      "row1": "Travel map",
+      "row2": "Live local time",
+      "row3": "Country tracker",
+      "row4": "No ads, no transaction fees",
+      "row5": "Custom domain",
+      "row6": "Unlimited links"
+    },
+    "darkCta": {
+      "line1": "One link.",
+      "line2": "Wherever you are.",
+      "body": "Set it up in a minute. Carry it forever.",
+      "cta": "Get your card",
+      "note": "From $2.80 / month · Cancel any time"
+    },
+    "previewCard": {
+      "name": "Kenji Tanaka",
+      "role": "Product Designer",
+      "city": "Bangkok",
+      "countries": "countries",
+      "since": "since",
+      "verified": "Verified",
+      "open": "Open"
+    }
+  },
+  "pricing": {
+    "headline": "Two plans. No ads. No fees.",
+    "subhead": "We don't offer a free tier — it's how we keep the platform clean, ad-free, and built for nomads instead of advertisers.",
+    "mostPopular": "Most popular",
+    "perMonth": "/mo",
+    "basic": {
+      "label": "Basic",
+      "tagline": "Get on the map. Everything you need for a public nomad card.",
+      "cta": "Start with Basic"
+    },
+    "pro": {
+      "label": "Pro",
+      "tagline": "Own your nomad brand. Custom domain, unlimited links, advanced analytics.",
+      "cta": "Go Pro"
+    },
+    "footnote": "Prices in USD. Billed monthly. Cancel any time — your card stays live to the end of the current period.",
+    "compareTitle": "Compare plans",
+    "compare": {
+      "feature": "Feature",
+      "basic": "Basic",
+      "pro": "Pro"
+    },
+    "sections": {
+      "yourCard": "Your card",
+      "distribution": "Distribution",
+      "insights": "Insights",
+      "automation": "Automation",
+      "support": "Support"
+    },
+    "features": {
+      "publicProfile": "Handle on nomad.now (premium .now domain)",
+      "worldMap": "Visited countries world map",
+      "liveTimezone": "Current city + live timezone",
+      "ogImage": "Auto-generated share image (OG)",
+      "themesBasic": "4 presets",
+      "themesPro": "4 presets + custom",
+      "linksLabel": "Brand-icon links (10 platforms)",
+      "linksBasic": "1 link",
+      "linksPro": "Unlimited",
+      "verifiedBadge": "Verified badge",
+      "footerLabel": "\"Made on nomad.now\" footer",
+      "footerOptional": "Optional",
+      "listingFeatured": "Featured placement",
+      "listingDefault": "Listed on /map and /in/{country}",
+      "embedBasic": "With branding",
+      "embedPro": "No branding",
+      "embed": "Embed widget on your site",
+      "customDomain": "Custom domain (yourdomain.com)",
+      "viewsClicks": "Page views + link clicks",
+      "visitorAnalytics": "Visitor geography + referrers",
+      "funnel": "Click-through funnel",
+      "drafts": "Multiple draft cards",
+      "autoSync": "Auto-sync current city (Strava / Wise)",
+      "emailLabel": "Email support",
+      "emailBasic": "Standard",
+      "emailPro": "Priority"
+    },
+    "basicBullets": {
+      "premiumDomain": "Your handle on nomad.now — a premium .now domain",
+      "publicProfile": "Public profile page",
+      "worldMap": "Visited countries world map",
+      "liveTimezone": "Current city + live timezone",
+      "oneLink": "1 link (choose from 10 brand icons)",
+      "themes": "4 built-in themes",
+      "analytics": "Basic analytics",
+      "ogImage": "Auto-generated share image",
+      "footer": "Optional \"Made on nomad.now\" footer"
+    },
+    "proBullets": {
+      "everythingInBasic": "Everything in Basic",
+      "customDomain": "Custom domain",
+      "unlimitedLinks": "Unlimited links",
+      "customTheme": "Custom theme color + background",
+      "verifiedBadge": "Verified badge",
+      "featured": "Featured on /map and /in/{country}",
+      "analytics": "Visitor analytics (geo + referrers)",
+      "drafts": "Multiple draft cards",
+      "autoSync": "Auto-sync city from Strava / Wise",
+      "embed": "Embed widget without branding",
+      "support": "Priority email support"
+    },
+    "faqTitle": "Common questions",
+    "faq": {
+      "noFree": {
+        "q": "Why is there no free plan?",
+        "a": "A free plan would force us to put ads or transaction fees somewhere — neither feels right for a profile you'd share to your network. $2.8 keeps the lights on without compromising the product."
+      },
+      "cancel": {
+        "q": "Can I cancel any time?",
+        "a": "Yes. Your card stays live until the end of the current billing period. After that the page returns a 'no longer available' notice — your handle is held for 30 days in case you change your mind."
+      },
+      "data": {
+        "q": "What happens to my data if I cancel?",
+        "a": "Export everything (profile, links, visited countries) as JSON from settings before cancelling. We keep your data for 90 days after cancellation in case you resubscribe."
+      },
+      "switch": {
+        "q": "Can I switch between Basic and Pro?",
+        "a": "Upgrade anytime — billed prorated. Downgrade takes effect at the end of the current period."
+      },
+      "fees": {
+        "q": "Do you charge transaction fees?",
+        "a": "No. We don't sell digital products on your behalf, so there's nothing to take a cut from. The card is your card."
+      }
+    },
+    "finalCta": {
+      "title": "Claim your handle.",
+      "body": "nomad.now/{handle} — pick one before someone else does.",
+      "cta": "Get started"
+    }
+  },
+  "login": {
+    "title": "Sign in.",
+    "subtitle": "Magic link — no password needed.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Send magic link",
+    "submitting": "Sending…",
+    "sentTitle": "Check your inbox.",
+    "sentBody": "We sent a sign-in link to {email}. Click it to continue.",
+    "tryAnother": "Try another email",
+    "errorGeneric": "Could not send the magic link. Please try again."
+  },
+  "createCard": {
+    "navCancel": "Cancel",
+    "title": "Claim your card.",
+    "subtitle": "Three fields to start. Everything else is optional and editable later.",
+    "handle": "Handle",
+    "handlePrefix": "nomad.now/",
+    "handlePlaceholder": "yourhandle",
+    "handleAvailable": "Available — claim it before someone else does",
+    "handleInvalid": "2–50 characters: letters, numbers, _ or -",
+    "handleTaken": "This handle is already taken",
+    "handleHint": "Cannot be changed later.",
+    "handleError": "Handle is not available",
+    "handleCheckError": "Error checking availability",
+    "name": "Name",
+    "namePlaceholder": "Kenji Tanaka",
+    "currentCity": "Currently in",
+    "currentCityPlaceholder": "Bangkok",
+    "currentCityHint": "Shown live on your card. Change when you move.",
+    "expand": "Customize more (optional)",
+    "collapse": "Hide extras",
+    "role": "Role",
+    "status": "Status",
+    "bio": "One-line bio",
+    "bioPlaceholder": "Building tools for remote life.",
+    "hometown": "From",
+    "hometownPlaceholder": "Osaka",
+    "avatarUrl": "Avatar URL",
+    "avatarPlaceholder": "https://example.com/avatar.jpg",
+    "linksLabel": "Link",
+    "linksHint": "Basic — 1 link",
+    "linkTypeOther": "Other",
+    "addLink": "+ Add link",
+    "linkUrlPlaceholder": "https://…",
+    "linkLabelPlaceholder": "Label",
+    "removeLink": "Remove link",
+    "proHintPrefix": "Want more? ",
+    "proHintLink": "Pro unlocks unlimited links",
+    "proHintSuffix": ".",
+    "visitedCountries": "Countries you've been to",
+    "visitedCountriesHint": "Plotted on the map on your card. Add the rest later if you don't remember them all now.",
+    "submit": "Claim my card",
+    "submitting": "Claiming…",
+    "submitNote": "From $2.80 / month. Cancel any time — your card stays live to the end of the period.",
+    "successToast": "Card created! Redirecting…",
+    "errorHandle": "Please pick an available handle",
+    "errorName": "Name is required",
+    "errorTooManyLinks": "Basic plan allows {cap} link — upgrade to Pro for unlimited",
+    "errorGeneric": "Failed to create nomad card"
+  },
+  "settings": {
+    "navView": "View profile",
+    "title": "Settings.",
+    "subtitle": "Customize your profile layout, theme, and what's shown.",
+    "layout": {
+      "title": "Layout",
+      "description": "Choose how your profile is arranged.",
+      "centered": "Centered",
+      "card": "Card",
+      "grid": "Grid",
+      "minimal": "Minimal"
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "A complete look — background, type, buttons, accent.",
+      "previewHint": "Preview any theme live at "
+    },
+    "sections": {
+      "title": "Sections",
+      "description": "Toggle visibility and reorder.",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "show": "Show"
+    },
+    "branding": {
+      "title": "Branding",
+      "description": "Whether to show the \"Make yours\" CTA to visitors on your card.",
+      "hideLabel": "Hide \"Make yours\" CTA on my card",
+      "hideHint": "Removes the floating button that invites visitors to create their own card. Your profile stays the same."
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "Who can see what, and with how much delay.",
+      "visibilityLabel": "Profile visibility",
+      "visibilityPublic": "Public — anyone can view",
+      "visibilityPrivate": "Private — only you",
+      "delayLabel": "Reveal delay (days)",
+      "delayHint": "Lag data behind real time for privacy. 0 = immediate."
+    },
+    "saved": "Settings saved",
+    "saveError": "Failed to save settings"
+  },
+  "card": {
+    "verified": "Verified",
+    "shareTitle": "Share this card",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "fromHometown": "From {city}",
+    "countryOne": "country",
+    "countryMany": "countries",
+    "memberSince": "member since",
+    "workStatus": {
+      "available": "Open to collaboration",
+      "freelancing": "Freelancing",
+      "busy": "Busy",
+      "fulltime": "Full-time"
+    },
+    "linkTypes": {
+      "website": "Website",
+      "instagram": "Instagram",
+      "twitter": "X",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "threads": "Threads",
+      "substack": "Substack",
+      "telegram": "Telegram",
+      "other": "Link"
+    }
+  },
+  "makeYoursCTA": {
+    "cta": "Make yours",
+    "aria": "Create your own Nomad Card"
+  },
+  "roles": {
+    "Designer": "Designer",
+    "Developer": "Developer",
+    "Writer": "Writer",
+    "Product Manager": "Product Manager",
+    "Marketer": "Marketer",
+    "Consultant": "Consultant",
+    "Entrepreneur": "Entrepreneur",
+    "Photographer": "Photographer",
+    "Content Creator": "Content Creator",
+    "Engineer": "Engineer",
+    "Founder": "Founder",
+    "Other": "Other"
+  },
+  "explore": {
+    "title": "Explore",
+    "subtitle": "Real people, real places, right now.",
+    "empty": "No profiles yet."
+  },
+  "map": {
+    "title": "The nomad map",
+    "subtitle": "See where everyone is, right now."
+  },
+  "inCountry": {
+    "title": "Nomads in {country}",
+    "subtitle": "People currently based here or passing through.",
+    "empty": "No one here yet. Be the first."
+  },
+  "profileNotFound": {
+    "availableBadge": "Available",
+    "reservedBadge": "Reserved",
+    "availableBody": "Nobody's claimed this handle yet. Take it before someone else does.",
+    "availableCta": "Claim @{handle}",
+    "availableNote": "From $2.80 / month · 1 minute to set up",
+    "reservedBody": "This handle is reserved — usually because it collides with a system page or a brand-protected name.",
+    "reservedCta": "Pick a different handle",
+    "invalidTitle": "Not a valid handle",
+    "invalidBody": "Handles use letters, numbers, hyphens, and underscores only — between 1 and 50 characters.",
+    "invalidPick": "Pick a handle",
+    "invalidExplore": "Explore nomads",
+    "footer": "© 2026 Nomad.now · The bio link for people who don't live in one place."
+  }
+}

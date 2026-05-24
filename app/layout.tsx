@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import './globals.css'
 import { PerformanceMonitor } from '@/components/PerformanceMonitor'
 
@@ -9,37 +11,52 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
-export const metadata: Metadata = {
-  title: 'Nomad.now — One page for your nomad life',
-  description: 'Where you are. Where you\'ve been. What you\'re building. One link.',
-  keywords: ['digital nomad', 'nomad profile', 'bio link', 'travel map', 'remote work', 'currently in', 'where am i'],
-  authors: [{ name: 'Nomad.now' }],
-  openGraph: {
-    title: 'Nomad.now — One page for your nomad life',
-    description: 'Where you are. Where you\'ve been. What you\'re building.',
-    type: 'website',
-    locale: 'en_US',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Nomad.now — One page for your nomad life',
-    description: 'Where you are. Where you\'ve been. What you\'re building.',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+const OG_LOCALE: Record<string, string> = {
+  en: 'en_US',
+  ja: 'ja_JP',
+  zh: 'zh_CN',
 }
 
-export default function RootLayout({
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata')
+  const locale = await getLocale()
+  return {
+    title: t('title'),
+    description: t('description'),
+    keywords: ['digital nomad', 'nomad profile', 'bio link', 'travel map', 'remote work'],
+    authors: [{ name: 'Nomad.now' }],
+    openGraph: {
+      title: t('title'),
+      description: t('ogDescription'),
+      type: 'website',
+      locale: OG_LOCALE[locale] || 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('title'),
+      description: t('ogDescription'),
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  }
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={inter.variable}>
+    <html lang={locale} data-scroll-behavior="smooth" className={inter.variable}>
       <body className="antialiased font-sans">
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
         <PerformanceMonitor />
       </body>
     </html>
