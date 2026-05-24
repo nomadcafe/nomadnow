@@ -312,7 +312,29 @@
       "delayHint": "Lag data behind real time for privacy. 0 = immediate."
     },
     "saved": "Settings saved",
-    "saveError": "Failed to save settings"
+    "saveError": "Failed to save settings",
+    "billing": {
+      "title": "Billing",
+      "description": "Manage your subscription, update your card, or cancel.",
+      "currentPlan": "Current plan",
+      "planBasic": "Basic",
+      "planPro": "Pro",
+      "planNone": "No active plan",
+      "manage": "Manage subscription",
+      "subscribe": "Choose a plan",
+      "renewsOn": "Renews on {date}",
+      "endsOn": "Access ends on {date}",
+      "status": {
+        "active": "Active",
+        "past_due": "Payment past due",
+        "trialing": "Trial",
+        "canceled": "Canceled",
+        "incomplete": "Incomplete",
+        "unpaid": "Unpaid",
+        "paused": "Paused"
+      },
+      "portalError": "Could not open the billing portal. Please try again."
+    }
   },
   "card": {
     "verified": "Verified",
@@ -409,6 +431,12 @@
     "emptyTitle": "No nomads here yet",
     "emptyBody": "Add {country} to your visited countries and you'll show up here for everyone searching for \"{country}\".",
     "backToMap": "← Back to the global map"
+  },
+  "profileExpired": {
+    "title": "This card is no longer available.",
+    "body": "The owner's subscription ended. The handle is held for 30 days in case they come back.",
+    "cta": "Claim your own card",
+    "browse": "Browse other nomads"
   },
   "profileNotFound": {
     "availableBadge": "Available",

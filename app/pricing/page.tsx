@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata')
@@ -236,12 +237,12 @@ export default async function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/login?plan=basic"
-              className="block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
+            <PlanCheckoutButton
+              plan="basic"
+              className="w-full block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
             >
               {t('basic.cta')}
-            </Link>
+            </PlanCheckoutButton>
           </div>
 
           {/* Pro */}
@@ -265,12 +266,12 @@ export default async function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/login?plan=pro"
-              className="block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
+            <PlanCheckoutButton
+              plan="pro"
+              className="w-full block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
             >
               {t('pro.cta')}
-            </Link>
+            </PlanCheckoutButton>
           </div>
         </div>
         <p className="text-center text-xs text-gray-500 mt-5">
@@ -358,15 +359,15 @@ export default async function PricingPage() {
               handle: () => <span className="font-mono">yourhandle</span>,
             })}
           </p>
-          <Link
-            href="/login?plan=basic"
+          <PlanCheckoutButton
+            plan="basic"
             className="inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
           >
             <span>{t('finalCta.cta')}</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-          </Link>
+          </PlanCheckoutButton>
         </div>
       </section>
     </div>

@@ -16,6 +16,12 @@ const envSchema = z.object({
   // When unset, rate limiting silently no-ops (fine for local dev / preview deploys).
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+  // Stripe billing — optional so the app still boots locally without Stripe set.
+  // The /api/billing/* routes will return 503 when these are missing.
+  STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  STRIPE_PRICE_BASIC: z.string().min(1).optional(),
+  STRIPE_PRICE_PRO: z.string().min(1).optional(),
 })
 
 type Env = z.infer<typeof envSchema>
@@ -36,6 +42,10 @@ export function getEnv(): Env {
       NEXT_PUBLIC_BASE_URL: baseUrl,
       UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
       UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+      STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+      STRIPE_PRICE_BASIC: process.env.STRIPE_PRICE_BASIC,
+      STRIPE_PRICE_PRO: process.env.STRIPE_PRICE_PRO,
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

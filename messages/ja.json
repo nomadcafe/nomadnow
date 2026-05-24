@@ -312,7 +312,29 @@
       "delayHint": "プライバシー保護のためデータを実時間から遅らせる。0 = 即時。"
     },
     "saved": "設定を保存しました",
-    "saveError": "設定を保存できませんでした"
+    "saveError": "設定を保存できませんでした",
+    "billing": {
+      "title": "課金",
+      "description": "サブスクリプション管理、カード更新、キャンセル。",
+      "currentPlan": "現在のプラン",
+      "planBasic": "Basic",
+      "planPro": "Pro",
+      "planNone": "プランなし",
+      "manage": "サブスクリプションを管理",
+      "subscribe": "プランを選ぶ",
+      "renewsOn": "{date} に更新",
+      "endsOn": "{date} までアクセス可能",
+      "status": {
+        "active": "有効",
+        "past_due": "支払い遅延",
+        "trialing": "トライアル中",
+        "canceled": "キャンセル済み",
+        "incomplete": "未完了",
+        "unpaid": "未払い",
+        "paused": "一時停止"
+      },
+      "portalError": "課金ポータルを開けませんでした。もう一度お試しください。"
+    }
   },
   "card": {
     "verified": "認証済み",
@@ -409,6 +431,12 @@
     "emptyTitle": "まだノマドがいません",
     "emptyBody": "{country} を訪問国に追加すると、「{country}」を検索した人にここで表示されます。",
     "backToMap": "← グローバル地図に戻る"
+  },
+  "profileExpired": {
+    "title": "このカードは利用できなくなりました。",
+    "body": "オーナーのサブスクリプションが終了しました。ハンドルは戻ってくる場合に備えて 30 日間保持されます。",
+    "cta": "自分のカードを作る",
+    "browse": "他のノマドを見る"
   },
   "profileNotFound": {
     "availableBadge": "利用可能",

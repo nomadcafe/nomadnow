@@ -18,6 +18,12 @@ export interface User {
   // since the Creator Profile wedge was deprecated. The DB column still exists
   // and the `users` table still holds whatever was saved on signup.
   profile_type?: string
+  // Stripe billing — see supabase/migrations/0003_subscriptions.sql
+  stripe_customer_id?: string | null
+  plan?: 'basic' | 'pro' | null
+  subscription_status?: string | null
+  subscription_id?: string | null
+  current_period_end?: string | null
   created_at: string
   updated_at: string
 }
