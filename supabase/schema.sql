@@ -83,6 +83,9 @@ CREATE TABLE IF NOT EXISTS profile_settings (
       enabled_sections JSONB DEFAULT '["header", "revenue", "projects", "chart", "milestones"]'::jsonb,
       -- Section order (JSON array defining display order)
       section_order JSONB DEFAULT '["header", "revenue", "projects", "chart", "milestones"]'::jsonb,
+  -- When true, suppresses the "Make yours" / "Made on nomad.now" branding on the public profile.
+  -- Available to all paid plans (Basic and Pro) — pricing is set in /pricing.
+  hide_branding BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

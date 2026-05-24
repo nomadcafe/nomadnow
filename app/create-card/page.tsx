@@ -198,8 +198,12 @@ export default function CreateCardPage() {
     })
   }
 
+  // Basic plan cap. Pro lifts this to unlimited (see /pricing). Enforcement
+  // server-side will land with the billing wiring; today the cap is purely UI.
+  const BASIC_LINK_CAP = 1
+
   const addLink = () => {
-    if (links.length < 3) {
+    if (links.length < BASIC_LINK_CAP) {
       setLinks([...links, { type: 'website', url: '' }])
     }
   }
@@ -221,8 +225,8 @@ export default function CreateCardPage() {
     }
 
     const validLinks = links.filter((link) => link.url.trim())
-    if (validLinks.length > 3) {
-      showError('Maximum 3 links allowed')
+    if (validLinks.length > BASIC_LINK_CAP) {
+      showError(`Basic plan allows ${BASIC_LINK_CAP} link — upgrade to Pro for unlimited`)
       return
     }
 
@@ -517,7 +521,7 @@ export default function CreateCardPage() {
                   {/* Links */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                      Links <span className="text-gray-400">(max 3)</span>
+                      Link <span className="text-gray-400">(Basic — 1 link)</span>
                     </label>
                     <div className="space-y-2">
                       {links.map((link, index) => (
@@ -561,7 +565,7 @@ export default function CreateCardPage() {
                           </button>
                         </div>
                       ))}
-                      {links.length < 3 && (
+                      {links.length < BASIC_LINK_CAP && (
                         <button
                           type="button"
                           onClick={addLink}
@@ -569,6 +573,15 @@ export default function CreateCardPage() {
                         >
                           + Add link
                         </button>
+                      )}
+                      {links.length >= BASIC_LINK_CAP && (
+                        <p className="text-xs text-gray-500">
+                          Want more?{' '}
+                          <Link href="/pricing" className="underline hover:text-gray-900">
+                            Pro unlocks unlimited links
+                          </Link>
+                          .
+                        </p>
                       )}
                     </div>
                   </div>
@@ -612,7 +625,7 @@ export default function CreateCardPage() {
                 )}
               </button>
               <p className="mt-3 text-center text-xs text-gray-500">
-                Free, no subscription. Cancel anytime by deleting your card.
+                From $2.80 / month. Cancel any time — your card stays live to the end of the period.
               </p>
             </div>
           </form>

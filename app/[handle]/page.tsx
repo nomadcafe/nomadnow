@@ -194,6 +194,7 @@ export default async function ProfilePage({
         themeKey={settings?.theme_color}
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
+        hideMakeYoursCTA={Boolean(settings?.hide_branding)}
       />
     </>
   )

@@ -11,6 +11,7 @@ const updateSettingsSchema = z.object({
   theme_color: z.enum(['classic', 'midnight', 'sunset', 'mono', 'vivid', 'forest', 'cream']).optional(),
   enabled_sections: z.array(z.string()).optional(),
   section_order: z.array(z.string()).optional(),
+  hide_branding: z.boolean().optional(),
 })
 
 export async function PUT(request: NextRequest) {
@@ -106,6 +107,7 @@ export async function GET() {
           theme_color: 'classic',
           enabled_sections: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
+          hide_branding: false,
         },
       })
     }

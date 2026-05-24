@@ -25,6 +25,7 @@ interface ProfileSettings {
   section_order?: string[]
   visibility?: 'public' | 'private'
   delay_days?: number
+  hide_branding?: boolean
 }
 
 function normalizeTheme(value: unknown): ThemeKey {
@@ -48,6 +49,7 @@ export default function SettingsPage() {
     section_order: NOMAD_DEFAULT_ORDER,
     visibility: 'public',
     delay_days: 0,
+    hide_branding: false,
   })
 
   useEffect(() => {
@@ -83,6 +85,7 @@ export default function SettingsPage() {
             section_order: order,
             visibility: data.settings.visibility || 'public',
             delay_days: data.settings.delay_days || 0,
+            hide_branding: Boolean(data.settings.hide_branding),
           })
         }
       } catch (error) {
@@ -318,6 +321,29 @@ export default function SettingsPage() {
                     })
                 })()}
               </div>
+            </Section>
+
+            {/* Branding */}
+            <Section
+              title="Branding"
+              description='Whether to show the "Make yours" CTA to visitors on your card.'
+            >
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-gray-300 transition">
+                <input
+                  type="checkbox"
+                  checked={Boolean(settings.hide_branding)}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, hide_branding: e.target.checked }))}
+                  className="w-4 h-4 mt-0.5 text-gray-900 border-gray-300 rounded focus:ring-gray-900/30"
+                />
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-gray-900">
+                    Hide &ldquo;Make yours&rdquo; CTA on my card
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    Removes the floating button that invites visitors to create their own card. Your profile stays the same.
+                  </div>
+                </div>
+              </label>
             </Section>
 
             {/* Privacy */}

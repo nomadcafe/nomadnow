@@ -27,13 +27,19 @@ export default function Home() {
               Explore
             </Link>
             <Link
+              href="/pricing"
+              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
+            >
+              Pricing
+            </Link>
+            <Link
               href="/login"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
               Sign in
             </Link>
             <Link
-              href="/create-card"
+              href="/pricing"
               className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
             >
               Get your card
@@ -76,7 +82,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                 <Link
-                  href="/create-card"
+                  href="/pricing"
                   className="group inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium text-base hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
                 >
                   Get your card
@@ -85,7 +91,7 @@ export default function Home() {
                   </svg>
                 </Link>
                 <div className="text-sm text-gray-500">
-                  Free, no subscription
+                  From $2.80 / month
                   <br />
                   1 minute to set up
                 </div>
@@ -257,7 +263,7 @@ export default function Home() {
               ['Travel map', false, true],
               ['Live local time', false, true],
               ['Country tracker', false, true],
-              ['Free, no subscription', false, true],
+              ['No ads, no transaction fees', false, true],
               ['Custom domain', true, 'soon'],
               ['Unlimited links', true, true],
             ].map(([label, a, b], i) => (
@@ -301,7 +307,7 @@ export default function Home() {
             Set it up in a minute. Carry it forever.
           </p>
           <Link
-            href="/create-card"
+            href="/pricing"
             className="inline-flex items-center gap-2 bg-white text-gray-900 px-7 py-4 rounded-full font-medium text-base hover:bg-gray-100 transition shadow-xl shadow-black/40"
           >
             Get your card
@@ -310,7 +316,7 @@ export default function Home() {
             </svg>
           </Link>
           <div className="mt-6 text-sm text-gray-500">
-            Free, no subscription · No card details to start
+            From $2.80 / month · Cancel any time
           </div>
         </div>
       </section>
@@ -328,7 +334,7 @@ export default function Home() {
           <div className="flex sm:justify-end items-center gap-6 text-sm text-gray-500">
             <Link href="/map" className="hover:text-gray-900 transition">Map</Link>
             <Link href="/explore" className="hover:text-gray-900 transition">Explore</Link>
-            <Link href="/create-card" className="hover:text-gray-900 transition">Get your card</Link>
+            <Link href="/pricing" className="hover:text-gray-900 transition">Pricing</Link>
             <Link href="/login" className="hover:text-gray-900 transition">Sign in</Link>
           </div>
         </div>
