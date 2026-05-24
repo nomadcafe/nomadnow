@@ -1,9 +1,11 @@
 import React from 'react'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createServerSupabase } from '@/lib/supabase/server'
 import ExploreClient from '@/components/ExploreClient'
 import { EmptyState } from '@/components/EmptyState'
 import { Logo } from '@/components/Logo'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import type { Metadata } from 'next'
 
 type SortKey = 'recent' | 'countries' | 'alpha'
@@ -68,19 +70,20 @@ async function getNomads(
 }
 
 export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('explore')
   return {
-    title: 'Explore nomads — Nomad.now',
-    description: 'See where digital nomads are right now, what they\'re building, and where they\'ve been.',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     openGraph: {
-      title: 'Explore nomads — Nomad.now',
-      description: 'See where digital nomads are right now.',
+      title: t('metaTitle'),
+      description: t('metaOgDescription'),
       type: 'website',
       siteName: 'Nomad.now',
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Explore nomads — Nomad.now',
-      description: 'See where digital nomads are right now.',
+      title: t('metaTitle'),
+      description: t('metaOgDescription'),
     },
     robots: { index: true, follow: true },
   }
@@ -99,6 +102,8 @@ export default async function ExplorePage({
   const page = parseInt(params.page || '1', 10)
 
   const data = await getNomads(filters, page, 24)
+  const t = await getTranslations('explore')
+  const tNav = await getTranslations('nav')
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -110,13 +115,14 @@ export default async function ExplorePage({
               href="/map"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
             >
-              Map
+              {tNav('map')}
             </Link>
+            <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/create-card"
               className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
             >
-              Get your card
+              {tNav('getCard')}
             </Link>
           </div>
         </div>
@@ -125,10 +131,10 @@ export default async function ExplorePage({
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         <header className="mb-8 sm:mb-10">
           <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-            Explore nomads.
+            {t('title')}
           </h1>
           <p className="text-gray-600">
-            Where they are. Where they&apos;ve been. What they&apos;re building.
+            {t('subtitle')}
           </p>
         </header>
 
@@ -144,9 +150,9 @@ export default async function ExplorePage({
 
         {data.nomads.length === 0 && (
           <EmptyState
-            title="No nomads here yet"
-            description="Be the first to claim a card and show up on the map."
-            action={{ label: 'Get your card', href: '/create-card' }}
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
+            action={{ label: tNav('getCard'), href: '/create-card' }}
           />
         )}
       </main>

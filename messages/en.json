@@ -362,18 +362,53 @@
     "Other": "Other"
   },
   "explore": {
-    "title": "Explore",
-    "subtitle": "Real people, real places, right now.",
-    "empty": "No profiles yet."
+    "metaTitle": "Explore nomads — Nomad.now",
+    "metaDescription": "See where digital nomads are right now, what they're building, and where they've been.",
+    "metaOgDescription": "See where digital nomads are right now.",
+    "title": "Explore nomads.",
+    "subtitle": "Where they are. Where they've been. What they're building.",
+    "searchPlaceholder": "Search by name, handle, bio, or city…",
+    "sortPrefix": "Sort:",
+    "sortRecent": "Newest",
+    "sortCountries": "Most countries",
+    "sortAlpha": "A → Z",
+    "emptyTitle": "No nomads here yet",
+    "emptyDescription": "Be the first to claim a card and show up on the map.",
+    "paginationOf": "{from}–{to} of {total} nomads"
   },
   "map": {
-    "title": "The nomad map",
-    "subtitle": "See where everyone is, right now."
+    "metaTitle": "The nomad map — where everyone's been",
+    "metaDescription": "See every country digital nomads on Nomad.now have set foot in, ranked by how active each one is. A live constellation of remote work.",
+    "metaOgDescription": "See every country digital nomads have visited. A live constellation of remote work.",
+    "eyebrow": "The nomad map",
+    "title": "Every country everyone's been to.",
+    "subtitle": "A live constellation of where the platform's nomads have set foot. Bigger dot = more people. Click a country to see who's been there.",
+    "statNomads": "nomads tracked",
+    "statCountries": "countries covered",
+    "statVisits": "visits logged",
+    "emptyTitle": "No nomads on the map yet",
+    "emptyDescription": "Be the first to claim a card and put a country on the board.",
+    "topTitle": "Where they're going.",
+    "browseAll": "Browse all nomads →",
+    "nomadCountOne": "{count} nomad",
+    "nomadCountMany": "{count} nomads",
+    "ctaTitle": "Put your countries on the map.",
+    "ctaBody": "Pick the ones you've been to. They appear here, on your card, and on your share image."
   },
   "inCountry": {
-    "title": "Nomads in {country}",
-    "subtitle": "People currently based here or passing through.",
-    "empty": "No one here yet. Be the first."
+    "metaTitleNotFound": "Country not found — Nomad.now",
+    "metaTitle": "Nomads who've been to {country} — Nomad.now",
+    "metaDescription": "Digital nomads who have set foot in {country} {flag}. See where remote workers travel, what they do, and where they're going next.",
+    "metaOgTitle": "{flag} Nomads in {country}",
+    "metaOgDescription": "Digital nomads who have set foot in {country}.",
+    "breadcrumbMap": "Map",
+    "title": "Nomads in <gray>{country}</gray>.",
+    "subtitleEmpty": "Nobody's claimed a card here yet. Be the first.",
+    "subtitleHasOne": "{count} nomad has set foot in {country}.",
+    "subtitleHasMany": "{count} nomads have set foot in {country}.",
+    "emptyTitle": "No nomads here yet",
+    "emptyBody": "Add {country} to your visited countries and you'll show up here for everyone searching for \"{country}\".",
+    "backToMap": "← Back to the global map"
   },
   "profileNotFound": {
     "availableBadge": "Available",

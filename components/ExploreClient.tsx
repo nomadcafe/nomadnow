@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { OptimizedImage } from './OptimizedImage'
 import { Pagination } from './Pagination'
 import { debounce } from '@/lib/debounce'
@@ -35,17 +36,18 @@ interface ExploreClientProps {
   }
 }
 
-const SORT_OPTIONS = [
-  { value: 'recent', label: 'Newest' },
-  { value: 'countries', label: 'Most countries' },
-  { value: 'alpha', label: 'A → Z' },
-]
+const SORT_KEYS = [
+  { value: 'recent', labelKey: 'sortRecent' },
+  { value: 'countries', labelKey: 'sortCountries' },
+  { value: 'alpha', labelKey: 'sortAlpha' },
+] as const
 
 export default function ExploreClient({
   nomads,
   initialFilters,
   pagination,
 }: ExploreClientProps) {
+  const t = useTranslations('explore')
   const router = useRouter()
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(initialFilters.search || '')
@@ -98,7 +100,7 @@ export default function ExploreClient({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, handle, bio, or city…"
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm bg-white"
           />
         </div>
@@ -110,9 +112,9 @@ export default function ExploreClient({
           }}
           className="px-4 py-2.5 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm bg-white"
         >
-          {SORT_OPTIONS.map((opt) => (
+          {SORT_KEYS.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              Sort: {opt.label}
+              {t('sortPrefix')} {t(opt.labelKey)}
             </option>
           ))}
         </select>
@@ -133,8 +135,11 @@ export default function ExploreClient({
             onPageChange={handlePageChange}
           />
           <div className="text-center text-xs text-gray-500 mt-4">
-            {(pagination.currentPage - 1) * 24 + 1}–
-            {Math.min(pagination.currentPage * 24, pagination.total)} of {pagination.total} nomads
+            {t('paginationOf', {
+              from: (pagination.currentPage - 1) * 24 + 1,
+              to: Math.min(pagination.currentPage * 24, pagination.total),
+              total: pagination.total,
+            })}
           </div>
         </div>
       )}
@@ -143,9 +148,21 @@ export default function ExploreClient({
 }
 
 function NomadCardSummary({ nomad }: { nomad: Nomad }) {
+  const tCard = useTranslations('card')
+  const tRole = useTranslations('roles')
   const countries = nomad.visited_countries ?? []
   const localTime = useClientLocalTime(nomad.timezone)
   const initial = (nomad.display_name || nomad.handle).charAt(0).toUpperCase()
+  // Localise the role label only if it matches a known slug; otherwise show raw.
+  const localisedRole = (raw?: string) => {
+    if (!raw) return raw
+    try {
+      const v = tRole(raw)
+      return v === raw ? raw : v
+    } catch {
+      return raw
+    }
+  }
 
   return (
     <Link
@@ -172,7 +189,7 @@ function NomadCardSummary({ nomad }: { nomad: Nomad }) {
           </h2>
           <div className="text-xs text-gray-500 truncate">
             @{nomad.handle}
-            {nomad.role && <span className="text-gray-400"> · {nomad.role}</span>}
+            {nomad.role && <span className="text-gray-400"> · {localisedRole(nomad.role)}</span>}
           </div>
         </div>
       </div>
@@ -194,7 +211,7 @@ function NomadCardSummary({ nomad }: { nomad: Nomad }) {
       <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs">
         <div className="flex items-center gap-1 text-gray-600">
           <span className="font-semibold tabular-nums text-gray-900">{countries.length}</span>
-          <span className="text-gray-500">{countries.length === 1 ? 'country' : 'countries'}</span>
+          <span className="text-gray-500">{countries.length === 1 ? tCard('countryOne') : tCard('countryMany')}</span>
         </div>
         <div className="flex items-center gap-0.5 text-base leading-none">
           {countries.slice(0, 5).map((c) => (

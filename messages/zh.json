@@ -362,18 +362,53 @@
     "Other": "其他"
   },
   "explore": {
-    "title": "发现",
-    "subtitle": "真实的人,真实的地方,实时进行中。",
-    "empty": "还没有主页。"
+    "metaTitle": "发现游民 — Nomad.now",
+    "metaDescription": "看看数字游民现在在哪、在做什么、去过哪里。",
+    "metaOgDescription": "看看数字游民现在都在哪。",
+    "title": "发现游民。",
+    "subtitle": "他们在哪。他们去过哪。他们在做什么。",
+    "searchPlaceholder": "按姓名、handle、简介或城市搜索…",
+    "sortPrefix": "排序:",
+    "sortRecent": "最新",
+    "sortCountries": "去过国家最多",
+    "sortAlpha": "A → Z",
+    "emptyTitle": "这里还没有游民",
+    "emptyDescription": "成为第一个占下卡片、出现在地图上的人。",
+    "paginationOf": "{from}–{to} / 共 {total} 位游民"
   },
   "map": {
-    "title": "游民地图",
-    "subtitle": "看看大家现在都在哪。"
+    "metaTitle": "游民地图 —— 大家都去过哪里",
+    "metaDescription": "Nomad.now 上数字游民踏足过的每个国家,按活跃度排序。一幅远程工作的实时星座图。",
+    "metaOgDescription": "数字游民去过的每个国家。一幅远程工作的实时星座图。",
+    "eyebrow": "游民地图",
+    "title": "大家都去过的每一个国家。",
+    "subtitle": "平台上所有游民足迹的实时星座图。圆点越大人越多。点击一个国家,看谁去过那里。",
+    "statNomads": "已追踪游民",
+    "statCountries": "已覆盖国家",
+    "statVisits": "总访问记录",
+    "emptyTitle": "地图上还没有游民",
+    "emptyDescription": "成为第一个占下卡片、把国家放上地图的人。",
+    "topTitle": "大家都在往哪走。",
+    "browseAll": "浏览所有游民 →",
+    "nomadCountOne": "{count} 位游民",
+    "nomadCountMany": "{count} 位游民",
+    "ctaTitle": "把你的国家放上地图。",
+    "ctaBody": "选下你去过的国家。它们会出现在这里、你的卡片上、还有分享图上。"
   },
   "inCountry": {
-    "title": "{country} 的游民",
-    "subtitle": "目前在这里或正在路过的人。",
-    "empty": "这里还没人。当第一个吧。"
+    "metaTitleNotFound": "未找到该国家 —— Nomad.now",
+    "metaTitle": "去过 {country} 的游民 —— Nomad.now",
+    "metaDescription": "踏足过 {country} {flag} 的数字游民。看看远程工作者去哪、做什么、下一步去哪。",
+    "metaOgTitle": "{flag} 在 {country} 的游民",
+    "metaOgDescription": "踏足过 {country} 的数字游民。",
+    "breadcrumbMap": "地图",
+    "title": "在 <gray>{country}</gray> 的游民。",
+    "subtitleEmpty": "这里还没人占下卡片。当第一个吧。",
+    "subtitleHasOne": "已有 {count} 位游民踏足 {country}。",
+    "subtitleHasMany": "已有 {count} 位游民踏足 {country}。",
+    "emptyTitle": "这里还没有游民",
+    "emptyBody": "把 {country} 加进你的访问国家清单,搜索「{country}」的人就能在这里看到你。",
+    "backToMap": "← 返回全球地图"
   },
   "profileNotFound": {
     "availableBadge": "可用",
