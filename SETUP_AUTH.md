@@ -14,20 +14,14 @@ In your Supabase project dashboard:
      - `https://<your-prod-domain>/auth/callback`
 3. (Optional) **Authentication → Email Templates → Magic Link**: customize the email subject/body.
 
-## 2. Run the RLS migration
+## 2. Apply the schema and migrations
 
-In **SQL Editor**, paste and run the contents of:
+In **SQL Editor**:
 
-```
-supabase/migrations/0001_auth_and_rls.sql
-```
+1. Paste and run `supabase/schema.sql` — creates all tables and the canonical RLS policies (`auth.uid()`-based writes, public reads).
+2. Run any files in `supabase/migrations/` in numeric order. These add columns introduced after the initial schema.
 
-This:
-- Drops the old `USING (true)` placeholder policies.
-- Installs real per-table policies enforcing `auth.uid() = user_id` on writes.
-- Keeps public read on all profile-facing tables.
-
-If you provisioned the DB after this change, `supabase/schema.sql` already includes the new policies, so the migration is a no-op for fresh installs (the `DROP POLICY IF EXISTS` calls are idempotent).
+RLS is included in `schema.sql`; no separate auth-policies migration is required.
 
 ## 3. Migrate existing demo data (optional)
 
