@@ -106,7 +106,7 @@ export default async function Home() {
           }}
         />
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 lg:pt-32 pb-20 sm:pb-28">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 lg:pt-20 pb-20 sm:pb-28">
           {/* items-start so the left column anchors to the top of the hero
               instead of vertically centering against the taller right
               column (the real NomadCard preview is ~650px). The left
