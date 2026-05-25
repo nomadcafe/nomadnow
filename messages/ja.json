@@ -231,6 +231,23 @@
   "createCard": {
     "navCancel": "キャンセル",
     "previewLabel": "ライブプレビュー",
+    "previewExampleLabel": "プレビュー例",
+    "completion": {
+      "title": "カード完成度",
+      "next": "次は: {item}",
+      "complete": "あなたのカード、いい感じです。",
+      "items": {
+        "handle": "ハンドルを選ぶ",
+        "name": "名前を追加",
+        "avatar": "アバターをアップロード",
+        "role": "職種を追加",
+        "bio": "一言自己紹介を追加",
+        "city": "現在地を追加",
+        "hometown": "出身地を追加",
+        "countries": "訪問国をマーク",
+        "links": "少なくとも 1 つリンクを追加"
+      }
+    },
     "title": "カードを確保。",
     "subtitle": "始めるには 3 つの項目だけ。残りはすべて任意、後から編集可能。",
     "editTitle": "カードを編集。",

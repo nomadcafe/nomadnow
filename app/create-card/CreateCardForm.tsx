@@ -9,7 +9,7 @@ import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
 import { AvatarUploader } from '@/components/AvatarUploader'
-import { LiveCardPreview } from '@/components/LiveCardPreview'
+import { LiveCardPreview, isPreviewEmpty } from '@/components/LiveCardPreview'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { debounce } from '@/lib/debounce'
@@ -433,6 +433,20 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                 </p>
               </header>
 
+              <CompletionMeter
+                items={[
+                  { key: 'handle', filled: !!formData.handle.trim() },
+                  { key: 'name', filled: !!formData.display_name.trim() },
+                  { key: 'avatar', filled: !!formData.avatar_url },
+                  { key: 'role', filled: !!formData.role },
+                  { key: 'bio', filled: !!formData.bio.trim() },
+                  { key: 'city', filled: !!formData.current_city.trim() },
+                  { key: 'hometown', filled: !!formData.hometown.trim() },
+                  { key: 'countries', filled: visitedCountries.length > 0 },
+                  { key: 'links', filled: links.some((l) => l.url.trim()) },
+                ]}
+              />
+
               <form onSubmit={handleSubmit} className="space-y-6">
             {/* Essentials */}
             <div className="space-y-5">
@@ -777,7 +791,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
             <aside className="hidden lg:block">
               <div className="sticky top-24">
                 <div className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-3">
-                  {t('previewLabel')}
+                  {isPreviewEmpty(formData) ? t('previewExampleLabel') : t('previewLabel')}
                 </div>
                 <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                   {/* Theme isn't part of this form (lives in /settings as
@@ -797,5 +811,39 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
         </main>
       </div>
     </>
+  )
+}
+
+// Progress bar + "next field to fill" prompt. Gamifies filling out the form
+// by giving users a visible target — empirically a strong nudge for
+// completion rate. Lives next to the form so the most useful "what's
+// missing" reminder is always in eye-line.
+type CompletionItem = { key: string; filled: boolean }
+
+function CompletionMeter({ items }: { items: CompletionItem[] }) {
+  const t = useTranslations('createCard.completion')
+  const filled = items.filter((i) => i.filled).length
+  const total = items.length
+  const next = items.find((i) => !i.filled)
+  const pct = Math.round((filled / total) * 100)
+
+  return (
+    <div className="mb-8 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="text-sm font-medium text-gray-900">{t('title')}</span>
+        <span className="text-sm font-mono tabular-nums text-gray-600">
+          {filled}/{total}
+        </span>
+      </div>
+      <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gray-900 transition-all duration-300"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-gray-500">
+        {next ? t('next', { item: t(`items.${next.key}`) }) : t('complete')}
+      </p>
+    </div>
   )
 }

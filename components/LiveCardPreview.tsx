@@ -41,6 +41,35 @@ export interface PreviewLink {
 
 const NOW_ISO = new Date().toISOString()
 
+// Sample card shown when the form is essentially blank. Gives new users an
+// immediate "this is what's possible" picture instead of a near-empty card
+// they'd have to fill out before seeing any value. The moment the user
+// types their name (or arrives in edit mode with one), the preview
+// switches to their real data.
+const SAMPLE_FORM: PreviewFormState = {
+  handle: 'kenji',
+  display_name: 'Kenji Tanaka',
+  role: 'Product Designer',
+  bio: 'Designing tools for the new remote.\nBased between Bangkok, Lisbon, and Mexico City.',
+  current_city: 'Bangkok',
+  hometown: 'Osaka',
+  avatar_url: '',
+  work_status: 'available',
+  timezone: 'Asia/Bangkok',
+}
+const SAMPLE_LINKS: PreviewLink[] = [
+  { type: 'instagram', url: 'https://instagram.com/kenji' },
+  { type: 'linkedin', url: 'https://linkedin.com/in/kenji' },
+  { type: 'website', url: 'https://kenji.example' },
+]
+const SAMPLE_VISITED = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
+
+export function isPreviewEmpty(form: PreviewFormState): boolean {
+  // display_name is the trigger because handle exists in edit mode but
+  // display_name is the first content signal for new users.
+  return !form.display_name.trim()
+}
+
 export function LiveCardPreview({
   form,
   links,
@@ -52,24 +81,29 @@ export function LiveCardPreview({
   visitedCountries: string[]
   themeKey?: string | null
 }) {
+  const empty = isPreviewEmpty(form)
+  const effectiveForm = empty ? SAMPLE_FORM : form
+  const effectiveLinks = empty ? SAMPLE_LINKS : links
+  const effectiveCountries = empty ? SAMPLE_VISITED : visitedCountries
+
   const user: User = {
     id: 'preview',
-    handle: form.handle || 'yourhandle',
-    display_name: form.display_name || undefined,
-    avatar_url: form.avatar_url || undefined,
-    bio: form.bio || undefined,
-    role: form.role || undefined,
-    hometown: form.hometown || undefined,
-    current_city: form.current_city || undefined,
-    work_status: form.work_status,
-    timezone: form.timezone || undefined,
-    visited_countries: visitedCountries,
+    handle: effectiveForm.handle || 'yourhandle',
+    display_name: effectiveForm.display_name || undefined,
+    avatar_url: effectiveForm.avatar_url || undefined,
+    bio: effectiveForm.bio || undefined,
+    role: effectiveForm.role || undefined,
+    hometown: effectiveForm.hometown || undefined,
+    current_city: effectiveForm.current_city || undefined,
+    work_status: effectiveForm.work_status,
+    timezone: effectiveForm.timezone || undefined,
+    visited_countries: effectiveCountries,
     profile_type: 'nomad',
     created_at: NOW_ISO,
     updated_at: NOW_ISO,
   }
 
-  const cardLinks: NomadLink[] = links
+  const cardLinks: NomadLink[] = effectiveLinks
     .filter((l) => l.url.trim())
     .map((l, i) => ({
       id: `preview-${i}`,

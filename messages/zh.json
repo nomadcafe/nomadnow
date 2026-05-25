@@ -231,6 +231,23 @@
   "createCard": {
     "navCancel": "取消",
     "previewLabel": "实时预览",
+    "previewExampleLabel": "示例预览",
+    "completion": {
+      "title": "卡片完成度",
+      "next": "下一项: {item}",
+      "complete": "你的卡片已经很完整了。",
+      "items": {
+        "handle": "选个 handle",
+        "name": "填写名字",
+        "avatar": "上传头像",
+        "role": "填写职业",
+        "bio": "加一句简介",
+        "city": "填写当前城市",
+        "hometown": "填写出生地",
+        "countries": "标记去过的国家",
+        "links": "至少加一条链接"
+      }
+    },
     "title": "占下你的卡片。",
     "subtitle": "三个字段即可开始。其他都是可选,稍后可改。",
     "editTitle": "编辑你的卡片。",
