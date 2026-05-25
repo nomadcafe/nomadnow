@@ -50,8 +50,7 @@
     "heroLine1": "Where you are.",
     "heroLine2": "Where you've been.",
     "heroLine3": "What you're building.",
-    "heroSub1": "One link for your whole nomad life. Live local time, every country you've set foot in, what you're working on. At ",
-    "heroSub2": ".",
+    "heroSub": "One link for your whole nomad life. Live local time, every country you've set foot in, what you're working on. At <handle>nomad.now/yourhandle</handle>.",
     "heroPriceNote": "From $2.80 / month",
     "heroSetupNote": "1 minute to set up",
     "live": {
@@ -97,12 +96,7 @@
       "note": "From $2.80 / month · Cancel any time"
     },
     "previewCard": {
-      "name": "Kenji Tanaka",
-      "role": "Product Designer",
-      "city": "Bangkok",
-      "countries": "countries",
-      "verified": "Verified",
-      "open": "Open"
+      "verified": "Verified"
     }
   },
   "pricing": {

@@ -50,8 +50,7 @@
     "heroLine1": "你在哪。",
     "heroLine2": "你去过哪。",
     "heroLine3": "你在做什么。",
-    "heroSub1": "一个链接装下整个数字游民人生。当地实时时间、你踏足过的每个国家、你正在做的事。全都在 ",
-    "heroSub2": "。",
+    "heroSub": "一个链接装下整个数字游民人生。当地实时时间、你踏足过的每个国家、你正在做的事。全都在 <handle>nomad.now/yourhandle</handle>。",
     "heroPriceNote": "每月 $2.80 起",
     "heroSetupNote": "1 分钟即可上线",
     "live": {
@@ -97,12 +96,7 @@
       "note": "每月 $2.80 起 · 随时可取消"
     },
     "previewCard": {
-      "name": "田中健二",
-      "role": "产品设计师",
-      "city": "曼谷",
-      "countries": "国",
-      "verified": "已认证",
-      "open": "可约"
+      "verified": "已认证"
     }
   },
   "pricing": {
