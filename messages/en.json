@@ -318,6 +318,15 @@
     "navView": "View profile",
     "title": "Settings.",
     "subtitle": "Customize your profile layout, theme, and what's shown.",
+    "unsavedChanges": "Unsaved changes",
+    "reset": "Reset",
+    "preview": {
+      "title": "Live preview",
+      "openFull": "Open full card",
+      "unsavedHint": "Preview reflects unsaved changes",
+      "noCard": "You haven't created your card yet.",
+      "createCard": "Create one"
+    },
     "profile": {
       "title": "Profile info",
       "description": "Your name, bio, current city, links, visited countries.",

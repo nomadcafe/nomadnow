@@ -815,8 +815,16 @@ export function NomadCard({
   // card fits inside a constrained parent (e.g. the live preview panel).
   // The inner card keeps its theme styling so users see the real look.
   if (embedded) {
+    // Embedded mode wraps the inner card in a smaller "page" so the live
+    // preview shows custom background and font choices the same way the
+    // full /[handle] route would. The outer padding gives the inner card
+    // breathing room against the bg, mirroring how the real card sits
+    // inside the page.
     return (
-      <div className={`${theme.font}`}>
+      <div
+        className={`${customFontClass || theme.font} ${customBg ? '' : theme.page} rounded-2xl p-4 sm:p-6`}
+        style={customBg ? { background: customBg } : undefined}
+      >
         <div className={`${theme.card} ${theme.text} p-5 sm:p-6`}>
           {renderedSections}
           <div className={`mt-6 pt-6 border-t ${theme.divider} text-center`}>
