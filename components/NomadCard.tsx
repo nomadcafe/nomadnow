@@ -6,7 +6,7 @@ import { User, NomadLink, NomadStay } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
 import { WorldMap } from './WorldMap'
 import { getCountryFlag, getCountryName } from '@/lib/countries'
-import { stayDayCount, findCurrentStay } from '@/lib/stays'
+import { stayDayCount, findCurrentStay, mergedVisitedCodes } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { VideoLightbox, detectVideo } from './VideoLightbox'
@@ -204,7 +204,11 @@ export function NomadCard({
   const displayLocation = currentStay?.city || user.current_city || user.location
   const displayCountryFlag = currentStay ? getCountryFlag(currentStay.country) : null
   const localTime = useLocalTime(user.timezone)
-  const visitedCount = user.visited_countries?.length ?? 0
+  // Stats badge counts the UNION of country-level toggles and the countries
+  // derived from city-level stays — so a user who used the Stays UI without
+  // also ticking the country picker still sees a meaningful number, and a
+  // user who did both doesn't get double-counted.
+  const visitedCount = mergedVisitedCodes(user.visited_countries, stays).size
 
   // Roles are stored in DB as their English label (the select in /create-card
   // posts that string). Map back to a localised label when the slug matches;

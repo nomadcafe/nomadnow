@@ -31,6 +31,32 @@ export function formatDuration(days: number): { value: number; unit: 'day' | 'we
 }
 
 /**
+ * Union of country-level toggles (`users.visited_countries`) with the
+ * countries derived from city-level stays. Lets a user who only filled out
+ * the Stays UI still appear to have "visited" those countries on their card,
+ * without forcing them to also tick every country in the country picker.
+ *
+ * Accepts any stay-shape with a `country` field — works for both the
+ * server-side nomad_stays row and the form-side StayDraft.
+ *
+ * Returns ISO α-2 codes uppercased so callers don't have to normalise.
+ */
+export function mergedVisitedCodes(
+  visited: ReadonlyArray<string> | null | undefined,
+  stayLikes: ReadonlyArray<{ country?: string | null }> | null | undefined,
+): Set<string> {
+  const out = new Set<string>()
+  for (const code of visited ?? []) {
+    if (code && code.length === 2) out.add(code.toUpperCase())
+  }
+  for (const stay of stayLikes ?? []) {
+    const code = stay.country
+    if (code && code.length === 2) out.add(code.toUpperCase())
+  }
+  return out
+}
+
+/**
  * Returns the user's current stay (the open-ended one — end_date null —
  * or the most-recent-start stay if multiple are open). Used by the card
  * to render "Currently in X" prominently.

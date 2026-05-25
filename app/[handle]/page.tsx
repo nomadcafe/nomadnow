@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { getBillingState } from '@/lib/billing'
 import { getCountryName } from '@/lib/countries'
+import { mergedVisitedCodes } from '@/lib/stays'
 import { createServerSupabase } from '@/lib/supabase/server'
 
 async function getProfileData(handle: string) {
@@ -145,8 +146,12 @@ export default async function ProfilePage({
   const isOwner = viewer?.id === user.id
 
   const currentLocation = user.current_city || user.location
-  const visitedNames: string[] = (user.visited_countries ?? [])
-    .map((code: string) => getCountryName(code))
+  // SEO additionalProperty uses the same union the card renders, so a user
+  // who only filled out Stays still appears in country-list rich results.
+  const visitedNames: string[] = Array.from(
+    mergedVisitedCodes(user.visited_countries, nomadStays),
+  )
+    .map((code) => getCountryName(code))
     .filter(Boolean)
 
   // schema.org Person. Nomad-flavored only — Creator Profile was deprecated.
