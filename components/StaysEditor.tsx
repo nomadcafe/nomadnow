@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { countries, getCountryFlag } from '@/lib/countries'
 import { stayDayCount } from '@/lib/stays'
@@ -21,10 +22,22 @@ export interface StayDraft {
   start_date: string // YYYY-MM-DD
   end_date: string // '' = currently here
   notes: string
+  // Public Supabase Storage URL once uploaded, empty string otherwise.
+  // Kept as a string (not null) so React's controlled inputs stay happy.
+  photo_url: string
 }
 
 export function emptyStay(): StayDraft {
-  return { city: '', country: '', lat: null, lon: null, start_date: '', end_date: '', notes: '' }
+  return {
+    city: '',
+    country: '',
+    lat: null,
+    lon: null,
+    start_date: '',
+    end_date: '',
+    notes: '',
+    photo_url: '',
+  }
 }
 
 // Sorts countries by name for the picker. Sorted once at module load —
@@ -40,6 +53,12 @@ const HARD_CAP = 50
 
 export function StaysEditor({ stays, onChange }: StaysEditorProps) {
   const t = useTranslations('stays')
+  // Per-stay upload state — keyed by the row index. Cleared on success or
+  // failure. We do not block re-uploading while a previous one is in
+  // flight because the form is generally one user clicking once at a
+  // time, and the worst case is a wasted POST.
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null)
+  const [uploadErrorIdx, setUploadErrorIdx] = useState<number | null>(null)
 
   const update = (idx: number, patch: Partial<StayDraft>) => {
     onChange(stays.map((s, i) => (i === idx ? { ...s, ...patch } : s)))
@@ -50,6 +69,30 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
   const add = () => {
     if (stays.length >= HARD_CAP) return
     onChange([...stays, emptyStay()])
+  }
+
+  const uploadPhoto = async (idx: number, file: File) => {
+    setUploadingIdx(idx)
+    setUploadErrorIdx(null)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch('/api/stays/photo/upload', { method: 'POST', body: form })
+      if (!res.ok) {
+        setUploadErrorIdx(idx)
+        return
+      }
+      const data = (await res.json()) as { url?: string }
+      if (!data.url) {
+        setUploadErrorIdx(idx)
+        return
+      }
+      update(idx, { photo_url: data.url })
+    } catch {
+      setUploadErrorIdx(idx)
+    } finally {
+      setUploadingIdx((cur) => (cur === idx ? null : cur))
+    }
   }
 
   return (
@@ -141,6 +184,58 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
               maxLength={280}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm"
             />
+
+            <div className="flex items-center gap-3">
+              {stay.photo_url ? (
+                <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={stay.photo_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => update(idx, { photo_url: '' })}
+                    aria-label={t('photoRemove')}
+                    className="absolute top-1 right-1 bg-white/90 hover:bg-white rounded-full w-5 h-5 flex items-center justify-center shadow text-gray-700"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <label className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 flex items-center justify-center cursor-pointer transition shrink-0 text-gray-400 hover:text-gray-600">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) uploadPhoto(idx, f)
+                      // Reset so picking the same file again re-fires onChange.
+                      e.target.value = ''
+                    }}
+                  />
+                  {uploadingIdx === idx ? (
+                    <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v3m6.364 1.636l-2.121 2.121M20 12h-3m-1.636 6.364l-2.121-2.121M12 17v3m-6.364-1.636l2.121-2.121M4 12h3m1.636-6.364l2.121 2.121" />
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  )}
+                </label>
+              )}
+              <div className="text-xs text-gray-500 flex-1">
+                {stay.photo_url ? t('photoHint') : t('photoEmptyHint')}
+                {uploadErrorIdx === idx && (
+                  <p className="text-red-600 mt-1">{t('photoError')}</p>
+                )}
+              </div>
+            </div>
 
             {days > 0 && (
               <p className="text-xs text-gray-500">

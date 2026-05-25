@@ -7,7 +7,7 @@ import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { getBillingState } from '@/lib/billing'
 import { getCountryName } from '@/lib/countries'
-import { mergedVisitedCodes } from '@/lib/stays'
+import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { createServerSupabase } from '@/lib/supabase/server'
 
 async function getProfileData(handle: string) {
@@ -148,8 +148,14 @@ export default async function ProfilePage({
   const currentLocation = user.current_city || user.location
   // SEO additionalProperty uses the same union the card renders, so a user
   // who only filled out Stays still appears in country-list rich results.
+  // Upcoming stays are excluded — a place you haven't been to yet shouldn't
+  // appear in your "Visited countries" rich result.
+  const stayBuckets = splitStays(nomadStays as { start_date: string; end_date?: string | null; country?: string }[] | null | undefined)
+  const visitedStaysForSeo = stayBuckets.current
+    ? [stayBuckets.current, ...stayBuckets.past]
+    : stayBuckets.past
   const visitedNames: string[] = Array.from(
-    mergedVisitedCodes(user.visited_countries, nomadStays),
+    mergedVisitedCodes(user.visited_countries, visitedStaysForSeo),
   )
     .map((code) => getCountryName(code))
     .filter(Boolean)

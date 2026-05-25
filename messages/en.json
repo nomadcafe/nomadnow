@@ -413,6 +413,12 @@
     "currentDuration": "{days} days so far",
     "pastDuration": "{days} days",
     "currentBadge": "Now",
+    "upcomingTitle": "Coming up",
+    "nextLabel": "Next:",
+    "photoEmptyHint": "Add a photo from this stay (optional).",
+    "photoHint": "Tap the × to remove.",
+    "photoRemove": "Remove photo",
+    "photoError": "Couldn't upload — try a smaller image.",
     "durationDay": "{value, plural, =1 {1 day} other {# days}}",
     "durationWeek": "{value, plural, =1 {1 week} other {# weeks}}",
     "durationMonth": "{value, plural, =1 {1 month} other {# months}}"

@@ -60,6 +60,9 @@ export interface NomadStay {
   start_date: string // YYYY-MM-DD
   end_date?: string | null
   notes?: string | null
+  // Public Supabase Storage URL for an optional single photo per stay.
+  // Null/undefined means the stay renders without imagery.
+  photo_url?: string | null
   created_at: string
   updated_at: string
 }

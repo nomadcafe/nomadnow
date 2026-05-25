@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { User, NomadLink, NomadStay } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
 import { WorldMap } from './WorldMap'
 import { getCountryFlag, getCountryName } from '@/lib/countries'
-import { stayDayCount, findCurrentStay, mergedVisitedCodes } from '@/lib/stays'
+import { stayDayCount, mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { VideoLightbox, detectVideo } from './VideoLightbox'
@@ -59,6 +59,21 @@ function useLinkLabel() {
     if ((LOCALISED_LINK_SLUGS as readonly string[]).includes(type)) return t(type)
     return type.charAt(0).toUpperCase() + type.slice(1)
   }
+}
+
+// Brand colors for the platforms with strong visual identities. Used to
+// tint the icon chip on the link row so a viewer can scan platforms at a
+// glance (Liinks aesthetic). Monochrome-by-design platforms (X, GitHub,
+// Threads, generic website/other) intentionally aren't in this map —
+// they inherit the theme's text color so they stay legible on both
+// light and dark cards without per-theme tuning.
+export const LINK_BRAND_COLORS: Record<string, string> = {
+  instagram: '#E1306C',
+  linkedin: '#0A66C2',
+  youtube: '#FF0000',
+  tiktok: '#FE2C55',
+  substack: '#FF6719',
+  telegram: '#26A5E4',
 }
 
 export const getLinkIcon = (type: string) => {
@@ -196,11 +211,17 @@ export function NomadCard({
   // when no video is open. Detected from link URLs on click.
   const [videoEmbed, setVideoEmbed] = useState<string | null>(null)
   const theme = getTheme(themeKey)
-  // Prefer the current open-ended stay if there is one — it's more grounded
-  // data (city + start date proven) than the free-form current_city field,
-  // which has no time context. Falls back through current_city → location
-  // so users who haven't started using stays don't see anything break.
-  const currentStay = findCurrentStay(stays)
+  const locale = useLocale()
+  // Split stays into upcoming / current / past once and re-use the buckets
+  // throughout the render — the rules for "what is current" (open-ended,
+  // start date in the past) and "what counts as visited" (not upcoming)
+  // need to agree across the header, the map, the stats, and the timeline.
+  const { upcoming: upcomingStays, current: currentStay, past: pastStays } =
+    splitStays(stays)
+  const nextStay = upcomingStays[0] ?? null
+  // Anything we count as "visited" excludes future stays — a place I haven't
+  // gone to yet shouldn't bump my country count or light up the map.
+  const visitedStays = currentStay ? [currentStay, ...pastStays] : pastStays
   const displayLocation = currentStay?.city || user.current_city || user.location
   const displayCountryFlag = currentStay ? getCountryFlag(currentStay.country) : null
   const localTime = useLocalTime(user.timezone)
@@ -208,7 +229,16 @@ export function NomadCard({
   // derived from city-level stays — so a user who used the Stays UI without
   // also ticking the country picker still sees a meaningful number, and a
   // user who did both doesn't get double-counted.
-  const visitedCount = mergedVisitedCodes(user.visited_countries, stays).size
+  const visitedCount = mergedVisitedCodes(user.visited_countries, visitedStays).size
+
+  // Locale-aware short date for upcoming-stay labels — "Jun 12" in en,
+  // "6月12日" in ja, "6月12日" in zh. Hoisted so both the header "Next:"
+  // pill and the Coming up timeline render identically.
+  const formatShortDate = (iso: string) => {
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return iso
+    return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(d)
+  }
 
   // Roles are stored in DB as their English label (the select in /create-card
   // posts that string). Map back to a localised label when the slug matches;
@@ -330,6 +360,15 @@ export function NomadCard({
               </span>
             </p>
           )}
+          {nextStay && (
+            <p className={`mt-1 text-xs sm:text-sm ${theme.textMuted}`}>
+              <span aria-hidden>→ </span>
+              {tStays('nextLabel')}{' '}
+              <span className="font-medium">{nextStay.city}</span>
+              <span aria-hidden> · </span>
+              {formatShortDate(nextStay.start_date)}
+            </p>
+          )}
         </div>
       )
     },
@@ -360,52 +399,104 @@ export function NomadCard({
     },
     stays: () => {
       if (!stays || stays.length === 0) return null
-      const currentStay = findCurrentStay(stays)
-      // Past stays = everything except the current one. Already ordered
-      // most-recent-first by the API query.
-      const pastStays = stays.filter((s) => s !== currentStay)
       return (
         <div key="stays" className="my-6">
           <h3 className={`text-xs uppercase tracking-wider mb-3 ${theme.textMuted}`}>
             {tStays('sectionTitle')}
           </h3>
+          {upcomingStays.length > 0 && (
+            <div className="mb-4">
+              <h4
+                className={`text-[10px] uppercase tracking-wider mb-2 ${theme.textMuted}`}
+              >
+                {tStays('upcomingTitle')}
+              </h4>
+              <ul className="space-y-2">
+                {upcomingStays.map((s) => (
+                  <li
+                    key={s.id}
+                    className={`flex items-start gap-3 text-sm rounded-lg p-3 border border-dashed ${theme.divider}`}
+                  >
+                    <span className="text-lg leading-none mt-0.5" aria-hidden>
+                      {getCountryFlag(s.country) || '✈️'}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        <span className="font-medium">
+                          {s.city}, {getCountryName(s.country)}
+                        </span>
+                        <span className={`text-xs ${theme.textMuted}`}>
+                          {formatShortDate(s.start_date)}
+                          {s.end_date ? ` – ${formatShortDate(s.end_date)}` : ''}
+                        </span>
+                      </div>
+                      {s.notes && (
+                        <p className={`text-xs mt-0.5 ${theme.textMuted}`}>{s.notes}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {currentStay && (
-            <div
-              className={`rounded-xl p-4 mb-3 border ${theme.divider} bg-opacity-50 flex items-start gap-3`}
-            >
-              <span className="text-2xl leading-none mt-0.5" aria-hidden>
-                {getCountryFlag(currentStay.country) || '📍'}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="font-semibold text-base">
-                    {currentStay.city}, {getCountryName(currentStay.country)}
-                  </span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${theme.pillVerified}`}>
-                    {tStays('currentBadge')}
-                  </span>
+            <div className={`rounded-xl mb-3 border ${theme.divider} overflow-hidden`}>
+              {currentStay.photo_url && (
+                /* Hero photo for the current stay — full-width banner above
+                   the text, like a postcard. Object-cover crops oddly-sized
+                   uploads to a consistent aspect ratio. */
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={currentStay.photo_url}
+                  alt=""
+                  className="w-full h-40 sm:h-48 object-cover"
+                  loading="lazy"
+                />
+              )}
+              <div className="p-4 flex items-start gap-3">
+                <span className="text-2xl leading-none mt-0.5" aria-hidden>
+                  {getCountryFlag(currentStay.country) || '📍'}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="font-semibold text-base">
+                      {currentStay.city}, {getCountryName(currentStay.country)}
+                    </span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${theme.pillVerified}`}>
+                      {tStays('currentBadge')}
+                    </span>
+                  </div>
+                  <div className={`text-xs mt-0.5 ${theme.textMuted}`}>
+                    {tStays('currentDuration', {
+                      days: stayDayCount(currentStay.start_date, currentStay.end_date),
+                    })}
+                  </div>
+                  {currentStay.notes && (
+                    <p className={`text-xs mt-1 ${theme.textMuted}`}>{currentStay.notes}</p>
+                  )}
                 </div>
-                <div className={`text-xs mt-0.5 ${theme.textMuted}`}>
-                  {tStays('currentDuration', {
-                    days: stayDayCount(currentStay.start_date, currentStay.end_date),
-                  })}
-                </div>
-                {currentStay.notes && (
-                  <p className={`text-xs mt-1 ${theme.textMuted}`}>{currentStay.notes}</p>
-                )}
               </div>
             </div>
           )}
           {pastStays.length > 0 && (
             <ul className="space-y-2">
               {pastStays.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex items-start gap-3 text-sm"
-                >
-                  <span className="text-lg leading-none mt-0.5" aria-hidden>
-                    {getCountryFlag(s.country) || '·'}
-                  </span>
+                <li key={s.id} className="flex items-start gap-3 text-sm">
+                  {s.photo_url ? (
+                    /* Square thumbnail when the stay has a photo — turns
+                       the timeline into a stamp-collection style row. */
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={s.photo_url}
+                      alt=""
+                      className="w-12 h-12 rounded-lg object-cover shrink-0"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-lg leading-none mt-0.5 w-6 text-center" aria-hidden>
+                      {getCountryFlag(s.country) || '·'}
+                    </span>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="font-medium">
@@ -451,9 +542,10 @@ export function NomadCard({
     },
     map: () => {
       // Map shows if the user has either country-level data (visited_countries)
-      // OR city-level data (any stay with coordinates). City data takes
-      // precedence inside WorldMap when both are present.
-      const cityDots = stays
+      // OR city-level data (any stay with coordinates). Upcoming stays are
+      // intentionally excluded — a place I haven't been to yet shouldn't
+      // plot a dot or light up a country.
+      const cityDots = visitedStays
         .filter((s) => typeof s.lat === 'number' && typeof s.lon === 'number')
         .map((s) => ({
           city: s.city,
@@ -506,10 +598,23 @@ export function NomadCard({
             .filter((link) => link.url)
             .map((link, index) => {
               const video = detectVideo(link.url)
+              const brandColor = LINK_BRAND_COLORS[link.type]
               const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-medium group touch-manipulation transition-all duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-md ${theme.linkRow}`
               const inner = (
                 <>
-                  <span className="opacity-80 group-hover:opacity-100 transition">
+                  {/* Brand-colored icon chip when the platform has a
+                      recognised brand color; subtle inherited-color icon
+                      otherwise. The chip background uses ~12% alpha of
+                      the brand color so it reads as "branded" without
+                      overpowering the themed card background. */}
+                  <span
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition group-hover:scale-105"
+                    style={
+                      brandColor
+                        ? { backgroundColor: `${brandColor}1f`, color: brandColor }
+                        : undefined
+                    }
+                  >
                     {getLinkIcon(link.type)}
                   </span>
                   <span className="flex-1 text-left">

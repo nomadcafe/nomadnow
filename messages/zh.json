@@ -413,6 +413,12 @@
     "currentDuration": "已经 {days} 天",
     "pastDuration": "{days} 天",
     "currentBadge": "当前",
+    "upcomingTitle": "即将",
+    "nextLabel": "下一站：",
+    "photoEmptyHint": "添加一张这次停留的照片(可选)。",
+    "photoHint": "点 × 删除。",
+    "photoRemove": "删除照片",
+    "photoError": "上传失败 —— 试试更小的图片。",
     "durationDay": "{value} 天",
     "durationWeek": "{value} 周",
     "durationMonth": "{value} 个月"
