@@ -446,11 +446,23 @@ export function NomadCard({
       )
     },
     map: () => {
-      if (visitedCount === 0) return null
+      // Map shows if the user has either country-level data (visited_countries)
+      // OR city-level data (any stay with coordinates). City data takes
+      // precedence inside WorldMap when both are present.
+      const cityDots = stays
+        .filter((s) => typeof s.lat === 'number' && typeof s.lon === 'number')
+        .map((s) => ({
+          city: s.city,
+          country: s.country,
+          lat: s.lat as number,
+          lon: s.lon as number,
+        }))
+      if (visitedCount === 0 && cityDots.length === 0) return null
       return (
         <div key="map" className="my-6">
           <WorldMap
             visitedCodes={user.visited_countries}
+            cityDots={cityDots}
             accentColor={theme.accentHex}
             baseColor={mapBaseForTheme(theme.key)}
           />
