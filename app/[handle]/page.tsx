@@ -2,6 +2,7 @@ import React from 'react'
 import { NomadCard } from '@/components/NomadCard'
 import { ProfileNotFound } from '@/components/ProfileNotFound'
 import { ProfileExpired } from '@/components/ProfileExpired'
+import { CelebrationBanner } from '@/components/CelebrationBanner'
 import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { deriveBillingState } from '@/lib/billing'
@@ -206,6 +207,11 @@ export default async function ProfilePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+
+      {/* Owner just finished creating the card via /create-card → show the
+          celebratory share banner. No-op when the query param isn't present,
+          so this is free to render for every viewer. */}
+      <CelebrationBanner handle={handle} />
 
       <NomadCard
         user={user}

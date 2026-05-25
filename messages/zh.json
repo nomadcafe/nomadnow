@@ -377,6 +377,16 @@
       "portalError": "无法打开订阅管理页面,请稍后再试。"
     }
   },
+  "celebrate": {
+    "title": "你的卡片已上线!",
+    "subtitle": "分享给你的人脉 —— 每一次分享都能带来新关注者。",
+    "shareX": "分享到 X",
+    "shareLinkedin": "分享到 LinkedIn",
+    "copyLink": "复制链接",
+    "copied": "已复制",
+    "dismiss": "关闭",
+    "tweetTemplate": "刚做了我的 Nomad Card @nomadnow —— 来看看: {url}"
+  },
   "card": {
     "verified": "已认证",
     "shareTitle": "分享这张卡片",

@@ -377,6 +377,16 @@
       "portalError": "Could not open the billing portal. Please try again."
     }
   },
+  "celebrate": {
+    "title": "Your card is live!",
+    "subtitle": "Share it with your network — every share brings someone new.",
+    "shareX": "Share on X",
+    "shareLinkedin": "Share on LinkedIn",
+    "copyLink": "Copy link",
+    "copied": "Link copied",
+    "dismiss": "Dismiss",
+    "tweetTemplate": "Just made my nomad card on @nomadnow — check it out: {url}"
+  },
   "card": {
     "verified": "Verified",
     "shareTitle": "Share this card",
