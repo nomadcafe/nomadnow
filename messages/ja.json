@@ -393,6 +393,9 @@
     "dismiss": "閉じる",
     "tweetTemplate": "Nomad Card を作りました @nomadnow — ぜひ見てください: {url}"
   },
+  "cityAutocomplete": {
+    "searching": "検索中…"
+  },
   "stays": {
     "sectionTitle": "滞在履歴",
     "currentLabel": "現在の滞在",

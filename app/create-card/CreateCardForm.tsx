@@ -403,6 +403,8 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
             stays: validStays.map((s) => ({
               city: s.city.trim(),
               country: s.country,
+              lat: s.lat ?? null,
+              lon: s.lon ?? null,
               start_date: s.start_date,
               end_date: s.end_date || null,
               notes: s.notes?.trim() || null,

@@ -393,6 +393,9 @@
     "dismiss": "Dismiss",
     "tweetTemplate": "Just made my nomad card on @nomadnow — check it out: {url}"
   },
+  "cityAutocomplete": {
+    "searching": "Searching…"
+  },
   "stays": {
     "sectionTitle": "Where I've been",
     "currentLabel": "Currently in",

@@ -3,21 +3,28 @@
 import { useTranslations } from 'next-intl'
 import { countries, getCountryFlag } from '@/lib/countries'
 import { stayDayCount } from '@/lib/stays'
+import { CityAutocomplete } from './CityAutocomplete'
 
 // Form-side representation of a stay. Matches what gets POSTed to
 // /api/stays — server fills in id/user_id/timestamps. `end_date` may be
 // the empty string while the user is still entering data; the API treats
 // '' the same as null (= currently here).
+//
+// lat/lon get populated when the user picks an autocomplete suggestion;
+// stay null when they type a city manually (some small towns won't be in
+// Nominatim, and that shouldn't block save).
 export interface StayDraft {
   city: string
   country: string // ISO 3166-1 alpha-2
+  lat: number | null
+  lon: number | null
   start_date: string // YYYY-MM-DD
   end_date: string // '' = currently here
   notes: string
 }
 
 export function emptyStay(): StayDraft {
-  return { city: '', country: '', start_date: '', end_date: '', notes: '' }
+  return { city: '', country: '', lat: null, lon: null, start_date: '', end_date: '', notes: '' }
 }
 
 // Sorts countries by name for the picker. Sorted once at module load —
@@ -70,13 +77,22 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
             </button>
 
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px] gap-2">
-              <input
-                type="text"
-                placeholder={t('cityPlaceholder')}
+              <CityAutocomplete
                 value={stay.city}
-                onChange={(e) => update(idx, { city: e.target.value })}
-                maxLength={100}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm"
+                placeholder={t('cityPlaceholder')}
+                onCityChange={(city) => update(idx, { city })}
+                // Picking a suggestion fills city + country + coords as
+                // one atomic update. The country <select> below still
+                // shows the picked country, and lat/lon get carried
+                // through so the WorldMap can plot per-city dots later.
+                onSelect={(s) =>
+                  update(idx, {
+                    city: s.city,
+                    country: s.country,
+                    lat: s.lat,
+                    lon: s.lon,
+                  })
+                }
               />
               <select
                 value={stay.country}
