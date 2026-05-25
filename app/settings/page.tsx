@@ -15,18 +15,13 @@ import {
   NOMAD_SECTIONS,
   NOMAD_DEFAULT_ORDER,
   reconcileSectionOrder,
-  reconcileEnabledSections,
   type SectionDef,
 } from '@/lib/sections'
 
 interface ProfileSettings {
-  layout_template?: 'centered' | 'card' | 'grid' | 'minimal'
   // theme_color stores the preset key (legacy column). See lib/themes.ts.
   theme_color?: ThemeKey
-  enabled_sections?: string[]
   section_order?: string[]
-  visibility?: 'public' | 'private'
-  delay_days?: number
   hide_branding?: boolean
 }
 
@@ -63,12 +58,8 @@ export default function SettingsPage() {
   })
   const [portalLoading, setPortalLoading] = useState(false)
   const [settings, setSettings] = useState<ProfileSettings>({
-    layout_template: 'centered',
     theme_color: 'classic',
-    enabled_sections: NOMAD_DEFAULT_ORDER,
     section_order: NOMAD_DEFAULT_ORDER,
-    visibility: 'public',
-    delay_days: 0,
     hide_branding: false,
   })
 
@@ -102,16 +93,9 @@ export default function SettingsPage() {
           // Reconcile against the nomad section catalog so legacy creator IDs
           // get dropped and any new sections added since last save show up.
           const order = reconcileSectionOrder('nomad', data.settings.section_order)
-          const enabled = Array.from(
-            reconcileEnabledSections('nomad', data.settings.enabled_sections)
-          )
           setSettings({
-            layout_template: data.settings.layout_template || 'centered',
             theme_color: normalizeTheme(data.settings.theme_color),
-            enabled_sections: enabled,
             section_order: order,
-            visibility: data.settings.visibility || 'public',
-            delay_days: data.settings.delay_days || 0,
             hide_branding: Boolean(data.settings.hide_branding),
           })
         }
@@ -183,23 +167,6 @@ export default function SettingsPage() {
     } catch {
       return null
     }
-  }
-
-  const toggleSection = (sectionId: string) => {
-    // Required sections cannot be toggled off — required is enforced at render time
-    // by reconcileEnabledSections, but block the click here for nicer UX.
-    const def = NOMAD_SECTIONS.find((s) => s.id === sectionId)
-    if (def?.required) return
-
-    setSettings((prev) => {
-      const enabled = prev.enabled_sections || []
-      const newEnabled = enabled.includes(sectionId)
-        ? enabled.filter((id) => id !== sectionId)
-        : [...enabled, sectionId]
-      // Note: keep section_order intact. Disabled sections retain their position
-      // so re-enabling restores them where they were.
-      return { ...prev, enabled_sections: newEnabled }
-    })
   }
 
   const moveSection = (sectionId: string, direction: 'up' | 'down') => {
@@ -329,31 +296,6 @@ export default function SettingsPage() {
               </div>
             </Section>
 
-            {/* Layout */}
-            <Section
-              title={t('layout.title')}
-              description={t('layout.description')}
-            >
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {(['centered', 'card', 'grid', 'minimal'] as const).map((template) => {
-                  const active = settings.layout_template === template
-                  return (
-                    <button
-                      key={template}
-                      onClick={() => setSettings((prev) => ({ ...prev, layout_template: template }))}
-                      className={`p-4 rounded-xl border transition text-left ${
-                        active
-                          ? 'border-gray-900 bg-gray-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="text-sm font-medium text-gray-900">{t(`layout.${template}`)}</div>
-                    </button>
-                  )
-                })}
-              </div>
-            </Section>
-
             {/* Theme */}
             <Section
               title={t('theme.title')}
@@ -383,51 +325,40 @@ export default function SettingsPage() {
               </p>
             </Section>
 
-            {/* Sections */}
-            <Section
-              title={t('sections.title')}
-              description={t('sections.description')}
-            >
-              <div className="space-y-2">
+            {/* Sections — reorder only. Empty sections already auto-hide in
+                NomadCard, so the old show/hide toggle was redundant.
+                Reordering is niche so we tuck it behind a disclosure. */}
+            <details className="group">
+              <summary className="cursor-pointer list-none flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition">
+                <svg
+                  className="w-4 h-4 transition group-open:rotate-90"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                {t('sections.title')}
+              </summary>
+              <p className="mt-2 ml-6 text-xs text-gray-500">{t('sections.description')}</p>
+              <div className="mt-4 space-y-2">
                 {(() => {
                   const defs = NOMAD_SECTIONS
                   const order = settings.section_order ?? NOMAD_DEFAULT_ORDER
-                  // Render in the user's preferred order so move-up/down feedback is instant.
                   return order
                     .map((id) => defs.find((d) => d.id === id))
                     .filter((d): d is SectionDef => Boolean(d))
                     .map((section, idx, arr) => {
-                      const isEnabled = settings.enabled_sections?.includes(section.id) ?? true
                       const isFirst = idx === 0
                       const isLast = idx === arr.length - 1
-                      const isRequired = section.required
-
                       return (
                         <div
                           key={section.id}
-                          className={`flex items-center gap-3 p-4 rounded-xl border transition ${
-                            isEnabled
-                              ? 'border-gray-200 bg-white'
-                              : 'border-gray-100 bg-gray-50 opacity-60'
-                          }`}
+                          className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white"
                         >
-                          <input
-                            type="checkbox"
-                            checked={isEnabled}
-                            disabled={isRequired}
-                            onChange={() => toggleSection(section.id)}
-                            className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900/30 disabled:cursor-not-allowed"
-                            aria-label={`${t('sections.show')} ${section.label}`}
-                          />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                              {section.label}
-                              {isRequired && (
-                                <span className="text-[10px] uppercase tracking-wider text-gray-400 font-normal">
-                                  {tCommon('required')}
-                                </span>
-                              )}
-                            </div>
+                            <div className="text-sm font-medium text-gray-900">{section.label}</div>
                             <div className="text-xs text-gray-500 truncate">{section.description}</div>
                           </div>
                           <div className="flex items-center gap-0.5">
@@ -457,7 +388,7 @@ export default function SettingsPage() {
                     })
                 })()}
               </div>
-            </Section>
+            </details>
 
             {/* Branding */}
             <Section
@@ -482,39 +413,6 @@ export default function SettingsPage() {
               </label>
             </Section>
 
-            {/* Privacy */}
-            <Section
-              title={t('privacy.title')}
-              description={t('privacy.description')}
-            >
-              <div className="space-y-4">
-                <Field label={t('privacy.visibilityLabel')}>
-                  <select
-                    value={settings.visibility || 'public'}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, visibility: e.target.value as 'public' | 'private' }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
-                  >
-                    <option value="public">{t('privacy.visibilityPublic')}</option>
-                    <option value="private">{t('privacy.visibilityPrivate')}</option>
-                  </select>
-                </Field>
-
-                <Field
-                  label={t('privacy.delayLabel')}
-                  hint={t('privacy.delayHint')}
-                >
-                  <input
-                    type="number"
-                    min="0"
-                    max="365"
-                    value={settings.delay_days || 0}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, delay_days: parseInt(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                    placeholder="0"
-                  />
-                </Field>
-              </div>
-            </Section>
           </div>
         </main>
 
@@ -567,24 +465,6 @@ function Section({
       </div>
       {children}
     </section>
-  )
-}
-
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string
-  hint?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-900 mb-1.5">{label}</label>
-      {children}
-      {hint && <p className="mt-1.5 text-xs text-gray-500">{hint}</p>}
-    </div>
   )
 }
 

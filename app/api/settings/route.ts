@@ -3,13 +3,13 @@ import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 
+// Settings the user can actually change today. Dropped fields (visibility,
+// delay_days, layout_template, enabled_sections) had UI but were never read
+// anywhere — the row keeps those columns for backward compat with old data,
+// we just stop writing them.
 const updateSettingsSchema = z.object({
-  visibility: z.enum(['public', 'private']).optional(),
-  delay_days: z.number().int().min(0).max(365).optional(),
-  layout_template: z.enum(['centered', 'card', 'grid', 'minimal']).optional(),
   // theme_color stores the preset key (legacy column name). See lib/themes.ts.
   theme_color: z.enum(['classic', 'midnight', 'sunset', 'mono', 'vivid', 'forest', 'cream']).optional(),
-  enabled_sections: z.array(z.string()).optional(),
   section_order: z.array(z.string()).optional(),
   hide_branding: z.boolean().optional(),
 })
@@ -101,11 +101,7 @@ export async function GET() {
         success: true,
         settings: {
           user_id: user.id,
-          visibility: 'public',
-          delay_days: 0,
-          layout_template: 'centered',
           theme_color: 'classic',
-          enabled_sections: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
           hide_branding: false,
         },
