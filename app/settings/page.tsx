@@ -309,6 +309,26 @@ export default function SettingsPage() {
     })
   }
 
+  // Drag-and-drop state for section reordering. Uses native HTML5 drag
+  // events (no library) — works great on desktop pointers. The up/down
+  // arrow buttons stay as the fallback for touch / keyboard users since
+  // HTML5 DnD is awkward on mobile.
+  const [dragSourceId, setDragSourceId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
+
+  const reorderSection = (fromId: string, toId: string) => {
+    if (fromId === toId) return
+    setSettings((prev) => {
+      const order = [...(prev.section_order ?? [])]
+      const from = order.indexOf(fromId)
+      const to = order.indexOf(toId)
+      if (from === -1 || to === -1) return prev
+      const [moved] = order.splice(from, 1)
+      order.splice(to, 0, moved)
+      return { ...prev, section_order: order }
+    })
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -462,6 +482,7 @@ export default function SettingsPage() {
                     themeKey={key}
                     active={settings.theme_color === key}
                     onClick={() => setSettings((prev) => ({ ...prev, theme_color: key }))}
+                    user={previewData?.user}
                   />
                 ))}
               </div>
@@ -737,15 +758,72 @@ export default function SettingsPage() {
                     .map((section, idx, arr) => {
                       const isFirst = idx === 0
                       const isLast = idx === arr.length - 1
+                      const isDragSource = dragSourceId === section.id
+                      const isDragOver =
+                        dragOverId === section.id && dragSourceId && dragSourceId !== section.id
                       return (
                         <div
                           key={section.id}
-                          className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white"
+                          draggable
+                          onDragStart={(e) => {
+                            setDragSourceId(section.id)
+                            e.dataTransfer.effectAllowed = 'move'
+                            // Required for Firefox — drag won't start without
+                            // something on the dataTransfer.
+                            e.dataTransfer.setData('text/plain', section.id)
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault()
+                            e.dataTransfer.dropEffect = 'move'
+                            if (dragSourceId && dragSourceId !== section.id) {
+                              setDragOverId(section.id)
+                            }
+                          }}
+                          onDragLeave={(e) => {
+                            // Only clear the highlight when leaving the row
+                            // itself, not a child element.
+                            if (e.currentTarget === e.target) setDragOverId(null)
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            if (dragSourceId) reorderSection(dragSourceId, section.id)
+                            setDragSourceId(null)
+                            setDragOverId(null)
+                          }}
+                          onDragEnd={() => {
+                            setDragSourceId(null)
+                            setDragOverId(null)
+                          }}
+                          className={`flex items-center gap-3 p-3 rounded-xl border bg-white transition cursor-grab active:cursor-grabbing ${
+                            isDragSource
+                              ? 'opacity-40 border-gray-200'
+                              : isDragOver
+                                ? 'border-gray-900 ring-2 ring-gray-900/10'
+                                : 'border-gray-200 hover:border-gray-300'
+                          }`}
                         >
+                          {/* Grip handle — visual cue that the card is
+                              draggable. Inactive on click; the whole row
+                              is the drag target. */}
+                          <svg
+                            className="w-4 h-4 text-gray-300 shrink-0"
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            aria-hidden="true"
+                          >
+                            <circle cx="5" cy="3" r="1" />
+                            <circle cx="5" cy="8" r="1" />
+                            <circle cx="5" cy="13" r="1" />
+                            <circle cx="11" cy="3" r="1" />
+                            <circle cx="11" cy="8" r="1" />
+                            <circle cx="11" cy="13" r="1" />
+                          </svg>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-gray-900">{section.label}</div>
                             <div className="text-xs text-gray-500 truncate">{section.description}</div>
                           </div>
+                          {/* Keyboard / mobile fallback — HTML5 DnD is rough
+                              on touch, so up/down stays even after DnD lands. */}
                           <div className="flex items-center gap-0.5">
                             <button
                               onClick={() => moveSection(section.id, 'up')}
@@ -934,12 +1012,27 @@ function ThemeTile({
   themeKey,
   active,
   onClick,
+  user,
 }: {
   themeKey: ThemeKey
   active: boolean
   onClick: () => void
+  // Optional — when present the tile shows the user's real avatar + name
+  // inside the mini card, so each tile previews "what my card looks like
+  // under this theme" rather than abstract placeholder dots.
+  user?: { avatar_url?: string | null; display_name?: string | null; handle?: string | null }
 }) {
   const theme = THEMES[themeKey]
+  const displayName = user?.display_name || user?.handle || null
+  const initials = displayName
+    ? displayName
+        .split(/\s+/)
+        .map((w) => w[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : null
   return (
     <button
       onClick={onClick}
@@ -949,21 +1042,44 @@ function ThemeTile({
         active ? 'border-gray-900 ring-2 ring-gray-900/10 ring-offset-2' : 'border-gray-200 hover:border-gray-300'
       }`}
     >
-      {/* Mini preview surface: applies the theme's page background + a smaller card. */}
+      {/* Mini preview surface: applies the theme's page background + a
+          smaller card. When we have the user's real data the avatar +
+          name + a sample link chip render in the theme's actual styles
+          — much more telling than the abstract dots we used to show. */}
       <div className={`${theme.page} ${theme.font} p-3 h-28 flex items-center justify-center`}>
         <div className={`${theme.card} ${theme.text} w-full p-2.5 flex flex-col items-center gap-1.5`}>
-          <div
-            className="w-6 h-6 rounded-full"
-            style={{ background: `linear-gradient(135deg, ${theme.accentHex}, ${theme.accentHex}aa)` }}
-          />
-          <div className="h-1.5 w-12 rounded-full" style={{ background: 'currentColor', opacity: 0.55 }} />
-          <div className="h-1 w-16 rounded-full" style={{ background: 'currentColor', opacity: 0.25 }} />
-          <div className="flex gap-1 mt-1">
-            <span
-              className="h-1.5 w-3 rounded-full"
-              style={{ background: theme.accentHex, opacity: 0.7 }}
+          {user?.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.avatar_url}
+              alt=""
+              className="w-7 h-7 rounded-full object-cover"
             />
-            <span className="h-1.5 w-3 rounded-full" style={{ background: 'currentColor', opacity: 0.3 }} />
+          ) : initials ? (
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${theme.accentHex}, ${theme.accentHex}aa)` }}
+            >
+              {initials}
+            </div>
+          ) : (
+            <div
+              className="w-7 h-7 rounded-full"
+              style={{ background: `linear-gradient(135deg, ${theme.accentHex}, ${theme.accentHex}aa)` }}
+            />
+          )}
+          {displayName ? (
+            <div className="text-[9px] font-semibold leading-tight truncate max-w-full px-1">
+              {displayName}
+            </div>
+          ) : (
+            <div className="h-1.5 w-12 rounded-full" style={{ background: 'currentColor', opacity: 0.55 }} />
+          )}
+          {/* Sample link chip — uses the theme's linkRow class so the
+              accent button style itself becomes part of the preview. */}
+          <div className={`mt-0.5 h-3 w-full rounded-md ${theme.linkRow} flex items-center justify-center`}>
+            <span className="h-1 w-3 rounded-full" style={{ background: theme.accentHex, opacity: 0.85 }} />
+            <span className="ml-1 h-0.5 w-6 rounded-full" style={{ background: 'currentColor', opacity: 0.4 }} />
           </div>
         </div>
       </div>
