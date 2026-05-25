@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createServerSupabase, requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
+import { safeLinkUrlSchema } from '@/lib/validation'
 
 const createNomadLinkSchema = z.object({
   type: z.enum([
@@ -19,7 +20,7 @@ const createNomadLinkSchema = z.object({
     'other',
   ]),
   label: z.string().optional(),
-  url: z.string().url('Invalid URL'),
+  url: safeLinkUrlSchema,
   // Soft cap matches the form's LINK_CAP; large enough that no real user
   // hits it, small enough that abuse can't blow up a row.
   order_index: z.number().int().min(0).max(49),
@@ -90,7 +91,7 @@ const replaceLinksSchema = z.object({
           'other',
         ]),
         label: z.string().optional().nullable(),
-        url: z.string().url('Invalid URL'),
+        url: safeLinkUrlSchema,
       }),
     )
     .max(50),

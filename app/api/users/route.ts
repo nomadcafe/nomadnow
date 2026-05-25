@@ -6,6 +6,7 @@ import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { bumpProfileCache } from '@/lib/revalidate'
+import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
 
 const createUserSchema = z.object({
   handle: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Handle can only contain letters, numbers, underscores, and hyphens'),
@@ -76,7 +77,10 @@ export async function POST(request: NextRequest) {
         visited_countries: validation.data.visited_countries || null,
         profile_type: validation.data.profile_type || 'creator',
       })
-      .select()
+      // Explicit column list — '.select()' (no args) returns every column
+      // and would fail RETURNING because session role lacks SELECT on the
+      // billing columns (see migration 0007).
+      .select(SAFE_USER_COLUMNS)
       .single()
 
     if (error) {
@@ -96,7 +100,7 @@ export async function POST(request: NextRequest) {
     let userRow = data
     try {
       const recovered = await recoverOrphanSubscription(user.id)
-      if (recovered) userRow = recovered
+      if (recovered) userRow = recovered as typeof data
     } catch (err) {
       // Don't fail card creation just because Stripe recovery hit a transient
       // error — the user can resubscribe via /pricing and the webhook will
@@ -166,7 +170,11 @@ async function recoverOrphanSubscription(userId: string): Promise<unknown | null
       updated_at: new Date().toISOString(),
     })
     .eq('id', userId)
-    .select()
+    // Admin client bypasses the column-level GRANT — but the returned row
+    // is forwarded to the client as `user`, so we explicitly drop billing
+    // identifiers here too. SAFE_USER_COLUMNS includes `plan`, which the
+    // UI needs to render the post-payment state correctly.
+    .select(SAFE_USER_COLUMNS)
     .single()
   return data
 }
@@ -192,7 +200,7 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id)
-      .select()
+      .select(SAFE_USER_COLUMNS)
       .single()
 
     if (error) {

@@ -6,7 +6,17 @@ import { formatErrorResponse, logError } from '@/lib/errors'
 // Avatars get a hard 5 MB cap — anything bigger is the user's holiday photo,
 // not a profile picture. NomadCard renders at 96–120px so we don't need more.
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+// MIME → on-disk extension. Single source of truth for both validation
+// ("does this MIME pass?") and path construction ("what suffix do we write
+// to disk?"). Deriving the extension from the validated MIME instead of
+// the user-supplied filename means a malicious filename can't influence
+// the path we put in storage.
+const ALLOWED_TYPES: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+}
 
 // Uploads a file to the Supabase `avatars` bucket and returns its public URL.
 // Path layout: `{user_id}/{timestamp}.{ext}` — putting the user's UUID first
@@ -33,14 +43,14 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
-    if (!ALLOWED_TYPES.has(file.type)) {
+    const ext = ALLOWED_TYPES[file.type]
+    if (!ext) {
       return NextResponse.json(
         { error: 'Unsupported file type', code: 'BAD_TYPE' },
         { status: 400 },
       )
     }
 
-    const ext = file.name.split('.').pop()?.toLowerCase() || file.type.split('/')[1] || 'jpg'
     const path = `${user.id}/${Date.now()}.${ext}`
 
     const admin = createAdminSupabase()

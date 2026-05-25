@@ -235,6 +235,11 @@ CREATE POLICY "social_metrics_select_public" ON social_metrics FOR SELECT USING 
 CREATE POLICY "social_metrics_insert_owner" ON social_metrics FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM social_accounts WHERE social_accounts.id = social_metrics.social_account_id AND social_accounts.user_id = auth.uid())
 );
+CREATE POLICY "social_metrics_update_owner" ON social_metrics FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM social_accounts WHERE social_accounts.id = social_metrics.social_account_id AND social_accounts.user_id = auth.uid())
+) WITH CHECK (
+  EXISTS (SELECT 1 FROM social_accounts WHERE social_accounts.id = social_metrics.social_account_id AND social_accounts.user_id = auth.uid())
+);
 CREATE POLICY "social_metrics_delete_owner" ON social_metrics FOR DELETE USING (
   EXISTS (SELECT 1 FROM social_accounts WHERE social_accounts.id = social_metrics.social_account_id AND social_accounts.user_id = auth.uid())
 );

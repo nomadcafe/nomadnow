@@ -176,9 +176,7 @@ export default async function PricingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const currentPlan = user
-    ? (await getBillingState(supabase, user.id)).plan
-    : null
+  const currentPlan = user ? (await getBillingState(user.id)).plan : null
 
   return (
     <div className="min-h-screen bg-white text-gray-900">

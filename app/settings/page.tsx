@@ -72,18 +72,29 @@ export default function SettingsPage() {
         return
       }
 
+      // Handle is in the publicly-readable column set. Billing fields are
+      // not — they go through /api/billing/state which uses the admin
+      // client server-side. See migration 0007 for the column lockdown.
       const { data: profile } = await supabase
         .from('users')
-        .select('handle, plan, subscription_status, current_period_end')
+        .select('handle')
         .eq('id', user.id)
         .maybeSingle()
       if (profile?.handle) setHandle(profile.handle as string)
-      if (profile) {
-        setBilling({
-          plan: (profile.plan as 'basic' | 'pro' | null) ?? null,
-          status: (profile.subscription_status as string | null) ?? null,
-          currentPeriodEnd: (profile.current_period_end as string | null) ?? null,
-        })
+
+      try {
+        const billingRes = await fetch('/api/billing/state')
+        if (billingRes.ok) {
+          const billingData = await billingRes.json()
+          setBilling({
+            plan: billingData.plan ?? null,
+            status: billingData.status ?? null,
+            currentPeriodEnd: billingData.currentPeriodEnd ?? null,
+          })
+        }
+      } catch {
+        // Non-fatal — settings page still renders with billing=null,
+        // which the UI treats as "no active subscription".
       }
 
       try {

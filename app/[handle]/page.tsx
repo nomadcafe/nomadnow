@@ -5,7 +5,7 @@ import { ProfileExpired } from '@/components/ProfileExpired'
 import { CelebrationBanner } from '@/components/CelebrationBanner'
 import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
-import { deriveBillingState } from '@/lib/billing'
+import { getBillingState } from '@/lib/billing'
 import { getCountryName } from '@/lib/countries'
 import { createServerSupabase } from '@/lib/supabase/server'
 
@@ -129,7 +129,9 @@ export default async function ProfilePage({
   // Subscription gate. If the owner canceled and the paid period has elapsed,
   // we hide the card entirely — keeps the paid-only model honest. Active and
   // past_due subs render normally (we accept past_due as grace).
-  const billing = deriveBillingState(user)
+  // Billing state goes through the admin client (see lib/billing.ts) so the
+  // raw subscription_status / current_period_end never leave the server.
+  const billing = await getBillingState(user.id)
   if (billing.isExpired) {
     return <ProfileExpired handle={handle} />
   }
@@ -162,9 +164,6 @@ export default async function ProfilePage({
     ...(user.website && { mainEntityOfPage: user.website }),
     ...(currentLocation && {
       address: { '@type': 'PostalAddress', addressLocality: currentLocation },
-    }),
-    ...(user.hometown && {
-      homeLocation: { '@type': 'Place', name: user.hometown },
     }),
     ...(user.role && { jobTitle: user.role }),
     ...(visitedNames.length > 0 && {
