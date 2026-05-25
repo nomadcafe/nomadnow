@@ -218,7 +218,11 @@
   },
   "login": {
     "title": "ログイン。",
-    "subtitle": "マジックリンク — パスワード不要。",
+    "subtitle": "パスワード不要 — 好きな方法を選んでください。",
+    "google": "Google で続ける",
+    "googleSigningIn": "リダイレクト中…",
+    "googleError": "Google でログインできませんでした。もう一度お試しください。",
+    "or": "または",
     "emailLabel": "メールアドレス",
     "emailPlaceholder": "you@example.com",
     "submit": "マジックリンクを送信",

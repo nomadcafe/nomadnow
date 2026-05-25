@@ -218,7 +218,11 @@
   },
   "login": {
     "title": "Sign in.",
-    "subtitle": "Magic link — no password needed.",
+    "subtitle": "No password needed — pick how you'd like to sign in.",
+    "google": "Continue with Google",
+    "googleSigningIn": "Redirecting…",
+    "googleError": "Could not sign in with Google. Please try again.",
+    "or": "or",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "submit": "Send magic link",
