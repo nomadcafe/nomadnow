@@ -230,6 +230,7 @@
   },
   "createCard": {
     "navCancel": "キャンセル",
+    "previewLabel": "ライブプレビュー",
     "title": "カードを確保。",
     "subtitle": "始めるには 3 つの項目だけ。残りはすべて任意、後から編集可能。",
     "editTitle": "カードを編集。",

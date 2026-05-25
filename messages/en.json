@@ -230,6 +230,7 @@
   },
   "createCard": {
     "navCancel": "Cancel",
+    "previewLabel": "Live preview",
     "title": "Claim your card.",
     "subtitle": "Three fields to start. Everything else is optional and editable later.",
     "editTitle": "Edit your card.",

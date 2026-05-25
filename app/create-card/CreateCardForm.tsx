@@ -9,6 +9,7 @@ import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
 import { AvatarUploader } from '@/components/AvatarUploader'
+import { LiveCardPreview } from '@/components/LiveCardPreview'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { debounce } from '@/lib/debounce'
@@ -406,7 +407,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       <div className="min-h-screen bg-white text-gray-900">
         <nav className="border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur z-50">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
             <Logo />
             <div className="flex items-center gap-4">
               <LanguageSwitcher />
@@ -420,17 +421,19 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
           </div>
         </nav>
 
-        <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <header className="mb-8 sm:mb-10">
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-              {isEdit ? t('editTitle') : t('title')}
-            </h1>
-            <p className="text-gray-600">
-              {isEdit ? t('editSubtitle') : t('subtitle')}
-            </p>
-          </header>
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-12 xl:gap-16">
+            <div className="min-w-0">
+              <header className="mb-8 sm:mb-10">
+                <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
+                  {isEdit ? t('editTitle') : t('title')}
+                </h1>
+                <p className="text-gray-600">
+                  {isEdit ? t('editSubtitle') : t('subtitle')}
+                </p>
+              </header>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
             {/* Essentials */}
             <div className="space-y-5">
               {/* Handle */}
@@ -765,6 +768,32 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
               )}
             </div>
           </form>
+            </div>
+
+            {/* Live preview — sticky on lg+. Hidden on small screens to
+                keep the form full-width; mobile users see their card on
+                save. The container itself owns the panel chrome so the
+                preview component can stay focused on rendering the card. */}
+            <aside className="hidden lg:block">
+              <div className="sticky top-24">
+                <div className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-3">
+                  {t('previewLabel')}
+                </div>
+                <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                  {/* Theme isn't part of this form (lives in /settings as
+                      profile_settings.theme_color), so the preview always
+                      uses the default. Users can switch themes from /settings
+                      and visit /{handle} to see the themed version. */}
+                  <LiveCardPreview
+                    form={formData}
+                    links={links}
+                    visitedCountries={visitedCountries}
+                    themeKey="classic"
+                  />
+                </div>
+              </div>
+            </aside>
+          </div>
         </main>
       </div>
     </>
