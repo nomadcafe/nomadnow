@@ -14,7 +14,6 @@ const previewUser: User = {
   avatar_url: 'https://i.pravatar.cc/240?img=12',
   bio: 'Designer building tools for remote life. Slow traveler, fast typer.',
   role: 'Product Designer',
-  hometown: 'Osaka',
   current_city: 'Bangkok',
   timezone: 'Asia/Bangkok',
   work_status: 'available',

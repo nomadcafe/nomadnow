@@ -166,14 +166,6 @@ function useLocalTime(timezone?: string) {
   return time
 }
 
-function formatMemberSince(iso: string) {
-  try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-  } catch {
-    return null
-  }
-}
-
 const MAP_BASE_FOR_DARK = '#374151'
 const MAP_BASE_FOR_GLASS = 'rgba(255,255,255,0.25)'
 
@@ -207,7 +199,6 @@ export function NomadCard({
   const displayLocation = user.current_city || user.location
   const localTime = useLocalTime(user.timezone)
   const visitedCount = user.visited_countries?.length ?? 0
-  const memberSince = formatMemberSince(user.created_at)
 
   // Roles are stored in DB as their English label (the select in /create-card
   // posts that string). Map back to a localised label when the slug matches;
@@ -425,30 +416,23 @@ export function NomadCard({
       )
     },
     stats: () => {
-      if (visitedCount === 0 && !memberSince) return null
+      // Stats used to also show "member since {date}" — dropped because it
+      // doesn't carry information visitors care about and adds visual
+      // weight competing with the actual content (countries, stays).
+      if (visitedCount === 0) return null
       return (
         <div
           key="stats"
           className={`flex items-center justify-center gap-6 sm:gap-10 my-6 py-4 border-y ${theme.divider}`}
         >
-          {visitedCount > 0 && (
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-semibold tabular-nums">
-                {visitedCount}
-              </div>
-              <div className={`text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
-                {visitedCount === 1 ? t('countryOne') : t('countryMany')}
-              </div>
+          <div className="text-center">
+            <div className="text-2xl sm:text-3xl font-semibold tabular-nums">
+              {visitedCount}
             </div>
-          )}
-          {memberSince && (
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-semibold">{memberSince}</div>
-              <div className={`text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
-                {t('memberSince')}
-              </div>
+            <div className={`text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
+              {visitedCount === 1 ? t('countryOne') : t('countryMany')}
             </div>
-          )}
+          </div>
         </div>
       )
     },

@@ -16,7 +16,6 @@ const createUserSchema = z.object({
   website: z.string().url().optional().or(z.literal('')),
   location: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
-  hometown: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
   // Free-form string up to 60 chars. Preset slugs (busy, freelancing,
   // fulltime) get translated by NomadCard; anything else renders verbatim
@@ -35,7 +34,6 @@ const updateUserSchema = z.object({
   website: z.string().url().optional().or(z.literal('')),
   location: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
-  hometown: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
   // Free-form string up to 60 chars. Preset slugs (busy, freelancing,
   // fulltime) get translated by NomadCard; anything else renders verbatim
@@ -72,7 +70,6 @@ export async function POST(request: NextRequest) {
         website: validation.data.website || null,
         location: validation.data.location,
         role: validation.data.role || null,
-        hometown: validation.data.hometown || null,
         current_city: validation.data.current_city || null,
         work_status: validation.data.work_status || 'available',
         timezone: validation.data.timezone || null,
