@@ -105,6 +105,8 @@
     }
   },
   "pricing": {
+    "currentPlanLabel": "Current plan",
+    "manageSubscription": "Manage subscription",
     "headline": "Two plans. No ads. No fees.",
     "subhead": "We don't offer a free tier — it's how we keep the platform clean, ad-free, and built for nomads instead of advertisers.",
     "mostPopular": "Most popular",
@@ -371,6 +373,10 @@
   "makeYoursCTA": {
     "cta": "Make yours",
     "aria": "Create your own Nomad Card"
+  },
+  "editCardCTA": {
+    "cta": "Edit your card",
+    "aria": "Edit your Nomad Card settings"
   },
   "roles": {
     "Designer": "Designer",

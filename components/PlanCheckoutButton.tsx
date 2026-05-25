@@ -3,24 +3,41 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
+type Plan = 'basic' | 'pro'
+
 interface PlanCheckoutButtonProps {
-  plan: 'basic' | 'pro'
+  plan: Plan
+  // Server-passed: what plan the viewer is currently subscribed to (or null).
+  // Drives whether this button starts a Checkout, opens the Customer Portal,
+  // or just shows a "Current plan" badge.
+  currentPlan?: Plan | null
   className?: string
   children: React.ReactNode
 }
 
-// Trades the plain Link for a button that calls /api/billing/checkout.
-//
-// If the user isn't signed in, the route returns 401 and we redirect to
-// /login with `next` set back to /pricing — they continue the flow after
-// magic-link, click the same plan again, and roll into Stripe Checkout.
-// Skipping the auto-resume-after-login dance keeps state out of the URL.
-export function PlanCheckoutButton({ plan, className, children }: PlanCheckoutButtonProps) {
+// Three button states, chosen by comparing `plan` (which plan card this button
+// belongs to) against `currentPlan` (the user's active subscription):
+//   - no subscription: POST /api/billing/checkout, redirect to Stripe
+//   - subscribed to this plan: render an inert "Current plan" badge so the
+//     user can't double-pay by clicking twice
+//   - subscribed to the other plan: send them to the Customer Portal where
+//     plan switches happen — Stripe handles proration and avoids creating a
+//     second subscription on the same customer
+export function PlanCheckoutButton({
+  plan,
+  currentPlan,
+  className,
+  children,
+}: PlanCheckoutButtonProps) {
   const t = useTranslations('common')
+  const tPricing = useTranslations('pricing')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const onClick = async () => {
+  const isCurrent = currentPlan === plan
+  const isOnOtherPlan = currentPlan !== null && currentPlan !== undefined && currentPlan !== plan
+
+  const startCheckout = async () => {
     setLoading(true)
     setError(null)
     try {
@@ -46,15 +63,52 @@ export function PlanCheckoutButton({ plan, className, children }: PlanCheckoutBu
     }
   }
 
+  const openPortal = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/billing/portal', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.url) {
+        window.location.href = data.url
+        return
+      }
+      setError(data.error || 'Could not open subscription portal.')
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (isCurrent) {
+    // Inert label — can't be clicked to "buy again". Keeps the card layout
+    // stable (same height) by sharing the button class.
+    return (
+      <div
+        className={`${className ?? ''} cursor-default opacity-80 inline-flex items-center justify-center gap-1.5`}
+        aria-disabled="true"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>{tPricing('currentPlanLabel')}</span>
+      </div>
+    )
+  }
+
+  const handler = isOnOtherPlan ? openPortal : startCheckout
+  const label = isOnOtherPlan ? tPricing('manageSubscription') : children
+
   return (
     <>
       <button
         type="button"
-        onClick={onClick}
+        onClick={handler}
         disabled={loading}
         className={`${className ?? ''} disabled:opacity-60 disabled:cursor-wait`}
       >
-        {loading ? t('loading') : children}
+        {loading ? t('loading') : label}
       </button>
       {error && (
         <p className="mt-2 text-xs text-red-500 text-center" role="alert">

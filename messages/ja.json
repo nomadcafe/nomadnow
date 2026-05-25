@@ -105,6 +105,8 @@
     }
   },
   "pricing": {
+    "currentPlanLabel": "現在のプラン",
+    "manageSubscription": "サブスクリプションを管理",
     "headline": "2 つのプラン。広告なし。手数料なし。",
     "subhead": "無料プランは提供していません — 広告主のためじゃなく、ノマドのために作られたクリーンなサービスを保つために。",
     "mostPopular": "人気",
@@ -371,6 +373,10 @@
   "makeYoursCTA": {
     "cta": "カードを作る",
     "aria": "自分の Nomad Card を作る"
+  },
+  "editCardCTA": {
+    "cta": "カードを編集",
+    "aria": "Nomad Card の設定を編集"
   },
   "roles": {
     "Designer": "デザイナー",

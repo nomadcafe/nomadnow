@@ -6,6 +6,7 @@ import { User, NomadLink } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
 import { WorldMap } from './WorldMap'
 import { MakeYoursCTA } from './MakeYoursCTA'
+import { EditCardCTA } from './EditCardCTA'
 import Link from 'next/link'
 import { getTheme, type ThemeKey } from '@/lib/themes'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
@@ -20,6 +21,11 @@ interface NomadCardProps {
   // /preview design-QA page (where the CTA would point users to make a card
   // they're already looking at a mock of).
   hideMakeYoursCTA?: boolean
+  // True when the viewer is the card owner. Renders the EditCardCTA
+  // floating button (→ /settings) instead of the visitor-targeted
+  // MakeYoursCTA. The hide-branding setting only governs visitor view;
+  // owners always get their edit affordance.
+  isOwner?: boolean
 }
 
 // Slugs we localise via the `card.linkTypes.*` namespace. The DB still stores
@@ -171,6 +177,7 @@ export function NomadCard({
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
+  isOwner = false,
 }: NomadCardProps) {
   const t = useTranslations('card')
   const tStatus = useTranslations('card.workStatus')
@@ -444,7 +451,7 @@ export function NomadCard({
 
   return (
     <div className={`min-h-screen ${theme.page} ${theme.font}`}>
-      {!hideMakeYoursCTA && <MakeYoursCTA />}
+      {isOwner ? <EditCardCTA /> : !hideMakeYoursCTA && <MakeYoursCTA />}
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
         <div className={`${theme.card} ${theme.text} p-6 sm:p-8 md:p-12`}>

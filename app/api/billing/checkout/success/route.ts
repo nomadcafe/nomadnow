@@ -58,6 +58,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/pricing`)
     }
 
+    // Decide where to send the user *after* writing plan to DB. If they
+    // already have a handle they should land on their public card; if not,
+    // they still need to claim one via /create-card. Looking this up before
+    // the redirect keeps the post-payment flow consistent with the rest of
+    // the app's "handle-first" assumption.
+    const { data: existing } = await createAdminSupabase()
+      .from('users')
+      .select('handle')
+      .eq('id', user.id)
+      .maybeSingle()
+    const landingPath = existing?.handle
+      ? `/${existing.handle as string}?checkout=success`
+      : '/create-card?checkout=success'
+
     const sub = session.subscription
     if (sub && typeof sub !== 'string') {
       // Pull the same fields the webhook handler does (single source of
@@ -95,7 +109,7 @@ export async function GET(request: NextRequest) {
         .eq('id', user.id)
     }
 
-    return NextResponse.redirect(`${baseUrl}/create-card?checkout=success`)
+    return NextResponse.redirect(`${baseUrl}${landingPath}`)
   } catch (err) {
     logError(err, { operation: 'checkout_success', sessionId })
     return NextResponse.redirect(`${baseUrl}/pricing?checkout=failed`)
