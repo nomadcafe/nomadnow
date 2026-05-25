@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useDeferredValue, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useEffect, useState, useDeferredValue } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useToast } from '@/hooks/useToast'
@@ -10,339 +9,77 @@ import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
 import { AvatarUploader } from '@/components/AvatarUploader'
 import { LiveCardPreview, isPreviewEmpty } from '@/components/LiveCardPreview'
-import { StaysEditor, type StayDraft } from '@/components/StaysEditor'
+import { StaysEditor } from '@/components/StaysEditor'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { debounce } from '@/lib/debounce'
-import {
-  DRAFT_STORAGE_KEY,
-  LINK_CAP,
-  ROLES,
-  TIMEZONE_LIST,
-  WORK_STATUS_PRESETS,
-  detectBrowserTimezone,
-  type HandleStatus,
-  type NomadLinkDraft,
-} from './form-constants'
+import { ROLES, TIMEZONE_LIST } from './form-constants'
 import {
   CompletionMeter,
   HandleField,
   LinksField,
   WorkStatusField,
 } from './form-sections'
+import { useHandleCheck } from './useHandleCheck'
+import { useFormDraft, type FormInitial } from './useFormDraft'
+import { useSubmitCard } from './useSubmitCard'
 
 // Server-injected snapshot. When non-null the form switches to edit mode:
 // fields pre-populate, handle becomes read-only, submit hits PUT.
-export interface InitialCardData {
-  handle: string
-  display_name: string
-  role: string
-  bio: string
-  current_city: string
-  avatar_url: string
-  // Free-form string. Preset slugs (busy / freelancing / fulltime) get
-  // their localised labels on the card; anything else renders verbatim.
-  work_status: string
-  timezone: string
-  visited_countries: string[]
-  links: NomadLinkDraft[]
-  stays: StayDraft[]
-}
+export type InitialCardData = FormInitial
 
 export default function CreateCardForm({ initial }: { initial?: InitialCardData | null }) {
   const isEdit = Boolean(initial)
   const t = useTranslations('createCard')
   const tStays = useTranslations('stays')
   const tRole = useTranslations('roles')
-  const router = useRouter()
   const { toasts, showError, removeToast } = useToast()
-  const [loading, setLoading] = useState(false)
-  // In edit mode the handle is the server-provided value and is locked, so
-  // there's nothing to validate; pretend it's "available" so the submit
-  // button doesn't get disabled by `handleStatus !== 'available'`.
-  const [handleStatus, setHandleStatus] = useState<HandleStatus>(isEdit ? 'available' : 'idle')
-  const [handleError, setHandleError] = useState<string>('')
+
+  const {
+    formData,
+    setFormData,
+    visitedCountries,
+    setVisitedCountries,
+    links,
+    setLinks,
+    stays,
+    setStays,
+    draftHasOptionalData,
+    clearDraft,
+  } = useFormDraft(initial ?? null)
+
+  // Auto-expand the optional section when there's draft data in it, so users
+  // don't lose visibility into in-progress work. Edit mode opens it by
+  // default (the user already has data in there).
   const [showMore, setShowMore] = useState(isEdit)
+  useEffect(() => {
+    if (draftHasOptionalData) setShowMore(true)
+  }, [draftHasOptionalData])
 
-  const loadDraft = () => {
-    // Edit mode ignores the localStorage draft — it was captured during a
-    // previous create attempt and shouldn't bleed into an existing card.
-    if (isEdit || typeof window === 'undefined') return null
-    try {
-      const saved = localStorage.getItem(DRAFT_STORAGE_KEY)
-      if (saved) return JSON.parse(saved)
-    } catch {
-      // Ignore parse errors
-    }
-    return null
-  }
+  const { status: handleStatus, error: handleError } = useHandleCheck(formData.handle, isEdit)
 
-  const savedDraft = loadDraft()
-  const [formData, setFormData] = useState({
-    handle: initial?.handle ?? savedDraft?.handle ?? '',
-    display_name: initial?.display_name ?? savedDraft?.display_name ?? '',
-    role: initial?.role ?? savedDraft?.role ?? '',
-    bio: initial?.bio ?? savedDraft?.bio ?? '',
-    current_city: initial?.current_city ?? savedDraft?.current_city ?? '',
-    // work_status is now free-form. Default to '' (no status pill on the
-    // card) so new users aren't auto-assigned something they didn't pick.
-    work_status: initial?.work_status ?? savedDraft?.work_status ?? '',
-    avatar_url: initial?.avatar_url ?? savedDraft?.avatar_url ?? '',
-    // Default: existing card → keep its value; new card → detect from browser
-    // so the live local-time feature on the card works out of the box for
-    // people who never touch the dropdown.
-    timezone: initial?.timezone ?? savedDraft?.timezone ?? '',
+  const { loading, submit } = useSubmitCard({
+    initial: initial ?? null,
+    formData,
+    visitedCountries,
+    links,
+    stays,
+    isHandleAvailable: handleStatus === 'available',
+    clearDraft,
+    showError,
   })
-  const [visitedCountries, setVisitedCountries] = useState<string[]>(
-    initial?.visited_countries ?? savedDraft?.visitedCountries ?? [],
-  )
-  const [links, setLinks] = useState<NomadLinkDraft[]>(initial?.links ?? savedDraft?.links ?? [])
-  const [stays, setStays] = useState<StayDraft[]>(initial?.stays ?? savedDraft?.stays ?? [])
 
-  // Every keystroke in the bio textarea / name / city inputs triggers a full
-  // re-render of the embedded NomadCard preview (and its WorldMap SVG).
-  // useDeferredValue lets React keep the inputs responsive — the preview
-  // renders against a slightly stale snapshot that catches up when idle.
+  // Every keystroke triggers a full re-render of the embedded NomadCard
+  // preview (and its WorldMap SVG). useDeferredValue lets React keep the
+  // inputs responsive — the preview renders against a slightly stale
+  // snapshot that catches up when the user pauses.
   const deferredFormData = useDeferredValue(formData)
   const deferredLinks = useDeferredValue(links)
   const deferredStays = useDeferredValue(stays)
   const deferredVisitedCountries = useDeferredValue(visitedCountries)
 
-  // Auto-expand the optional section if the user has any saved draft data in it,
-  // so they don't lose visibility into in-progress work.
-  // Also: if the page was opened with ?handle=xxx (e.g. from the 404 "Claim this"
-  // CTA), prefill that handle, overriding any saved draft so the intent is honored.
-  useEffect(() => {
-    if (
-      savedDraft &&
-      (savedDraft.role || savedDraft.bio ||
-        (savedDraft.visitedCountries?.length ?? 0) > 0 ||
-        (savedDraft.links?.length ?? 0) > 0 ||
-        savedDraft.avatar_url)
-    ) {
-      setShowMore(true)
-    }
-
-    if (typeof window !== 'undefined') {
-      const prefill = new URLSearchParams(window.location.search).get('handle')
-      if (prefill) {
-        const cleaned = prefill.trim().toLowerCase().slice(0, 50)
-        if (cleaned) {
-          setFormData((prev) => ({ ...prev, handle: cleaned }))
-        }
-      }
-    }
-
-    // Seed timezone from the browser only when nothing's stored yet — never
-    // overwrite an existing card's saved zone (the user might be in a coffee
-    // shop in Lisbon but still want their card to say Bangkok).
-    setFormData((prev) => {
-      if (prev.timezone) return prev
-      return { ...prev, timezone: detectBrowserTimezone() }
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (isEdit || typeof window === 'undefined') return
-    try {
-      const draft = { ...formData, visitedCountries, links, stays }
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
-    } catch {
-      // Ignore storage errors
-    }
-  }, [formData, visitedCountries, links, stays, isEdit])
-
-  const clearDraft = () => {
-    if (typeof window === 'undefined') return
-    try {
-      localStorage.removeItem(DRAFT_STORAGE_KEY)
-    } catch {
-      // Ignore
-    }
-  }
-
-  // Tracks the in-flight handle-check request so a slow response for an
-  // older handle (network jitter) can't overwrite a fresh fast response.
-  const handleCheckAbortRef = useRef<AbortController | null>(null)
-
-  const checkHandleAvailability = useCallback(
-    debounce(async (handle: string) => {
-      if (!handle.trim()) {
-        setHandleStatus('idle')
-        return
-      }
-
-      const handleRegex = /^[a-zA-Z0-9_-]+$/
-      if (!handleRegex.test(handle) || handle.length < 2 || handle.length > 50) {
-        setHandleStatus('invalid')
-        setHandleError(t('handleInvalid'))
-        return
-      }
-
-      handleCheckAbortRef.current?.abort()
-      const controller = new AbortController()
-      handleCheckAbortRef.current = controller
-
-      setHandleStatus('checking')
-      try {
-        const response = await fetch(
-          `/api/users/check-handle?handle=${encodeURIComponent(handle.toLowerCase())}`,
-          { signal: controller.signal },
-        )
-        const data = await response.json()
-
-        if (data.available) {
-          setHandleStatus('available')
-          setHandleError('')
-        } else {
-          setHandleStatus('unavailable')
-          setHandleError(t('handleTaken'))
-        }
-      } catch (err) {
-        // AbortError fires when a newer keystroke superseded this check —
-        // not an error to surface to the user; the next call's response wins.
-        if (err instanceof DOMException && err.name === 'AbortError') return
-        setHandleStatus('idle')
-        setHandleError(t('handleCheckError'))
-      }
-    }, 500),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
-
-  useEffect(() => {
-    // Skip availability checks in edit mode — handle is locked.
-    if (isEdit) return
-    checkHandleAvailability(formData.handle)
-  }, [formData.handle, checkHandleAvailability, isEdit])
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!formData.handle.trim() || handleStatus !== 'available') {
-      showError(t('errorHandle'))
-      return
-    }
-    if (!formData.display_name.trim()) {
-      showError(t('errorName'))
-      return
-    }
-
-    const validLinks = links.filter((link) => link.url.trim())
-    if (validLinks.length > LINK_CAP) {
-      showError(t('errorTooManyLinks', { cap: LINK_CAP }))
-      return
-    }
-
-    setLoading(true)
-    try {
-      // Same payload shape regardless of mode — the API's create vs update
-      // schemas are subsets of one another and the data we send is valid
-      // under both. Only `handle` is omitted in edit mode (it's locked).
-      const baseBody = {
-        display_name: formData.display_name,
-        bio: formData.bio || undefined,
-        location: formData.current_city || undefined,
-        avatar_url: formData.avatar_url || undefined,
-        country: undefined,
-        role: formData.role || undefined,
-        current_city: formData.current_city || undefined,
-        work_status: formData.work_status,
-        timezone: formData.timezone || undefined,
-        visited_countries: visitedCountries,
-        profile_type: 'nomad',
-      }
-
-      const response = await fetch('/api/users', {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          isEdit
-            ? baseBody
-            : { ...baseBody, handle: formData.handle.trim().toLowerCase() },
-        ),
-      })
-
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.error || t('errorGeneric'))
-      }
-
-      // Links sync: replace-all in both modes. The server PUT atomically
-      // wipes + reinserts in array order, so reorders and removals come
-      // free. Skip the round-trip in create mode when there's nothing to
-      // insert (matching the stays branch below).
-      if (isEdit || validLinks.length > 0) {
-        const linksResponse = await fetch('/api/nomad-links', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            links: validLinks.map((link) => ({
-              type: link.type,
-              label: link.type === 'other' ? link.label || null : null,
-              url: link.url,
-            })),
-          }),
-        })
-        if (!linksResponse.ok) {
-          const linksData = await linksResponse.json().catch(() => ({}))
-          throw new Error(linksData.error || t('errorGeneric'))
-        }
-      }
-
-      // Stays sync: replace-all in both modes. The form always submits the
-      // full desired set; server wipes and re-inserts. Skip the PUT entirely
-      // when the user has no stays (saves a round-trip).
-      const validStays = stays.filter((s) => s.city.trim() && s.country && s.start_date)
-      if (isEdit || validStays.length > 0) {
-        const staysResponse = await fetch('/api/stays', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            stays: validStays.map((s) => ({
-              city: s.city.trim(),
-              country: s.country,
-              lat: s.lat ?? null,
-              lon: s.lon ?? null,
-              start_date: s.start_date,
-              end_date: s.end_date || null,
-              notes: s.notes?.trim() || null,
-              photo_urls: s.photo_urls,
-            })),
-          }),
-        })
-        if (!staysResponse.ok) {
-          const staysData = await staysResponse.json().catch(() => ({}))
-          throw new Error(staysData.error || t('errorGeneric'))
-        }
-      }
-
-      clearDraft()
-      const handleSlug = (initial?.handle ?? formData.handle).trim().toLowerCase()
-      // Edit mode: back to public card, no celebration (their card was
-      // already live). Create mode: paid users land on a celebration-armed
-      // version of their card so they're prompted to share; unpaid users
-      // get bounced to /pricing first.
-      let nextPath: string
-      if (isEdit) {
-        nextPath = `/${handleSlug}`
-      } else {
-        const claimedPlan = data?.user?.plan as 'basic' | 'pro' | null | undefined
-        nextPath = claimedPlan ? `/${handleSlug}?celebrate=1` : '/pricing?from=create'
-      }
-      router.push(nextPath)
-      router.refresh()
-    } catch (error) {
-      showError(error instanceof Error ? error.message : t('errorGeneric'))
-    } finally {
-      setLoading(false)
-    }
   }
 
   const canSubmit =
@@ -396,7 +133,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                 ]}
               />
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={submit} className="space-y-6">
                 {/* Essentials */}
                 <div className="space-y-5">
                   <HandleField
