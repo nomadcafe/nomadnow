@@ -43,6 +43,7 @@ export interface PreviewLink {
     | 'threads'
     | 'substack'
     | 'telegram'
+    | 'spotify'
     | 'other'
   label?: string
   url: string

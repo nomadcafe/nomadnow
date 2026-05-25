@@ -17,6 +17,7 @@ const createNomadLinkSchema = z.object({
     'threads',
     'substack',
     'telegram',
+    'spotify',
     'other',
   ]),
   label: z.string().optional(),
