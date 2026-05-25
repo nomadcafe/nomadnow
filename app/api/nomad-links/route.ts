@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerSupabase, requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
+import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 
 const createNomadLinkSchema = z.object({
   type: z.enum([
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
       throw error
     }
 
+    await bumpProfileCacheByUserId(supabase, user.id)
     return NextResponse.json({ success: true, link: data })
   } catch (error) {
     logError(error, { operation: 'create_nomad_link' })
@@ -118,6 +120,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (validation.data.links.length === 0) {
+      await bumpProfileCacheByUserId(supabase, user.id)
       return NextResponse.json({ success: true, links: [] })
     }
 
@@ -139,6 +142,7 @@ export async function PUT(request: NextRequest) {
       throw error
     }
 
+    await bumpProfileCacheByUserId(supabase, user.id)
     return NextResponse.json({ success: true, links: data || [] })
   } catch (error) {
     logError(error, { operation: 'replace_links' })

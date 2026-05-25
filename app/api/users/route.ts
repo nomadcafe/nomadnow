@@ -5,6 +5,7 @@ import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { isReservedHandle } from '@/lib/reserved-handles'
+import { bumpProfileCache } from '@/lib/revalidate'
 
 const createUserSchema = z.object({
   handle: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Handle can only contain letters, numbers, underscores, and hyphens'),
@@ -106,6 +107,7 @@ export async function POST(request: NextRequest) {
       logError(err, { operation: 'recover_orphan_subscription', userId: user.id })
     }
 
+    bumpProfileCache(validation.data.handle)
     return NextResponse.json({ success: true, user: userRow })
   } catch (error) {
     logError(error, { operation: 'create_user' })
@@ -205,6 +207,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    if (data.handle) bumpProfileCache(data.handle as string)
     return NextResponse.json({ success: true, user: data })
   } catch (error) {
     logError(error, { operation: 'update_user' })
