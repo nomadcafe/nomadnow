@@ -76,11 +76,13 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      // Returning to /create-card after a successful subscription so the user
-      // lands directly on the next step (claiming a handle). The webhook will
-      // have written `plan` to the DB by the time they get here in nearly all
-      // cases — if not, the page will redirect to /pricing and they retry.
-      success_url: `${baseUrl}/create-card?checkout=success`,
+      // Go through our own /api/billing/checkout/success first instead of
+      // landing on /create-card directly. That route forces a DB sync from
+      // the Checkout Session before the redirect, eliminating the race with
+      // the webhook (which usually fires within seconds but isn't guaranteed
+      // to beat the user's browser back from Stripe). Stripe substitutes
+      // {CHECKOUT_SESSION_ID} server-side, no encoding needed.
+      success_url: `${baseUrl}/api/billing/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pricing?checkout=canceled`,
       allow_promotion_codes: true,
     })
