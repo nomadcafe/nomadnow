@@ -35,6 +35,9 @@ const updateSettingsSchema = z.object({
   // resolver gracefully degrades to the theme default on mismatch.
   background_mode: z.enum(['theme', 'solid', 'gradient']).optional(),
   background_value: backgroundValueSchema,
+  // Font override key. 'theme' is equivalent to NULL (use the theme's
+  // font). See lib/fonts.ts for the curated list.
+  font_family: z.enum(['theme', 'inter', 'jakarta', 'fraunces', 'mono']).nullable().optional(),
   // The Nomad Card catalog has ~8 section IDs and each is a short string —
   // anything bigger is junk or abuse. Defensive caps so a malformed POST
   // can't blow up a row size or shove a giant JSONB blob into the DB.
@@ -135,6 +138,7 @@ export async function GET() {
           button_shape: 'rounded',
           background_mode: 'theme',
           background_value: null,
+          font_family: 'theme',
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
           hide_branding: false,
         },

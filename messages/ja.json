@@ -352,6 +352,11 @@
       "to": "終了色",
       "angle": "角度"
     },
+    "font": {
+      "title": "フォント",
+      "description": "各候補がそのフォント自身で表示されます — 雰囲気に合うものを。",
+      "themeDefault": "テーマのまま"
+    },
     "sections": {
       "title": "セクション順序",
       "advancedLabel": "詳細設定",

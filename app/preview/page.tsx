@@ -60,11 +60,12 @@ const previewLinks: NomadLink[] = [
 export default async function PreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ theme?: string; order?: string; disable?: string; shape?: string }>
+  searchParams: Promise<{ theme?: string; order?: string; disable?: string; shape?: string; font?: string }>
 }) {
   const params = await searchParams
   const themeKey = (params.theme as ThemeKey | undefined) ?? 'classic'
   const buttonShape = params.shape ?? 'rounded'
+  const fontFamily = params.font ?? 'theme'
   // ?order=name,location,bio,stats,map,avatar,status,links — for design QA.
   const customOrder = params.order ? params.order.split(',').map((s) => s.trim()) : undefined
   // ?disable=bio,map — comma-separated section IDs to hide.
@@ -103,6 +104,7 @@ export default async function PreviewPage({
         links={previewLinks}
         themeKey={themeKey}
         buttonShape={buttonShape}
+        fontFamily={fontFamily}
         sectionOrder={customOrder}
         enabledSections={enabledSections}
         hideMakeYoursCTA
