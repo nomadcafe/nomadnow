@@ -8,6 +8,7 @@ import { AccountMenu } from '@/components/AccountMenu'
 import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { getBillingState } from '@/lib/billing'
+import { PricingPlans } from './PricingPlans'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata')
@@ -143,31 +144,6 @@ function CellValue({
   )
 }
 
-const BASIC_BULLET_KEYS = [
-  'premiumDomain',
-  'worldMap',
-  'liveTimezone',
-  'stays',
-  'links',
-  'themes',
-  'travelStats',
-  'analytics',
-  'ogImage',
-  'footer',
-] as const
-
-const PRO_BULLET_KEYS: { key: string; soon?: boolean }[] = [
-  { key: 'everythingInBasic' },
-  { key: 'customDomain', soon: true },
-  { key: 'verifiedBadge' },
-  { key: 'featured' },
-  { key: 'analytics', soon: true },
-  { key: 'drafts', soon: true },
-  { key: 'autoSync', soon: true },
-  { key: 'embed', soon: true },
-  { key: 'support' },
-]
-
 const FAQ_KEYS = ['noFree', 'cancel', 'data', 'switch', 'fees'] as const
 
 export default async function PricingPage() {
@@ -226,72 +202,7 @@ export default async function PricingPage() {
 
       {/* Pricing cards */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-        <div className="grid md:grid-cols-2 gap-6 items-stretch">
-          {/* Basic — featured. */}
-          <div className="relative rounded-2xl border-2 border-gray-900 bg-gray-900 text-white p-7 sm:p-8 flex flex-col shadow-xl shadow-gray-900/20">
-            <span className="absolute -top-3 right-6 inline-flex items-center gap-1 bg-amber-300 text-gray-900 text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full">
-              {t('mostPopular')}
-            </span>
-            <div className="mb-6">
-              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-400 mb-2">{t('basic.label')}</h2>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl sm:text-5xl font-semibold tracking-tight">$2.8</span>
-                <span className="text-gray-400">{t('perMonth')}</span>
-              </div>
-              <p className="mt-2 text-sm text-gray-300">{t('basic.tagline')}</p>
-            </div>
-            <ul className="space-y-3 flex-1">
-              {BASIC_BULLET_KEYS.map((key) => (
-                <li key={key} className="flex items-start gap-2.5 text-[15px] text-gray-100">
-                  <Check className="text-amber-300 mt-0.5 shrink-0" />
-                  <span>{t(`basicBullets.${key}`)}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 mb-8 text-xs text-gray-400 italic">{t('comingMore')}</p>
-            <PlanCheckoutButton
-              plan="basic"
-              currentPlan={currentPlan}
-              className="w-full block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
-            >
-              {t('basic.cta')}
-            </PlanCheckoutButton>
-          </div>
-
-          {/* Pro */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-7 sm:p-8 flex flex-col">
-            <div className="mb-6">
-              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 mb-2">{t('pro.label')}</h2>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl sm:text-5xl font-semibold tracking-tight">$9.8</span>
-                <span className="text-gray-500">{t('perMonth')}</span>
-              </div>
-              <p className="mt-2 text-sm text-gray-600">{t('pro.tagline')}</p>
-            </div>
-            <ul className="space-y-3 flex-1">
-              {PRO_BULLET_KEYS.map(({ key, soon }) => (
-                <li key={key} className="flex items-start gap-2.5 text-[15px] text-gray-800">
-                  <Check className="text-gray-700 mt-0.5 shrink-0" />
-                  <span>
-                    {t(`proBullets.${key}`)}
-                    {soon && <SoonPill label={soonLabel} />}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 mb-8 text-xs text-gray-500 italic">{t('comingMore')}</p>
-            <PlanCheckoutButton
-              plan="pro"
-              currentPlan={currentPlan}
-              className="w-full block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
-            >
-              {t('pro.cta')}
-            </PlanCheckoutButton>
-          </div>
-        </div>
-        <p className="text-center text-xs text-gray-500 mt-5">
-          {t('footnote')}
-        </p>
+        <PricingPlans currentPlan={currentPlan} />
       </section>
 
       {/* Feature comparison table */}
