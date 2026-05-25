@@ -26,6 +26,7 @@ type OgUser = {
   visited_countries?: string[] | null
   created_at?: string | null
   bio?: string | null
+  verified?: boolean | null
 }
 
 type OgStay = {
@@ -45,6 +46,8 @@ const PREVIEW_USER: OgUser = {
   visited_countries: ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'PH', 'MX', 'ES', 'GE'],
   created_at: '2024-03-15T00:00:00.000Z',
   bio: 'Designer building tools for remote life. Slow traveler, fast typer.',
+  // Verified so the QA preview keeps exercising the pill rendering.
+  verified: true,
 }
 
 // Sample stays for preview mode — enough to exercise the city-count and
@@ -83,7 +86,7 @@ export async function GET(
       const lower = handle.toLowerCase()
       const { data: userData } = await supabase
         .from('users')
-        .select('id, handle, display_name, role, current_city, timezone, visited_countries, created_at, bio')
+        .select('id, handle, display_name, role, current_city, timezone, visited_countries, created_at, bio, verified')
         .eq('handle', lower)
         .maybeSingle()
       user = (userData as OgUser | null) ?? null
@@ -172,19 +175,21 @@ export async function GET(
           <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}>
             nomad.now/<span style={{ color: og.brandFg, fontWeight: 600 }}>{handle}</span>
           </span>
-          <span
-            style={{
-              background: og.pillBg,
-              color: og.pillFg,
-              border: `1px solid ${og.pillBorder}`,
-              padding: '6px 16px',
-              borderRadius: 999,
-              fontSize: 18,
-              fontWeight: 500,
-            }}
-          >
-            Verified
-          </span>
+          {user?.verified && (
+            <span
+              style={{
+                background: og.pillBg,
+                color: og.pillFg,
+                border: `1px solid ${og.pillBorder}`,
+                padding: '6px 16px',
+                borderRadius: 999,
+                fontSize: 18,
+                fontWeight: 500,
+              }}
+            >
+              Verified
+            </span>
+          )}
         </div>
 
         {/* Name + role */}

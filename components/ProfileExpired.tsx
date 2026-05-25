@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Logo } from './Logo'
@@ -11,7 +9,6 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 // so we don't offer it as claimable here.
 export function ProfileExpired({ handle }: { handle: string }) {
   const t = useTranslations('profileExpired')
-  const tNav = useTranslations('nav')
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
