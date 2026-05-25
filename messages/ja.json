@@ -377,6 +377,16 @@
       "portalError": "課金ポータルを開けませんでした。もう一度お試しください。"
     }
   },
+  "celebrate": {
+    "title": "カードが公開されました!",
+    "subtitle": "ネットワークでシェアしよう — シェアするたびに新しい人がやってきます。",
+    "shareX": "X でシェア",
+    "shareLinkedin": "LinkedIn でシェア",
+    "copyLink": "リンクをコピー",
+    "copied": "コピーしました",
+    "dismiss": "閉じる",
+    "tweetTemplate": "Nomad Card を作りました @nomadnow — ぜひ見てください: {url}"
+  },
   "card": {
     "verified": "認証済み",
     "shareTitle": "このカードをシェア",

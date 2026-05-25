@@ -377,15 +377,16 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
 
       clearDraft()
       const handleSlug = (initial?.handle ?? formData.handle).trim().toLowerCase()
-      // Edit mode: always return to the user's public card so they see the
-      // change applied. Create mode: paid users go to their card, unpaid
-      // users go to /pricing to subscribe.
+      // Edit mode: back to public card, no celebration (their card was
+      // already live). Create mode: paid users land on a celebration-armed
+      // version of their card so they're prompted to share; unpaid users
+      // get bounced to /pricing first.
       let nextPath: string
       if (isEdit) {
         nextPath = `/${handleSlug}`
       } else {
         const claimedPlan = data?.user?.plan as 'basic' | 'pro' | null | undefined
-        nextPath = claimedPlan ? `/${handleSlug}` : '/pricing?from=create'
+        nextPath = claimedPlan ? `/${handleSlug}?celebrate=1` : '/pricing?from=create'
       }
       router.push(nextPath)
       router.refresh()
