@@ -59,8 +59,37 @@ export interface InitialCardData {
   hometown: string
   avatar_url: string
   work_status: 'available' | 'busy' | 'fulltime' | 'freelancing'
+  timezone: string
   visited_countries: string[]
   links: NomadLink[]
+}
+
+// Cached at module scope so the dropdown doesn't recompute on every render.
+// `Intl.supportedValuesOf` is supported in all modern browsers + Node 18+.
+function getTimezoneList(): string[] {
+  try {
+    return Intl.supportedValuesOf('timeZone')
+  } catch {
+    // Safari < 16 doesn't ship the API. Fall back to a minimal nomad-friendly
+    // list so the form still renders something pickable.
+    return [
+      'UTC',
+      'America/Los_Angeles', 'America/New_York', 'America/Mexico_City',
+      'America/Sao_Paulo', 'America/Buenos_Aires',
+      'Europe/London', 'Europe/Lisbon', 'Europe/Berlin', 'Europe/Madrid',
+      'Africa/Casablanca', 'Asia/Dubai', 'Asia/Bangkok', 'Asia/Singapore',
+      'Asia/Tokyo', 'Asia/Seoul', 'Asia/Shanghai', 'Asia/Kolkata',
+      'Australia/Sydney',
+    ]
+  }
+}
+
+function detectBrowserTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  } catch {
+    return 'UTC'
+  }
 }
 
 // Roles persist as their English label (canonical DB value). Translation
@@ -121,6 +150,11 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     hometown: initial?.hometown ?? savedDraft?.hometown ?? '',
     work_status: (initial?.work_status ?? savedDraft?.work_status ?? 'available') as 'available' | 'busy' | 'fulltime' | 'freelancing',
     avatar_url: initial?.avatar_url ?? savedDraft?.avatar_url ?? '',
+    // Default: existing card → keep its value; new card → detect from browser
+    // so the live local-time feature on the card works out of the box for
+    // people who never touch the dropdown. Edit-mode users keep their saved
+    // zone intact even if they're traveling.
+    timezone: initial?.timezone ?? savedDraft?.timezone ?? '',
   })
   const [visitedCountries, setVisitedCountries] = useState<string[]>(
     initial?.visited_countries ?? savedDraft?.visitedCountries ?? [],
@@ -151,6 +185,14 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
         }
       }
     }
+
+    // Seed timezone from the browser only when nothing's stored yet — never
+    // overwrite an existing card's saved zone (the user might be in a coffee
+    // shop in Lisbon but still want their card to say Bangkok).
+    setFormData((prev) => {
+      if (prev.timezone) return prev
+      return { ...prev, timezone: detectBrowserTimezone() }
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -275,6 +317,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
         hometown: formData.hometown || undefined,
         current_city: formData.current_city || undefined,
         work_status: formData.work_status,
+        timezone: formData.timezone || undefined,
         visited_countries: visitedCountries,
         profile_type: 'nomad',
       }
@@ -487,6 +530,28 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                 />
                 <p className="mt-1.5 text-xs text-gray-500">{t('currentCityHint')}</p>
               </div>
+
+              {/* Timezone — drives the live clock on the public card. Defaults
+                  to the browser's detected zone so most users never have to
+                  touch this; remains overrideable for travelers who want
+                  their card to keep showing their "home" timezone. */}
+              <div>
+                <label htmlFor="timezone" className="block text-sm font-medium text-gray-900 mb-1.5">
+                  {t('timezone')}
+                </label>
+                <select
+                  id="timezone"
+                  name="timezone"
+                  value={formData.timezone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
+                >
+                  {getTimezoneList().map((tz) => (
+                    <option key={tz} value={tz}>{tz}</option>
+                  ))}
+                </select>
+                <p className="mt-1.5 text-xs text-gray-500">{t('timezoneHint')}</p>
+              </div>
             </div>
 
             {/* Customize more — collapsible */}
@@ -559,12 +624,12 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                       name="bio"
                       value={formData.bio}
                       onChange={handleChange}
-                      maxLength={200}
-                      rows={2}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 resize-none transition"
+                      maxLength={500}
+                      rows={5}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 resize-y transition"
                       placeholder={t('bioPlaceholder')}
                     />
-                    <p className="mt-1 text-xs text-gray-400 text-right">{formData.bio.length}/200</p>
+                    <p className="mt-1 text-xs text-gray-400 text-right">{formData.bio.length}/500</p>
                   </div>
 
                   {/* Hometown */}

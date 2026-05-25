@@ -325,7 +325,7 @@ export function NomadCard({
           >
             &ldquo;
           </span>
-          <p className={`text-base leading-relaxed ${theme.bioQuote} relative`}>
+          <p className={`text-base leading-relaxed whitespace-pre-line ${theme.bioQuote} relative`}>
             {user.bio}
           </p>
           <span

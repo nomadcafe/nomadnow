@@ -38,6 +38,7 @@ export default async function CreateCardPage() {
         work_status:
           (profile.work_status as 'available' | 'busy' | 'fulltime' | 'freelancing' | null) ??
           'available',
+        timezone: (profile.timezone as string | null) ?? '',
         visited_countries: (profile.visited_countries as string[] | null) ?? [],
         links: (links ?? []).map((l) => ({
           type: l.type as InitialCardData['links'][number]['type'],

@@ -251,6 +251,8 @@
     "currentCity": "現在地",
     "currentCityPlaceholder": "バンコク",
     "currentCityHint": "カード上にライブで表示されます。移動したら更新してください。",
+    "timezone": "タイムゾーン",
+    "timezoneHint": "カードのライブ時計に使われます。ブラウザから自動検出 — 別のタイムゾーンを表示したい場合は変更してください。",
     "expand": "詳細設定(任意)",
     "collapse": "詳細を隠す",
     "role": "職種",
