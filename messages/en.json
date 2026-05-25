@@ -352,6 +352,11 @@
       "to": "To",
       "angle": "Angle"
     },
+    "font": {
+      "title": "Font",
+      "description": "Each option renders in its own font — pick what fits your tone.",
+      "themeDefault": "Theme default"
+    },
     "sections": {
       "title": "Section order",
       "advancedLabel": "Advanced",

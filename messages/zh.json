@@ -352,6 +352,11 @@
       "to": "终色",
       "angle": "角度"
     },
+    "font": {
+      "title": "字体",
+      "description": "每个选项用自身字体显示 —— 挑一个合你调性的。",
+      "themeDefault": "跟随主题"
+    },
     "sections": {
       "title": "分节顺序",
       "advancedLabel": "高级",

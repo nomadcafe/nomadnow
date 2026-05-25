@@ -17,6 +17,7 @@ import {
   resolveBackgroundCss,
   type BackgroundMode,
 } from '@/lib/card-background'
+import { FONT_OPTIONS, FONT_KEYS, type FontKey } from '@/lib/fonts'
 import {
   NOMAD_SECTIONS,
   NOMAD_DEFAULT_ORDER,
@@ -33,6 +34,7 @@ interface ProfileSettings {
     | { color: string }
     | { from: string; to: string; angle: number }
     | null
+  font_family?: FontKey
   section_order?: string[]
   hide_branding?: boolean
 }
@@ -74,6 +76,7 @@ export default function SettingsPage() {
     button_shape: 'rounded',
     background_mode: 'theme',
     background_value: null,
+    font_family: 'theme',
     section_order: NOMAD_DEFAULT_ORDER,
     hide_branding: false,
   })
@@ -129,11 +132,17 @@ export default function SettingsPage() {
             rawBgMode && (BACKGROUND_MODE_KEYS as readonly string[]).includes(rawBgMode)
               ? (rawBgMode as BackgroundMode)
               : 'theme'
+          const rawFont = data.settings.font_family as string | null | undefined
+          const font_family: FontKey =
+            rawFont && (FONT_KEYS as readonly string[]).includes(rawFont)
+              ? (rawFont as FontKey)
+              : 'theme'
           setSettings({
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
             background_mode,
             background_value: data.settings.background_value ?? null,
+            font_family,
             section_order: order,
             hide_branding: Boolean(data.settings.hide_branding),
           })
@@ -569,6 +578,33 @@ export default function SettingsPage() {
                       <span className="text-xs font-medium text-gray-700">
                         {t(`buttonShape.${key}`)}
                       </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </Section>
+
+            {/* Font family — orthogonal to theme. Each option renders its
+                own label in its own font so the picker is its own preview. */}
+            <Section
+              title={t('font.title')}
+              description={t('font.description')}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                {FONT_OPTIONS.map((opt) => {
+                  const active = (settings.font_family ?? 'theme') === opt.key
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSettings((prev) => ({ ...prev, font_family: opt.key }))}
+                      className={`px-3 py-3 rounded-lg border text-base text-center transition ${opt.className} ${
+                        active
+                          ? 'border-gray-900 bg-gray-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {opt.key === 'theme' ? t('font.themeDefault') : opt.label}
                     </button>
                   )
                 })}

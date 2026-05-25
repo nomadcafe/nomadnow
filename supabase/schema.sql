@@ -99,6 +99,8 @@ CREATE TABLE IF NOT EXISTS profile_settings (
   -- 'solid' / 'gradient' use background_value. See lib/card-background.ts.
   background_mode TEXT DEFAULT 'theme',
   background_value JSONB,
+  -- Font override (null = use theme.font). Keys match lib/fonts.ts FONT_KEYS.
+  font_family TEXT,
   -- When true, suppresses the "Make yours" / "Made on nomad.now" branding on the public profile.
   -- Available to all paid plans (Basic and Pro) — pricing is set in /pricing.
   hide_branding BOOLEAN DEFAULT FALSE,

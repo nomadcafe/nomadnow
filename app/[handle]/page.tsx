@@ -231,6 +231,7 @@ export default async function ProfilePage({
         buttonShape={settings?.button_shape}
         backgroundMode={settings?.background_mode}
         backgroundValue={settings?.background_value}
+        fontFamily={settings?.font_family}
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
         hideMakeYoursCTA={Boolean(settings?.hide_branding)}

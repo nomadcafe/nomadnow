@@ -13,6 +13,7 @@ import { VideoLightbox, detectVideo } from './VideoLightbox'
 import Link from 'next/link'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
+import { getFontClassName } from '@/lib/fonts'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
 
 interface NomadCardProps {
@@ -29,6 +30,9 @@ interface NomadCardProps {
   // theme default rather than throwing.
   backgroundMode?: string | null
   backgroundValue?: unknown
+  // Font override key from lib/fonts.ts. Null / 'theme' falls back to
+  // the theme's own font class.
+  fontFamily?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
   // When true, the floating "Make yours →" CTA is suppressed. Use on the
@@ -207,6 +211,7 @@ export function NomadCard({
   buttonShape,
   backgroundMode,
   backgroundValue,
+  fontFamily,
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
@@ -226,6 +231,9 @@ export function NomadCard({
   const theme = getTheme(themeKey)
   const shape = getButtonShape(buttonShape)
   const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
+  // Empty string for theme-default; otherwise the next/font className wins
+  // over theme.font because it applies font-family directly via inline CSS.
+  const customFontClass = getFontClassName(fontFamily)
   const locale = useLocale()
   // Split stays into upcoming / current / past once and re-use the buckets
   // throughout the render — the rules for "what is current" (open-ended,
@@ -740,7 +748,7 @@ export function NomadCard({
 
   return (
     <div
-      className={`min-h-screen ${customBg ? '' : theme.page} ${theme.font}`}
+      className={`min-h-screen ${customBg ? '' : theme.page} ${customFontClass || theme.font}`}
       style={customBg ? { background: customBg } : undefined}
     >
       {videoEmbed && <VideoLightbox url={videoEmbed} onClose={() => setVideoEmbed(null)} />}
