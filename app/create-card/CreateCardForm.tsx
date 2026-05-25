@@ -279,8 +279,15 @@ export default function CreateCardForm() {
 
       clearDraft()
       showSuccess(t('successToast'))
+      // /api/users returns the row after Stripe-orphan-subscription recovery,
+      // so user.plan is populated if they paid before claiming the handle.
+      // Send unpaid users to /pricing to subscribe; paid users land on their
+      // public card.
+      const claimedPlan = data?.user?.plan as 'basic' | 'pro' | null | undefined
+      const handleSlug = formData.handle.trim().toLowerCase()
+      const nextPath = claimedPlan ? `/${handleSlug}` : '/pricing'
       setTimeout(() => {
-        router.push(`/${formData.handle.trim().toLowerCase()}`)
+        router.push(nextPath)
       }, 1200)
     } catch (error) {
       showError(error instanceof Error ? error.message : t('errorGeneric'))
