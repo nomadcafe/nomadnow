@@ -29,6 +29,8 @@
     "account": "Account",
     "settings": "Settings",
     "getCard": "Get your card",
+    "finishSetup": "Finish setup",
+    "myCard": "My card",
     "viewProfile": "View profile"
   },
   "footer": {
