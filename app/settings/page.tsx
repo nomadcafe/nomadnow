@@ -237,10 +237,12 @@ export default function SettingsPage() {
                   {t('navView')}
                 </Link>
               ) : (
-                // No handle yet means the user hasn't claimed a card — the
-                // action they actually need is "create one", not "cancel".
+                // No handle yet means the user hasn't claimed a card — go
+                // straight to /create-card. The previous order (subscribe →
+                // claim) trapped users at the pricing gate because the
+                // public.users row didn't exist for the webhook to update.
                 <Link
-                  href="/pricing"
+                  href="/create-card"
                   className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
                 >
                   {tNav('getCard')}

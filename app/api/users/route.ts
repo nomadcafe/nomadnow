@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
+import { createAdminSupabase } from '@/lib/supabase/admin'
+import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { isReservedHandle } from '@/lib/reserved-handles'
 
@@ -81,7 +83,24 @@ export async function POST(request: NextRequest) {
       throw error
     }
 
-    return NextResponse.json({ success: true, user: data })
+    // If the user already paid before claiming a handle, the webhook's UPDATE
+    // matched 0 rows (this row didn't exist yet) and the subscription state
+    // is "lost" in Stripe — paid but not associated with any user row.
+    // Recover it here: ask Stripe for any active subscription whose metadata
+    // user_id matches this user, then copy plan/status onto the freshly
+    // created row. Idempotent: if no such sub exists, this is a no-op.
+    let userRow = data
+    try {
+      const recovered = await recoverOrphanSubscription(user.id)
+      if (recovered) userRow = recovered
+    } catch (err) {
+      // Don't fail card creation just because Stripe recovery hit a transient
+      // error — the user can resubscribe via /pricing and the webhook will
+      // pick up the new state.
+      logError(err, { operation: 'recover_orphan_subscription', userId: user.id })
+    }
+
+    return NextResponse.json({ success: true, user: userRow })
   } catch (error) {
     logError(error, { operation: 'create_user' })
     const errorResponse = formatErrorResponse(error)
@@ -90,6 +109,61 @@ export async function POST(request: NextRequest) {
       { status: errorResponse.statusCode }
     )
   }
+}
+
+// Look up any Stripe subscription tagged with this user_id in metadata and,
+// if found, apply plan/status/period to the user row. Run after a fresh
+// public.users INSERT to recover subscriptions that were paid BEFORE the row
+// existed (the webhook UPDATE matched 0 rows; nothing else picks them up).
+//
+// We search subscriptions rather than the user-row's customer ID because at
+// this point we may not have a customer ID stored (the older checkout flow
+// would only have written it back on a path that the orphan flow skipped).
+// Stripe's subscription search is rate-limited but cheap enough for a
+// once-per-account event.
+async function recoverOrphanSubscription(userId: string): Promise<unknown | null> {
+  if (!isStripeConfigured()) return null
+
+  const stripe = getStripe()
+  const result = await stripe.subscriptions.search({
+    query: `metadata['user_id']:'${userId}' AND status:'active'`,
+    limit: 1,
+  })
+  const sub = result.data[0]
+  if (!sub) return null
+
+  let plan: Plan | null = null
+  let maxPeriodEnd = 0
+  for (const item of sub.items.data) {
+    const priceId = item.price?.id
+    if (priceId && !plan) {
+      const matched = planForPriceId(priceId)
+      if (matched) plan = matched
+    }
+    const end = item.current_period_end
+    if (typeof end === 'number' && end > maxPeriodEnd) {
+      maxPeriodEnd = end
+    }
+  }
+
+  const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id
+  const admin = createAdminSupabase()
+  const { data } = await admin
+    .from('users')
+    .update({
+      stripe_customer_id: customerId,
+      subscription_id: sub.id,
+      subscription_status: sub.status,
+      current_period_end: maxPeriodEnd > 0
+        ? new Date(maxPeriodEnd * 1000).toISOString()
+        : null,
+      plan,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+    .select()
+    .single()
+  return data
 }
 
 export async function PUT(request: NextRequest) {
