@@ -48,6 +48,21 @@ interface NomadLink {
   url: string
 }
 
+// Server-injected snapshot. When non-null the form switches to edit mode:
+// fields pre-populate, handle becomes read-only, submit hits PUT.
+export interface InitialCardData {
+  handle: string
+  display_name: string
+  role: string
+  bio: string
+  current_city: string
+  hometown: string
+  avatar_url: string
+  work_status: 'available' | 'busy' | 'fulltime' | 'freelancing'
+  visited_countries: string[]
+  links: NomadLink[]
+}
+
 // Roles persist as their English label (canonical DB value). Translation
 // happens at display time via the `roles.*` namespace.
 const ROLES = [
@@ -67,7 +82,8 @@ const WORK_STATUS_KEYS = ['available', 'freelancing', 'busy', 'fulltime'] as con
 
 const STORAGE_KEY = 'nomad-card-draft'
 
-export default function CreateCardForm() {
+export default function CreateCardForm({ initial }: { initial?: InitialCardData | null }) {
+  const isEdit = Boolean(initial)
   const t = useTranslations('createCard')
   const tStatus = useTranslations('card.workStatus')
   const tRole = useTranslations('roles')
@@ -75,12 +91,17 @@ export default function CreateCardForm() {
   const router = useRouter()
   const { toasts, showError, removeToast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [handleStatus, setHandleStatus] = useState<HandleStatus>('idle')
+  // In edit mode the handle is the server-provided value and is locked, so
+  // there's nothing to validate; pretend it's "available" so the submit
+  // button doesn't get disabled by `handleStatus !== 'available'`.
+  const [handleStatus, setHandleStatus] = useState<HandleStatus>(isEdit ? 'available' : 'idle')
   const [handleError, setHandleError] = useState<string>('')
-  const [showMore, setShowMore] = useState(false)
+  const [showMore, setShowMore] = useState(isEdit)
 
   const loadDraft = () => {
-    if (typeof window === 'undefined') return null
+    // Edit mode ignores the localStorage draft — it was captured during a
+    // previous create attempt and shouldn't bleed into an existing card.
+    if (isEdit || typeof window === 'undefined') return null
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) return JSON.parse(saved)
@@ -92,17 +113,19 @@ export default function CreateCardForm() {
 
   const savedDraft = loadDraft()
   const [formData, setFormData] = useState({
-    handle: savedDraft?.handle || '',
-    display_name: savedDraft?.display_name || '',
-    role: savedDraft?.role || '',
-    bio: savedDraft?.bio || '',
-    current_city: savedDraft?.current_city || '',
-    hometown: savedDraft?.hometown || '',
-    work_status: (savedDraft?.work_status || 'available') as 'available' | 'busy' | 'fulltime' | 'freelancing',
-    avatar_url: savedDraft?.avatar_url || '',
+    handle: initial?.handle ?? savedDraft?.handle ?? '',
+    display_name: initial?.display_name ?? savedDraft?.display_name ?? '',
+    role: initial?.role ?? savedDraft?.role ?? '',
+    bio: initial?.bio ?? savedDraft?.bio ?? '',
+    current_city: initial?.current_city ?? savedDraft?.current_city ?? '',
+    hometown: initial?.hometown ?? savedDraft?.hometown ?? '',
+    work_status: (initial?.work_status ?? savedDraft?.work_status ?? 'available') as 'available' | 'busy' | 'fulltime' | 'freelancing',
+    avatar_url: initial?.avatar_url ?? savedDraft?.avatar_url ?? '',
   })
-  const [visitedCountries, setVisitedCountries] = useState<string[]>(savedDraft?.visitedCountries || [])
-  const [links, setLinks] = useState<NomadLink[]>(savedDraft?.links || [])
+  const [visitedCountries, setVisitedCountries] = useState<string[]>(
+    initial?.visited_countries ?? savedDraft?.visitedCountries ?? [],
+  )
+  const [links, setLinks] = useState<NomadLink[]>(initial?.links ?? savedDraft?.links ?? [])
 
   // Auto-expand the optional section if the user has any saved draft data in it,
   // so they don't lose visibility into in-progress work.
@@ -132,14 +155,14 @@ export default function CreateCardForm() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (isEdit || typeof window === 'undefined') return
     try {
       const draft = { ...formData, visitedCountries, links }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
     } catch {
       // Ignore storage errors
     }
-  }, [formData, visitedCountries, links])
+  }, [formData, visitedCountries, links, isEdit])
 
   const clearDraft = () => {
     if (typeof window === 'undefined') return
@@ -186,8 +209,10 @@ export default function CreateCardForm() {
   )
 
   useEffect(() => {
+    // Skip availability checks in edit mode — handle is locked.
+    if (isEdit) return
     checkHandleAvailability(formData.handle)
-  }, [formData.handle, checkHandleAvailability])
+  }, [formData.handle, checkHandleAvailability, isEdit])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -236,23 +261,31 @@ export default function CreateCardForm() {
 
     setLoading(true)
     try {
+      // Same payload shape regardless of mode — the API's create vs update
+      // schemas are subsets of one another and the data we send is valid
+      // under both. Only `handle` is omitted in edit mode (it's locked).
+      const baseBody = {
+        display_name: formData.display_name,
+        bio: formData.bio || undefined,
+        location: formData.current_city || undefined,
+        avatar_url: formData.avatar_url || undefined,
+        country: undefined,
+        role: formData.role || undefined,
+        hometown: formData.hometown || undefined,
+        current_city: formData.current_city || undefined,
+        work_status: formData.work_status,
+        visited_countries: visitedCountries,
+        profile_type: 'nomad',
+      }
+
       const response = await fetch('/api/users', {
-        method: 'POST',
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          handle: formData.handle.trim().toLowerCase(),
-          display_name: formData.display_name,
-          bio: formData.bio || undefined,
-          location: formData.current_city || undefined,
-          avatar_url: formData.avatar_url || undefined,
-          country: undefined,
-          role: formData.role || undefined,
-          hometown: formData.hometown || undefined,
-          current_city: formData.current_city || undefined,
-          work_status: formData.work_status,
-          visited_countries: visitedCountries,
-          profile_type: 'nomad',
-        }),
+        body: JSON.stringify(
+          isEdit
+            ? baseBody
+            : { ...baseBody, handle: formData.handle.trim().toLowerCase() },
+        ),
       })
 
       const data = await response.json()
@@ -260,7 +293,26 @@ export default function CreateCardForm() {
         throw new Error(data.error || t('errorGeneric'))
       }
 
-      if (validLinks.length > 0) {
+      // Links sync: edit mode uses replace-all semantics (PUT) so removals
+      // and reorders are handled in one round-trip. Create mode keeps the
+      // per-link POST pattern for now.
+      if (isEdit) {
+        const replaceResponse = await fetch('/api/nomad-links', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            links: validLinks.map((link) => ({
+              type: link.type,
+              label: link.type === 'other' ? link.label || null : null,
+              url: link.url,
+            })),
+          }),
+        })
+        if (!replaceResponse.ok) {
+          const replaceData = await replaceResponse.json().catch(() => ({}))
+          throw new Error(replaceData.error || t('errorGeneric'))
+        }
+      } else if (validLinks.length > 0) {
         await Promise.all(
           validLinks.map((link, index) =>
             fetch('/api/nomad-links', {
@@ -278,13 +330,19 @@ export default function CreateCardForm() {
       }
 
       clearDraft()
-      // Skip the setTimeout-with-toast pattern — during the 1.2s wait the
-      // user could refresh / click again and end up double-submitting.
-      // The new URL (their card or /pricing) is its own confirmation.
-      const claimedPlan = data?.user?.plan as 'basic' | 'pro' | null | undefined
-      const handleSlug = formData.handle.trim().toLowerCase()
-      const nextPath = claimedPlan ? `/${handleSlug}` : '/pricing?from=create'
+      const handleSlug = (initial?.handle ?? formData.handle).trim().toLowerCase()
+      // Edit mode: always return to the user's public card so they see the
+      // change applied. Create mode: paid users go to their card, unpaid
+      // users go to /pricing to subscribe.
+      let nextPath: string
+      if (isEdit) {
+        nextPath = `/${handleSlug}`
+      } else {
+        const claimedPlan = data?.user?.plan as 'basic' | 'pro' | null | undefined
+        nextPath = claimedPlan ? `/${handleSlug}` : '/pricing?from=create'
+      }
       router.push(nextPath)
+      router.refresh()
     } catch (error) {
       showError(error instanceof Error ? error.message : t('errorGeneric'))
     } finally {
@@ -307,7 +365,10 @@ export default function CreateCardForm() {
             <Logo />
             <div className="flex items-center gap-4">
               <LanguageSwitcher />
-              <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition">
+              <Link
+                href={isEdit && initial ? `/${initial.handle}` : '/'}
+                className="text-sm text-gray-500 hover:text-gray-900 transition"
+              >
                 {t('navCancel')}
               </Link>
             </div>
@@ -317,10 +378,10 @@ export default function CreateCardForm() {
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <header className="mb-8 sm:mb-10">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-              {t('title')}
+              {isEdit ? t('editTitle') : t('title')}
             </h1>
             <p className="text-gray-600">
-              {t('subtitle')}
+              {isEdit ? t('editSubtitle') : t('subtitle')}
             </p>
           </header>
 
@@ -330,52 +391,62 @@ export default function CreateCardForm() {
               {/* Handle */}
               <div>
                 <label htmlFor="handle" className="block text-sm font-medium text-gray-900 mb-1.5">
-                  {t('handle')} <span className="text-gray-400">*</span>
+                  {t('handle')} {!isEdit && <span className="text-gray-400">*</span>}
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-sm font-mono">{t('handlePrefix')}</span>
+                {isEdit ? (
+                  // Locked, read-only display. Renaming requires a 30-day
+                  // cooldown (see ROADMAP) so we don't expose it from this
+                  // form — point users at support instead.
+                  <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 font-mono text-sm text-gray-600 flex items-center gap-1">
+                    <span className="text-gray-400">{t('handlePrefix')}</span>
+                    <span>{formData.handle}</span>
                   </div>
-                  <input
-                    type="text"
-                    id="handle"
-                    name="handle"
-                    value={formData.handle}
-                    onChange={handleChange}
-                    required
-                    pattern="^[a-zA-Z0-9_-]+$"
-                    maxLength={50}
-                    autoFocus
-                    className={`w-full pl-[6.25rem] pr-10 py-3 border rounded-xl focus:outline-none focus:ring-2 font-mono text-sm bg-white transition ${
-                      handleStatus === 'available'
-                        ? 'border-green-500 focus:ring-green-500/30'
-                        : handleStatus === 'unavailable' || handleStatus === 'invalid'
-                        ? 'border-red-500 focus:ring-red-500/30'
-                        : 'border-gray-300 focus:ring-gray-900/15 focus:border-gray-900'
-                    }`}
-                    placeholder={t('handlePlaceholder')}
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    {handleStatus === 'checking' && <LoadingSpinner size="sm" />}
-                    {handleStatus === 'available' && (
-                      <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                    {(handleStatus === 'unavailable' || handleStatus === 'invalid') && (
-                      <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    )}
+                ) : (
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-400 text-sm font-mono">{t('handlePrefix')}</span>
+                    </div>
+                    <input
+                      type="text"
+                      id="handle"
+                      name="handle"
+                      value={formData.handle}
+                      onChange={handleChange}
+                      required
+                      pattern="^[a-zA-Z0-9_-]+$"
+                      maxLength={50}
+                      autoFocus
+                      className={`w-full pl-[6.25rem] pr-10 py-3 border rounded-xl focus:outline-none focus:ring-2 font-mono text-sm bg-white transition ${
+                        handleStatus === 'available'
+                          ? 'border-green-500 focus:ring-green-500/30'
+                          : handleStatus === 'unavailable' || handleStatus === 'invalid'
+                          ? 'border-red-500 focus:ring-red-500/30'
+                          : 'border-gray-300 focus:ring-gray-900/15 focus:border-gray-900'
+                      }`}
+                      placeholder={t('handlePlaceholder')}
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                      {handleStatus === 'checking' && <LoadingSpinner size="sm" />}
+                      {handleStatus === 'available' && (
+                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      {(handleStatus === 'unavailable' || handleStatus === 'invalid') && (
+                        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
-                </div>
-                {handleStatus === 'available' && (
+                )}
+                {isEdit ? (
+                  <p className="mt-1.5 text-xs text-gray-500">{t('handleLocked')}</p>
+                ) : handleStatus === 'available' ? (
                   <p className="mt-1.5 text-xs text-green-600">{t('handleAvailable')}</p>
-                )}
-                {(handleStatus === 'unavailable' || handleStatus === 'invalid') && (
+                ) : handleStatus === 'unavailable' || handleStatus === 'invalid' ? (
                   <p className="mt-1.5 text-xs text-red-600">{handleError || t('handleError')}</p>
-                )}
-                {handleStatus === 'idle' && (
+                ) : (
                   <p className="mt-1.5 text-xs text-gray-500">{t('handleHint')}</p>
                 )}
               </div>
@@ -623,20 +694,22 @@ export default function CreateCardForm() {
                 {loading ? (
                   <>
                     <LoadingSpinner size="sm" />
-                    <span>{t('submitting')}</span>
+                    <span>{isEdit ? t('editSubmitting') : t('submitting')}</span>
                   </>
                 ) : (
                   <>
-                    <span>{t('submit')}</span>
+                    <span>{isEdit ? t('editSubmit') : t('submit')}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </>
                 )}
               </button>
-              <p className="mt-3 text-center text-xs text-gray-500">
-                {t('submitNote')}
-              </p>
+              {!isEdit && (
+                <p className="mt-3 text-center text-xs text-gray-500">
+                  {t('submitNote')}
+                </p>
+              )}
             </div>
           </form>
         </main>

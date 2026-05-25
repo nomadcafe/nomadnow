@@ -63,6 +63,91 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Replace-all semantics: takes a links array and atomically replaces the
+// caller's nomad_links. Simpler than per-row PUT/DELETE for the form's edit
+// flow — the user always submits the full desired link set, and order_index
+// gets normalised from array position so reordering is free. Drops anything
+// with a blank URL so the form can pass partially-filled rows.
+const replaceLinksSchema = z.object({
+  links: z
+    .array(
+      z.object({
+        type: z.enum([
+          'website',
+          'instagram',
+          'twitter',
+          'linkedin',
+          'github',
+          'youtube',
+          'tiktok',
+          'threads',
+          'substack',
+          'telegram',
+          'other',
+        ]),
+        label: z.string().optional().nullable(),
+        url: z.string().url('Invalid URL'),
+      }),
+    )
+    .max(10),
+})
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { supabase, user } = await requireUser()
+    const body = await request.json()
+    const validation = replaceLinksSchema.safeParse(body)
+
+    if (!validation.success) {
+      throw new ValidationError('Invalid nomad link data', validation.error.errors)
+    }
+
+    // Wipe the existing set first. If we crash between delete and insert
+    // (function timeout, etc.), the user sees no links and can resubmit —
+    // less bad than ending up with duplicates of partial state.
+    const { error: deleteError } = await supabase
+      .from('nomad_links')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (deleteError) {
+      logError(deleteError, { operation: 'replace_links_delete', userId: user.id })
+      throw deleteError
+    }
+
+    if (validation.data.links.length === 0) {
+      return NextResponse.json({ success: true, links: [] })
+    }
+
+    const rows = validation.data.links.map((link, index) => ({
+      user_id: user.id,
+      type: link.type,
+      label: link.type === 'other' ? link.label || null : null,
+      url: link.url,
+      order_index: index,
+    }))
+
+    const { data, error } = await supabase
+      .from('nomad_links')
+      .insert(rows)
+      .select()
+
+    if (error) {
+      logError(error, { operation: 'replace_links_insert', userId: user.id })
+      throw error
+    }
+
+    return NextResponse.json({ success: true, links: data || [] })
+  } catch (error) {
+    logError(error, { operation: 'replace_links' })
+    const errorResponse = formatErrorResponse(error)
+    return NextResponse.json(
+      { error: errorResponse.error, code: errorResponse.code, details: errorResponse.details },
+      { status: errorResponse.statusCode }
+    )
+  }
+}
+
 // Public read — listing a user's nomad links by ID.
 export async function GET(request: NextRequest) {
   try {
