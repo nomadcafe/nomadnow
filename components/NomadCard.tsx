@@ -7,6 +7,7 @@ import { OptimizedImage } from './OptimizedImage'
 import { WorldMap } from './WorldMap'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
+import { VideoLightbox, detectVideo } from './VideoLightbox'
 import Link from 'next/link'
 import { getTheme, type ThemeKey } from '@/lib/themes'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
@@ -194,6 +195,9 @@ export function NomadCard({
   const tRole = useTranslations('roles')
   const getLinkLabel = useLinkLabel()
   const [copied, setCopied] = useState(false)
+  // URL of the embed that's currently open in the video lightbox, or null
+  // when no video is open. Detected from link URLs on click.
+  const [videoEmbed, setVideoEmbed] = useState<string | null>(null)
   const theme = getTheme(themeKey)
   const displayLocation = user.current_city || user.location
   const localTime = useLocalTime(user.timezone)
@@ -416,35 +420,70 @@ export function NomadCard({
         <div key="links" className="space-y-2 sm:space-y-3">
           {links
             .filter((link) => link.url)
-            .map((link, index) => (
-              <a
-                key={index}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-medium group touch-manipulation transition-all duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-md ${theme.linkRow}`}
-              >
-                <span className="opacity-80 group-hover:opacity-100 transition">
-                  {getLinkIcon(link.type)}
-                </span>
-                <span className="flex-1 text-left">
-                  {getLinkLabel(link.type, link.label)}
-                </span>
-                <svg
-                  className={`w-5 h-5 transition ${theme.linkArrow}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            .map((link, index) => {
+              const video = detectVideo(link.url)
+              const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-medium group touch-manipulation transition-all duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-md ${theme.linkRow}`
+              const inner = (
+                <>
+                  <span className="opacity-80 group-hover:opacity-100 transition">
+                    {getLinkIcon(link.type)}
+                  </span>
+                  <span className="flex-1 text-left">
+                    {getLinkLabel(link.type, link.label)}
+                  </span>
+                  {/* Video rows show a play triangle; external rows keep the
+                      "open in new tab" glyph so the visual signals the
+                      different behaviours. */}
+                  {video ? (
+                    <svg
+                      className={`w-5 h-5 transition ${theme.linkArrow}`}
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className={`w-5 h-5 transition ${theme.linkArrow}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  )}
+                </>
+              )
+              if (video) {
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setVideoEmbed(video.embedUrl)}
+                    className={baseClass}
+                  >
+                    {inner}
+                  </button>
+                )
+              }
+              return (
+                <a
+                  key={index}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={baseClass}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </a>
-            ))}
+                  {inner}
+                </a>
+              )
+            })}
         </div>
       )
     },
@@ -474,6 +513,7 @@ export function NomadCard({
 
   return (
     <div className={`min-h-screen ${theme.page} ${theme.font}`}>
+      {videoEmbed && <VideoLightbox url={videoEmbed} onClose={() => setVideoEmbed(null)} />}
       {isOwner ? <EditCardCTA /> : !hideMakeYoursCTA && <MakeYoursCTA />}
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
