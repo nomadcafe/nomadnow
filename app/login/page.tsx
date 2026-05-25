@@ -3,7 +3,6 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
@@ -112,19 +111,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   const t = useTranslations('login')
-  const tCommon = useTranslations('common')
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <nav className="border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Logo />
-          <div className="flex items-center gap-4">
-            <LanguageSwitcher />
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition">
-              {tCommon('cancel')}
-            </Link>
-          </div>
+          <LanguageSwitcher />
         </div>
       </nav>
 

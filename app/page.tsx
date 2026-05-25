@@ -23,18 +23,8 @@ export default async function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/map"
-              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
-            >
-              {tNav('map')}
-            </Link>
-            <Link
-              href="/explore"
-              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
-            >
-              {tNav('explore')}
-            </Link>
+            {/* Map and Explore hidden until there are enough cards to make
+                those pages feel populated. Routes still work for direct hits. */}
             <Link
               href="/pricing"
               className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
@@ -325,8 +315,6 @@ export default async function Home() {
             </p>
           </div>
           <div className="flex sm:justify-end items-center gap-6 text-sm text-gray-500 flex-wrap">
-            <Link href="/map" className="hover:text-gray-900 transition">{tNav('map')}</Link>
-            <Link href="/explore" className="hover:text-gray-900 transition">{tNav('explore')}</Link>
             <Link href="/pricing" className="hover:text-gray-900 transition">{tNav('pricing')}</Link>
             <Link href="/login" className="hover:text-gray-900 transition">{tNav('signin')}</Link>
             <LanguageSwitcher />

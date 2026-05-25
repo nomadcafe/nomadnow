@@ -100,12 +100,7 @@ export default async function MapPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/explore"
-              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
-            >
-              {tNav('explore')}
-            </Link>
+            {/* Explore link hidden until /explore feels populated. */}
             <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/create-card"
@@ -222,8 +217,6 @@ export default async function MapPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
           <p>{tFooter('copyright')}</p>
           <div className="flex items-center gap-6 flex-wrap">
-            <Link href="/explore" className="hover:text-gray-900 transition">{tNav('explore')}</Link>
-            <Link href="/map" className="hover:text-gray-900 transition">{tNav('map')}</Link>
             <Link href="/create-card" className="hover:text-gray-900 transition">{tNav('getCard')}</Link>
             <LanguageSwitcher />
           </div>

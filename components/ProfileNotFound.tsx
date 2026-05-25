@@ -35,18 +35,7 @@ export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/explore"
-              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
-            >
-              {tNav('explore')}
-            </Link>
-            <Link
-              href="/map"
-              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
-            >
-              {tNav('map')}
-            </Link>
+            {/* Map and Explore hidden until they feel populated. */}
             <LanguageSwitcher className="hidden sm:inline-flex" />
           </div>
         </div>
