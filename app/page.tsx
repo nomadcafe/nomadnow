@@ -9,6 +9,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { AccountMenu } from '@/components/AccountMenu'
 import { GetYourCardButton } from '@/components/GetYourCardButton'
 import { NomadCard } from '@/components/NomadCard'
+import { THEMES, THEME_KEYS } from '@/lib/themes'
 import type { User, NomadLink } from '@/types/database'
 
 const previewVisited = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
@@ -112,7 +113,12 @@ export default async function Home() {
         />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 lg:pt-32 pb-20 sm:pb-28">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          {/* items-start so the left column anchors to the top of the hero
+              instead of vertically centering against the taller right
+              column (the real NomadCard preview is ~650px). The left
+              column carries its own bottom content (theme swatches) so
+              the visual weight stays balanced even without center-align. */}
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-start">
             {/* Left: copy */}
             <div className="lg:col-span-7">
               <div className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-8">
@@ -146,6 +152,38 @@ export default async function Home() {
                   {t('heroPriceNote')}
                   <br />
                   {t('heroSetupNote')}
+                </div>
+              </div>
+
+              {/* Theme swatches — fills the left column's lower half (the
+                  real-card preview on the right is naturally tall) and
+                  hints at the customization story without competing with
+                  the Feature sections further down. Each circle uses the
+                  theme's page bg + accent color, so swapping the THEMES
+                  table reshapes this row automatically. */}
+              <div className="mt-14 lg:mt-20">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">
+                  {t('themeStrip')}
+                </div>
+                <div className="flex items-center gap-2.5">
+                  {THEME_KEYS.map((key) => {
+                    const theme = THEMES[key]
+                    return (
+                      <div
+                        key={key}
+                        className={`w-10 h-10 rounded-full ${theme.page} ring-1 ring-gray-200 flex items-center justify-center transition hover:scale-110`}
+                        aria-label={`${theme.label} theme`}
+                        title={theme.label}
+                      >
+                        <span
+                          className="w-4 h-4 rounded-full"
+                          style={{
+                            background: `linear-gradient(135deg, ${theme.accentHex}, ${theme.accentHex}aa)`,
+                          }}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </div>
