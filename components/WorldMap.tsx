@@ -1,9 +1,25 @@
 import { countries, getCountryName } from '@/lib/countries'
 
+interface CityDot {
+  // Display name (e.g. "Bangkok"). Used for the SVG <title> tooltip.
+  city: string
+  // ISO 3166-1 alpha-2; lets us render a country flag in the tooltip
+  // and group dots by country if a future style wants that.
+  country: string
+  lat: number
+  lon: number
+}
+
 interface WorldMapProps {
   // Visited countries (binary mode): each gets a uniform highlighted dot.
-  // Used by the Nomad Card to plot one user's travel.
+  // Used by the Nomad Card to plot one user's travel at country level
+  // when stays-level data isn't available.
   visitedCodes?: string[] | null
+  // City-level dots from nomad_stays. When any of these have lat/lon,
+  // they take precedence over visitedCodes and we render dots at the
+  // exact coordinates — gives a much truer picture of "where I've
+  // actually been" than country-centroid dots.
+  cityDots?: CityDot[] | null
   className?: string
   // Override the highlighted dot color (used by Nomad Card themes).
   accentColor?: string
@@ -53,6 +69,7 @@ function flagFor(code: string): string {
 
 export function WorldMap({
   visitedCodes,
+  cityDots,
   className = '',
   accentColor = '#3b82f6',
   baseColor = '#e5e7eb',
@@ -62,6 +79,18 @@ export function WorldMap({
   const visited = new Set(visitedCodes ?? [])
   const visitedCount = visited.size
   const latStroke = baseColor === '#e5e7eb' ? '#f3f4f6' : `${baseColor}33`
+
+  // Only use city dots when at least one stay has coordinates — partial
+  // data falls back to country-level so users who haven't completed all
+  // geocoded entries still see something.
+  const validCityDots = (cityDots ?? []).filter(
+    (d) => typeof d.lat === 'number' && typeof d.lon === 'number',
+  )
+  // De-dup by city+country so re-visiting the same city doesn't stack.
+  const dedupedCityDots = Array.from(
+    new Map(validCityDots.map((d) => [`${d.city}-${d.country}`, d])).values(),
+  )
+  const useCityMode = !isDensity && dedupedCityDots.length > 0
 
   const maxWeight = isDensity ? Math.max(...Object.values(weights!)) : 0
 
@@ -125,49 +154,69 @@ export function WorldMap({
 
         {/* Foreground dots */}
         <g>
-          {countries.map((c) => {
-            const { x, y } = project(c.lat, c.lon)
-            if (isDensity) {
-              const w = weights![c.code] ?? 0
-              if (w <= 0) return null
-              const r = radiusForWeight(w, maxWeight)
-              return (
-                <g key={c.code}>
-                  {/* Soft glow halo */}
-                  <circle cx={x} cy={y} r={r * 2.4} fill={`url(#dot-glow-${idSuffix})`} />
-                  <circle cx={x} cy={y} r={r} fill={accentColor}>
-                    <title>{`${getCountryName(c.code)} — ${w} ${w === 1 ? 'nomad' : 'nomads'}`}</title>
-                  </circle>
-                </g>
-              )
-            }
-            if (!visited.has(c.code)) return null
-            return (
-              <g key={c.code} className="motion-safe:animate-pulse-slow">
-                <circle cx={x} cy={y} r={16} fill={`url(#dot-glow-${idSuffix})`} />
-                <circle cx={x} cy={y} r={6} fill={accentColor} stroke="white" strokeWidth="1.5">
-                  <title>{getCountryName(c.code)}</title>
-                </circle>
-                {/* Flag emoji floats just above the dot. Renders cross-platform
-                    in modern browsers; if a device doesn't have flag glyphs,
-                    the dot still conveys the location. */}
-                <text
-                  x={x}
-                  y={y - 12}
-                  fontSize="11"
-                  textAnchor="middle"
-                  style={{ pointerEvents: 'none' }}
-                >
-                  {flagFor(c.code)}
-                </text>
-              </g>
-            )
-          })}
+          {useCityMode
+            ? // City mode — plot dots at exact stay coordinates. Smaller
+              // than country-mode dots so multiple cities in one country
+              // don't blob together. City name renders above the dot.
+              dedupedCityDots.map((d) => {
+                const { x, y } = project(d.lat, d.lon)
+                return (
+                  <g key={`${d.city}-${d.country}-${d.lat}-${d.lon}`} className="motion-safe:animate-pulse-slow">
+                    <circle cx={x} cy={y} r={12} fill={`url(#dot-glow-${idSuffix})`} />
+                    <circle cx={x} cy={y} r={4.5} fill={accentColor} stroke="white" strokeWidth="1.25">
+                      <title>{`${d.city}, ${getCountryName(d.country)}`}</title>
+                    </circle>
+                    <text
+                      x={x}
+                      y={y - 10}
+                      fontSize="10"
+                      textAnchor="middle"
+                      style={{ pointerEvents: 'none' }}
+                    >
+                      {flagFor(d.country)}
+                    </text>
+                  </g>
+                )
+              })
+            : countries.map((c) => {
+                const { x, y } = project(c.lat, c.lon)
+                if (isDensity) {
+                  const w = weights![c.code] ?? 0
+                  if (w <= 0) return null
+                  const r = radiusForWeight(w, maxWeight)
+                  return (
+                    <g key={c.code}>
+                      <circle cx={x} cy={y} r={r * 2.4} fill={`url(#dot-glow-${idSuffix})`} />
+                      <circle cx={x} cy={y} r={r} fill={accentColor}>
+                        <title>{`${getCountryName(c.code)} — ${w} ${w === 1 ? 'nomad' : 'nomads'}`}</title>
+                      </circle>
+                    </g>
+                  )
+                }
+                if (!visited.has(c.code)) return null
+                return (
+                  <g key={c.code} className="motion-safe:animate-pulse-slow">
+                    <circle cx={x} cy={y} r={16} fill={`url(#dot-glow-${idSuffix})`} />
+                    <circle cx={x} cy={y} r={6} fill={accentColor} stroke="white" strokeWidth="1.5">
+                      <title>{getCountryName(c.code)}</title>
+                    </circle>
+                    <text
+                      x={x}
+                      y={y - 12}
+                      fontSize="11"
+                      textAnchor="middle"
+                      style={{ pointerEvents: 'none' }}
+                    >
+                      {flagFor(c.code)}
+                    </text>
+                  </g>
+                )
+              })}
         </g>
 
-        {/* Count overlay in bottom-right — gives the map a sense of scale
-            at a glance without forcing the user to count dots. */}
-        {visitedCount > 0 && !isDensity && (
+        {/* Count overlay in bottom-right. City mode counts the dots
+            themselves; country mode counts visited country codes. */}
+        {!isDensity && (useCityMode ? dedupedCityDots.length > 0 : visitedCount > 0) && (
           <g>
             <text
               x={W - 12}
@@ -178,7 +227,9 @@ export function WorldMap({
               fill={baseColor === '#e5e7eb' ? '#374151' : 'white'}
               opacity="0.7"
             >
-              {visitedCount} {visitedCount === 1 ? 'country' : 'countries'}
+              {useCityMode
+                ? `${dedupedCityDots.length} ${dedupedCityDots.length === 1 ? 'city' : 'cities'}`
+                : `${visitedCount} ${visitedCount === 1 ? 'country' : 'countries'}`}
             </text>
           </g>
         )}
