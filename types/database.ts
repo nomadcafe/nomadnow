@@ -20,6 +20,9 @@ export interface User {
   // since the Creator Profile wedge was deprecated. The DB column still exists
   // and the `users` table still holds whatever was saved on signup.
   profile_type?: string
+  // Manual verification flag (admin-toggled). Drives the "Verified" pill on
+  // the public card — never set by users themselves.
+  verified?: boolean
   // Stripe billing — see supabase/migrations/0003_subscriptions.sql
   stripe_customer_id?: string | null
   plan?: 'basic' | 'pro' | null

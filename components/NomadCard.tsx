@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { User, NomadLink, NomadStay } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
@@ -11,6 +11,7 @@ import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { PhotoLightbox } from './PhotoLightbox'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
 import { detectEmbed } from '@/lib/embeds'
@@ -213,6 +214,28 @@ function mapBaseForTheme(themeKey: string): string | undefined {
   return undefined
 }
 
+// Hoisted out of the render so React doesn't see a new component type on
+// every render of the stats section (which would unmount+remount the
+// children). The `theme` is closed over via prop instead.
+function Stat({
+  value,
+  label,
+  mutedClass,
+}: {
+  value: React.ReactNode
+  label: string
+  mutedClass: string
+}) {
+  return (
+    <div className="text-center min-w-0">
+      <div className="text-2xl sm:text-3xl font-semibold tabular-nums">{value}</div>
+      <div className={`text-[10px] sm:text-xs uppercase tracking-wide mt-0.5 ${mutedClass}`}>
+        {label}
+      </div>
+    </div>
+  )
+}
+
 export function NomadCard({
   user,
   links,
@@ -271,12 +294,16 @@ export function NomadCard({
   const visitedCount = mergedVisitedCodes(user.visited_countries, visitedStays).size
 
   // Locale-aware short date for upcoming-stay labels — "Jun 12" in en,
-  // "6月12日" in ja, "6月12日" in zh. Hoisted so both the header "Next:"
-  // pill and the Coming up timeline render identically.
+  // "6月12日" in ja, "6月12日" in zh. The formatter is constructed once per
+  // locale change instead of per call.
+  const shortDateFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }),
+    [locale],
+  )
   const formatShortDate = (iso: string) => {
     const d = new Date(iso)
     if (Number.isNaN(d.getTime())) return iso
-    return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(d)
+    return shortDateFormatter.format(d)
   }
 
   // Roles are stored in DB as their English label (the select in /create-card
@@ -303,20 +330,7 @@ export function NomadCard({
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      const textArea = document.createElement('textarea')
-      textArea.value = url
-      textArea.style.position = 'fixed'
-      textArea.style.opacity = '0'
-      document.body.appendChild(textArea)
-      textArea.select()
-      try {
-        document.execCommand('copy')
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      } catch {
-        // Ignore
-      }
-      document.body.removeChild(textArea)
+      // Clipboard API can fail on insecure origins; degrade silently.
     }
   }
 
@@ -338,14 +352,14 @@ export function NomadCard({
             <OptimizedImage
               src={user.avatar_url}
               alt={user.display_name || user.handle}
-              width={120}
-              height={120}
-              className="w-24 h-24 sm:w-30 sm:h-30 rounded-full object-cover ring-2 ring-white/80 block"
+              width={128}
+              height={128}
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover ring-2 ring-white/80 block"
               priority
             />
           ) : (
             <div
-              className="w-24 h-24 sm:w-30 sm:h-30 rounded-full flex items-center justify-center text-3xl sm:text-4xl font-semibold text-white ring-2 ring-white/80"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center text-3xl sm:text-4xl font-semibold text-white ring-2 ring-white/80"
               style={{
                 background: `linear-gradient(135deg, ${theme.accentHex}, ${theme.accentHex}99)`,
               }}
@@ -494,13 +508,15 @@ export function NomadCard({
                   className="block w-full text-left focus:outline-none focus:ring-2 focus:ring-white/40"
                   aria-label={`Open ${caption} photo`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photos[0]}
-                    alt={caption}
-                    className="w-full h-40 sm:h-48 object-cover"
-                    loading="lazy"
-                  />
+                  <div className="relative w-full h-40 sm:h-48">
+                    <Image
+                      src={photos[0]}
+                      alt={caption}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 640px"
+                      className="object-cover"
+                    />
+                  </div>
                 </button>
               )}
               {photos.length > 1 && (
@@ -522,13 +538,15 @@ export function NomadCard({
                         className="snap-start shrink-0 w-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/40"
                         aria-label={`Open photo ${i + 1} of ${photos.length}`}
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={url}
-                          alt={`${caption} — photo ${i + 1} of ${photos.length}`}
-                          className="w-full h-40 sm:h-48 object-cover"
-                          loading="lazy"
-                        />
+                        <div className="relative w-full h-40 sm:h-48">
+                          <Image
+                            src={url}
+                            alt={`${caption} — photo ${i + 1} of ${photos.length}`}
+                            fill
+                            sizes="(max-width: 640px) 100vw, 640px"
+                            className="object-cover"
+                          />
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -589,12 +607,13 @@ export function NomadCard({
                       aria-label={`Open photos for ${s.city}, ${getCountryName(s.country)}`}
                       className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-gray-400 transition hover:opacity-90"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={firstPhoto}
                         alt={`${s.city}, ${getCountryName(s.country)}`}
+                        width={48}
+                        height={48}
+                        sizes="48px"
                         className="w-12 h-12 object-cover"
-                        loading="lazy"
                       />
                       {extra > 0 && (
                         <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-black/70 text-white backdrop-blur-sm">
@@ -649,14 +668,6 @@ export function NomadCard({
           : road.unit === 'month'
             ? t('unitMonth')
             : t('unitDay')
-      const Stat = ({ value, label }: { value: React.ReactNode; label: string }) => (
-        <div className="text-center min-w-0">
-          <div className="text-2xl sm:text-3xl font-semibold tabular-nums">{value}</div>
-          <div className={`text-[10px] sm:text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
-            {label}
-          </div>
-        </div>
-      )
       return (
         <div
           key="stats"
@@ -665,12 +676,14 @@ export function NomadCard({
           <Stat
             value={visitedCount}
             label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
+            mutedClass={theme.textMuted}
           />
           <Stat
             value={cityCount}
             label={cityCount === 1 ? t('cityOne') : t('cityMany')}
+            mutedClass={theme.textMuted}
           />
-          <Stat value={road.value} label={roadUnitLabel} />
+          <Stat value={road.value} label={roadUnitLabel} mutedClass={theme.textMuted} />
         </div>
       )
     },
@@ -699,31 +712,39 @@ export function NomadCard({
         </div>
       )
     },
-    status: () => (
-      <div key="status" className="flex items-center justify-center flex-wrap gap-2 mb-8">
-        <span
-          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${theme.pillVerified}`}
-        >
-          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-            <path
-              fillRule="evenodd"
-              d="M16.704 5.29a1 1 0 010 1.42l-8 8a1 1 0 01-1.42 0l-4-4a1 1 0 011.42-1.42L8 12.586l7.29-7.296a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {t('verified')}
-        </span>
-        {user.work_status && !REMOVED_STATUS_KEYS.has(user.work_status) && (
-          <span
-            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${theme.pillNeutral}`}
-          >
-            {(WORK_STATUS_KEYS as readonly string[]).includes(user.work_status)
-              ? tStatus(user.work_status)
-              : user.work_status}
-          </span>
-        )}
-      </div>
-    ),
+    status: () => {
+      const showVerified = user.verified === true
+      const showWorkStatus =
+        !!user.work_status && !REMOVED_STATUS_KEYS.has(user.work_status)
+      if (!showVerified && !showWorkStatus) return null
+      return (
+        <div key="status" className="flex items-center justify-center flex-wrap gap-2 mb-8">
+          {showVerified && (
+            <span
+              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${theme.pillVerified}`}
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path
+                  fillRule="evenodd"
+                  d="M16.704 5.29a1 1 0 010 1.42l-8 8a1 1 0 01-1.42 0l-4-4a1 1 0 011.42-1.42L8 12.586l7.29-7.296a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {t('verified')}
+            </span>
+          )}
+          {showWorkStatus && (
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${theme.pillNeutral}`}
+            >
+              {(WORK_STATUS_KEYS as readonly string[]).includes(user.work_status!)
+                ? tStatus(user.work_status!)
+                : user.work_status}
+            </span>
+          )}
+        </div>
+      )
+    },
     links: () => {
       if (!links.length) return null
       return (

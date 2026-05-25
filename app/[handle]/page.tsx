@@ -6,35 +6,9 @@ import { CelebrationBanner } from '@/components/CelebrationBanner'
 import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { getBillingState } from '@/lib/billing'
-import { getCountryName } from '@/lib/countries'
-import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { createServerSupabase } from '@/lib/supabase/server'
-
-async function getProfileData(handle: string) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-    
-    const response = await fetch(`${baseUrl}/api/profile/${handle}`, {
-      next: { 
-        revalidate: 60, // Revalidate every minute
-        tags: [`profile-${handle}`], // Add cache tag for manual revalidation
-      },
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null
-      }
-      throw new Error(`Failed to fetch profile: ${response.statusText}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    // Error is logged by the API route itself
-    return null
-  }
-}
+import { getProfileByHandle } from '@/lib/profile'
+import { buildProfileJsonLd, buildProfileBreadcrumbJsonLd } from '@/lib/seo/profile-jsonld'
 
 export async function generateMetadata({
   params,
@@ -47,7 +21,7 @@ export async function generateMetadata({
     return { title: 'Not found — Nomad.now' }
   }
 
-  const profileData = await getProfileData(handle)
+  const profileData = await getProfileByHandle(handle)
 
   if (!profileData) {
     return {
@@ -107,10 +81,13 @@ export async function generateMetadata({
 
 export default async function ProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ handle: string }>
+  searchParams: Promise<{ celebrate?: string }>
 }) {
-  const { handle } = await params
+  const [{ handle }, query] = await Promise.all([params, searchParams])
+  const showCelebration = query.celebrate === '1'
 
   // Reserved + missing both fall through to ProfileNotFound which itself
   // picks the right state (reserved / available / invalid). The Next 404
@@ -119,7 +96,13 @@ export default async function ProfilePage({
     return <ProfileNotFound handle={handle} />
   }
 
-  const profileData = await getProfileData(handle)
+  // Auth check is independent of the profile fetch, so kick both off in
+  // parallel. Billing depends on the resolved user.id and runs after.
+  const supabase = await createServerSupabase()
+  const [profileData, viewerResult] = await Promise.all([
+    getProfileByHandle(handle),
+    supabase.auth.getUser(),
+  ])
 
   if (!profileData) {
     return <ProfileNotFound handle={handle} />
@@ -137,74 +120,10 @@ export default async function ProfilePage({
     return <ProfileExpired handle={handle} />
   }
 
-  // Owner-of-this-card check, so NomadCard can swap "Make yours" for an
-  // "Edit your card" floating CTA. Anonymous visitors skip the auth roundtrip.
-  const supabase = await createServerSupabase()
-  const {
-    data: { user: viewer },
-  } = await supabase.auth.getUser()
-  const isOwner = viewer?.id === user.id
+  const isOwner = viewerResult.data.user?.id === user.id
 
-  const currentLocation = user.current_city || user.location
-  // SEO additionalProperty uses the same union the card renders, so a user
-  // who only filled out Stays still appears in country-list rich results.
-  // Upcoming stays are excluded — a place you haven't been to yet shouldn't
-  // appear in your "Visited countries" rich result.
-  const stayBuckets = splitStays(nomadStays as { start_date: string; end_date?: string | null; country?: string }[] | null | undefined)
-  const visitedStaysForSeo = stayBuckets.current
-    ? [stayBuckets.current, ...stayBuckets.past]
-    : stayBuckets.past
-  const visitedNames: string[] = Array.from(
-    mergedVisitedCodes(user.visited_countries, visitedStaysForSeo),
-  )
-    .map((code) => getCountryName(code))
-    .filter(Boolean)
-
-  // schema.org Person. Nomad-flavored only — Creator Profile was deprecated.
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: user.display_name || user.handle,
-    alternateName: `@${user.handle}`,
-    identifier: `@${user.handle}`,
-    description:
-      user.bio ||
-      `Digital nomad${user.role ? ` · ${user.role}` : ''}${currentLocation ? ` · currently in ${currentLocation}` : ''}`,
-    url: `https://nomad.now/${user.handle}`,
-    image: user.avatar_url,
-    ...(user.website && { mainEntityOfPage: user.website }),
-    ...(currentLocation && {
-      address: { '@type': 'PostalAddress', addressLocality: currentLocation },
-    }),
-    ...(user.role && { jobTitle: user.role }),
-    ...(visitedNames.length > 0 && {
-      additionalProperty: {
-        '@type': 'PropertyValue',
-        name: 'Visited countries',
-        value: visitedNames.join(', '),
-      },
-    }),
-  }
-
-  // Additional breadcrumb structured data
-  const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://nomad.now',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: user.display_name || user.handle,
-        item: `https://nomad.now/${user.handle}`,
-      },
-    ],
-  }
+  const jsonLd = buildProfileJsonLd(user, nomadStays || [])
+  const breadcrumbJsonLd = buildProfileBreadcrumbJsonLd(user)
 
   return (
     <>
@@ -218,10 +137,9 @@ export default async function ProfilePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      {/* Owner just finished creating the card via /create-card → show the
-          celebratory share banner. No-op when the query param isn't present,
-          so this is free to render for every viewer. */}
-      <CelebrationBanner handle={handle} />
+      {/* Mounted only when the user just landed from /create-card. Gating at
+          the server means the banner's JS doesn't ship to repeat visitors. */}
+      {showCelebration && <CelebrationBanner handle={handle} />}
 
       <NomadCard
         user={user}
