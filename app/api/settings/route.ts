@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
+import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 
 // Settings the user can actually change today. Dropped fields (visibility,
 // delay_days, layout_template, enabled_sections) had UI but were never read
@@ -50,6 +51,7 @@ export async function PUT(request: NextRequest) {
         throw error
       }
 
+      await bumpProfileCacheByUserId(supabase, user.id)
       return NextResponse.json({ success: true, settings: data })
     } else {
       const { data, error } = await supabase
@@ -66,6 +68,7 @@ export async function PUT(request: NextRequest) {
         throw error
       }
 
+      await bumpProfileCacheByUserId(supabase, user.id)
       return NextResponse.json({ success: true, settings: data })
     }
   } catch (error) {
