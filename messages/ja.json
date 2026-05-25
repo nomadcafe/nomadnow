@@ -101,7 +101,6 @@
       "role": "プロダクトデザイナー",
       "city": "バンコク",
       "countries": "カ国",
-      "since": "から",
       "verified": "認証済み",
       "open": "対応中"
     }
@@ -422,7 +421,6 @@
     "copied": "コピーしました!",
     "countryOne": "カ国",
     "countryMany": "カ国",
-    "memberSince": "登録日",
     "workStatus": {
       "freelancing": "フリーランス",
       "busy": "多忙",

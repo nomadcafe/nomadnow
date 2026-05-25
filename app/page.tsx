@@ -108,14 +108,10 @@ export default async function Home() {
                     <span className="text-gray-400 font-mono tabular-nums">· 14:35</span>
                   </span>
                 </p>
-                <div className="flex items-center justify-center gap-5 py-2 my-2 border-y border-gray-100">
+                <div className="flex items-center justify-center py-2 my-2 border-y border-gray-100">
                   <div className="text-center">
                     <div className="text-base font-semibold tabular-nums">10</div>
                     <div className="text-[9px] uppercase tracking-wider text-gray-500">{t('previewCard.countries')}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-base font-semibold">Mar 2024</div>
-                    <div className="text-[9px] uppercase tracking-wider text-gray-500">{t('previewCard.since')}</div>
                   </div>
                 </div>
                 <div className="my-2">

@@ -101,7 +101,6 @@
       "role": "Product Designer",
       "city": "Bangkok",
       "countries": "countries",
-      "since": "since",
       "verified": "Verified",
       "open": "Open"
     }
@@ -422,7 +421,6 @@
     "copied": "Copied!",
     "countryOne": "country",
     "countryMany": "countries",
-    "memberSince": "member since",
     "workStatus": {
       "freelancing": "Freelancing",
       "busy": "Busy",

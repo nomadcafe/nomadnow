@@ -101,7 +101,6 @@
       "role": "产品设计师",
       "city": "曼谷",
       "countries": "国",
-      "since": "起",
       "verified": "已认证",
       "open": "可约"
     }
@@ -422,7 +421,6 @@
     "copied": "已复制!",
     "countryOne": "国",
     "countryMany": "国",
-    "memberSince": "加入时间",
     "workStatus": {
       "freelancing": "自由职业",
       "busy": "忙碌中",

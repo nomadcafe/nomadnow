@@ -9,7 +9,6 @@ export interface User {
   location?: string
   // Nomad Card fields
   role?: string
-  hometown?: string
   current_city?: string
   // Free-form. Preset slugs ('freelancing' | 'busy' | 'fulltime') get
   // localised labels in NomadCard; anything else renders verbatim so

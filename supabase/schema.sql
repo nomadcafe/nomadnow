@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
   location TEXT,
   -- Nomad Card fields
   role TEXT, -- 'Designer', 'Developer', 'Writer', etc.
-  hometown TEXT, -- User's hometown
   current_city TEXT, -- Current location (overrides location for nomad card)
   work_status TEXT DEFAULT 'available', -- 'available' | 'busy' | 'fulltime' | 'freelancing'
   timezone TEXT, -- Current timezone
