@@ -231,6 +231,23 @@
   "createCard": {
     "navCancel": "Cancel",
     "previewLabel": "Live preview",
+    "previewExampleLabel": "Example preview",
+    "completion": {
+      "title": "Card completion",
+      "next": "Next: {item}",
+      "complete": "Your card is looking great.",
+      "items": {
+        "handle": "pick a handle",
+        "name": "add your name",
+        "avatar": "upload an avatar",
+        "role": "add your role",
+        "bio": "add a short bio",
+        "city": "add your current city",
+        "hometown": "add your hometown",
+        "countries": "mark visited countries",
+        "links": "add at least one link"
+      }
+    },
     "title": "Claim your card.",
     "subtitle": "Three fields to start. Everything else is optional and editable later.",
     "editTitle": "Edit your card.",
