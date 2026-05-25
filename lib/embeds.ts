@@ -8,7 +8,7 @@
 // through to null on anything weird so a malformed URL renders as a
 // normal link button rather than embedding `about:blank` or worse.
 
-export type EmbedKind = 'youtube' | 'spotify'
+export type EmbedKind = 'youtube' | 'vimeo' | 'spotify'
 
 export interface EmbedSpec {
   kind: EmbedKind
@@ -31,11 +31,16 @@ const YT_HOSTS = new Set([
   'm.youtube.com',
   'youtu.be',
 ])
+const VIMEO_HOSTS = new Set(['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'])
 const SP_HOSTS = new Set(['open.spotify.com', 'spotify.com'])
 
 // YouTube IDs are 11 chars of [A-Za-z0-9_-]. We accept 6–20 to tolerate
 // shorts (~11) and odd test IDs without falling for ?v=javascript:....
 const YT_ID_RE = /^[A-Za-z0-9_-]{6,20}$/
+// Vimeo IDs are numeric; 6–12 digits covers everything historical to
+// current. Private-link "secret" suffix (vimeo.com/{id}/{secret}) is
+// stripped — we only need the ID for the embed src.
+const VIMEO_ID_RE = /^\d{6,12}$/
 const SP_ID_RE = /^[A-Za-z0-9]{6,40}$/
 const SP_KINDS = new Set(['track', 'album', 'playlist', 'episode', 'show'])
 
@@ -59,6 +64,16 @@ export function detectEmbed(rawUrl: string | null | undefined): EmbedSpec | null
         embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
         aspectRatio: '16 / 9',
         title: 'YouTube video',
+      }
+    }
+  } else if (VIMEO_HOSTS.has(u.hostname)) {
+    const videoId = extractVimeoId(u)
+    if (videoId && VIMEO_ID_RE.test(videoId)) {
+      return {
+        kind: 'vimeo',
+        embedUrl: `https://player.vimeo.com/video/${videoId}`,
+        aspectRatio: '16 / 9',
+        title: 'Vimeo video',
       }
     }
   } else if (SP_HOSTS.has(u.hostname)) {
@@ -95,4 +110,17 @@ function extractYouTubeId(u: URL): string | null {
     return u.pathname.split('/')[2] || null
   }
   return null
+}
+
+function extractVimeoId(u: URL): string | null {
+  // player.vimeo.com/video/{id}
+  if (u.hostname === 'player.vimeo.com') {
+    const parts = u.pathname.split('/').filter(Boolean)
+    return parts[0] === 'video' ? parts[1] ?? null : null
+  }
+  // vimeo.com/{id}  OR  vimeo.com/{id}/{secret} (private-link hash)
+  // The leading path segment is always the numeric video id; the secret
+  // suffix is for unlisted videos and the embed iframe doesn't need it.
+  const first = u.pathname.split('/').filter(Boolean)[0]
+  return first ?? null
 }
