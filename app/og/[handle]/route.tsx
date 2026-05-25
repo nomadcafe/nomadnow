@@ -3,6 +3,12 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { getCountryFlag } from '@/lib/countries'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { getTheme, type ThemeKey } from '@/lib/themes'
+import {
+  computeTravelStats,
+  formatTimeOnTheRoad,
+  mergedVisitedCodes,
+  splitStays,
+} from '@/lib/stays'
 
 // OG share image rendered at request time via satori + resvg.
 // 1200x630 is the canonical size for Twitter/LinkedIn/Facebook previews.
@@ -22,6 +28,13 @@ type OgUser = {
   bio?: string | null
 }
 
+type OgStay = {
+  city: string | null
+  country: string | null
+  start_date: string
+  end_date: string | null
+}
+
 // Static mock used only when ?preview=1 — for visual QA without the DB.
 const PREVIEW_USER: OgUser = {
   handle: 'kenji',
@@ -33,6 +46,16 @@ const PREVIEW_USER: OgUser = {
   created_at: '2024-03-15T00:00:00.000Z',
   bio: 'Designer building tools for remote life. Slow traveler, fast typer.',
 }
+
+// Sample stays for preview mode — enough to exercise the city-count and
+// time-on-the-road numbers without hitting the DB.
+const PREVIEW_STAYS: OgStay[] = [
+  { city: 'Bangkok', country: 'TH', start_date: '2024-09-01', end_date: null },
+  { city: 'Lisbon', country: 'PT', start_date: '2024-05-15', end_date: '2024-08-20' },
+  { city: 'Tokyo', country: 'JP', start_date: '2024-02-01', end_date: '2024-05-10' },
+  { city: 'Mexico City', country: 'MX', start_date: '2023-10-01', end_date: '2024-01-15' },
+  { city: 'Tbilisi', country: 'GE', start_date: '2023-06-01', end_date: '2023-09-15' },
+]
 
 export async function GET(
   request: Request,
@@ -48,10 +71,12 @@ export async function GET(
   }
 
   let user: OgUser | null = null
+  let stays: OgStay[] = []
   let themeKey: string | null = themeOverride
 
   if (isPreview) {
     user = { ...PREVIEW_USER, handle }
+    stays = PREVIEW_STAYS
   } else {
     try {
       const supabase = await createServerSupabase()
@@ -62,29 +87,62 @@ export async function GET(
         .eq('handle', lower)
         .maybeSingle()
       user = (userData as OgUser | null) ?? null
-      if (userData?.id && !themeOverride) {
-        const { data: settings } = await supabase
-          .from('profile_settings')
-          .select('theme_color')
-          .eq('user_id', userData.id)
-          .maybeSingle()
-        themeKey = (settings?.theme_color as string | undefined) ?? null
+      if (userData?.id) {
+        // Fetch the stay rows we need to derive the headline stats.
+        // We do this in parallel with the settings lookup below.
+        const [staysRes, settingsRes] = await Promise.all([
+          supabase
+            .from('nomad_stays')
+            .select('city, country, start_date, end_date')
+            .eq('user_id', userData.id),
+          themeOverride
+            ? Promise.resolve({ data: null })
+            : supabase
+                .from('profile_settings')
+                .select('theme_color')
+                .eq('user_id', userData.id)
+                .maybeSingle(),
+        ])
+        stays = ((staysRes.data ?? []) as OgStay[]) ?? []
+        if (!themeOverride) {
+          themeKey =
+            ((settingsRes.data as { theme_color?: string } | null)?.theme_color as
+              | string
+              | undefined) ?? null
+        }
       }
     } catch {
       // Fall through to placeholder render.
     }
   }
 
+  // Same derivations the live card uses — see lib/stays.ts. Upcoming stays
+  // are excluded so a planned trip doesn't claim countries / days yet.
+  const { current, past } = splitStays(stays)
+  const visitedStays = current ? [current, ...past] : past
+  const mergedCountries = mergedVisitedCodes(user?.visited_countries, visitedStays)
+  const { cityCount, totalDays } = computeTravelStats(visitedStays)
+  const road = formatTimeOnTheRoad(totalDays)
+  const roadUnit =
+    road.unit === 'year'
+      ? totalDays >= 365 * 1.95
+        ? 'years nomading'
+        : 'year nomading'
+      : road.unit === 'month'
+        ? 'months traveling'
+        : 'days on the road'
+
   const theme = getTheme(themeKey)
   const og = theme.og
 
   const displayName = user?.display_name || handle
   const role = user?.role || null
-  const city = user?.current_city || null
-  const visited = user?.visited_countries ?? []
-  const memberSince = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-    : null
+  const city = current?.city || user?.current_city || null
+  // Flag row sources from the merged set so the OG strip stays consistent
+  // with the live card's WorldMap (stays-derived countries light up too).
+  const visitedCodes = Array.from(mergedCountries)
+  const countryCount = mergedCountries.size
+  const showStatStrip = countryCount > 0 || cityCount > 0 || totalDays > 0
 
   return new ImageResponse(
     (
@@ -167,8 +225,10 @@ export async function GET(
           </div>
         )}
 
-        {/* Stat strip */}
-        {(visited.length > 0 || memberSince) && (
+        {/* Stat strip — same three numbers as the live card so the social
+            preview reads as a continuation of the public profile, not a
+            different surface. countries · cities · time on the road. */}
+        {showStatStrip && (
           <div
             style={{
               display: 'flex',
@@ -179,47 +239,60 @@ export async function GET(
               marginBottom: 28,
             }}
           >
-            {visited.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
-                  {visited.length}
-                </span>
-                <span
-                  style={{
-                    fontSize: 16,
-                    color: og.muted,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    marginTop: 6,
-                  }}
-                >
-                  {visited.length === 1 ? 'country' : 'countries'}
-                </span>
-              </div>
-            )}
-            {memberSince && (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
-                  {memberSince}
-                </span>
-                <span
-                  style={{
-                    fontSize: 16,
-                    color: og.muted,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    marginTop: 6,
-                  }}
-                >
-                  member since
-                </span>
-              </div>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
+                {countryCount}
+              </span>
+              <span
+                style={{
+                  fontSize: 16,
+                  color: og.muted,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginTop: 6,
+                }}
+              >
+                {countryCount === 1 ? 'country' : 'countries'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
+                {cityCount}
+              </span>
+              <span
+                style={{
+                  fontSize: 16,
+                  color: og.muted,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginTop: 6,
+                }}
+              >
+                {cityCount === 1 ? 'city' : 'cities'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
+                {road.value}
+              </span>
+              <span
+                style={{
+                  fontSize: 16,
+                  color: og.muted,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginTop: 6,
+                }}
+              >
+                {roadUnit}
+              </span>
+            </div>
           </div>
         )}
 
-        {/* Flag row — anchored to bottom as the visual hook */}
-        {visited.length > 0 && (
+        {/* Flag row — anchored to bottom as the visual hook. Source from
+            the merged country set so stays-only users still get a flag row. */}
+        {visitedCodes.length > 0 && (
           <div
             style={{
               display: 'flex',
@@ -231,12 +304,12 @@ export async function GET(
               alignItems: 'flex-end',
             }}
           >
-            {visited.slice(0, 14).map((code) => (
+            {visitedCodes.slice(0, 14).map((code) => (
               <span key={code}>{getCountryFlag(code)}</span>
             ))}
-            {visited.length > 14 && (
+            {visitedCodes.length > 14 && (
               <span style={{ fontSize: 26, color: og.muted }}>
-                {`+${visited.length - 14}`}
+                {`+${visitedCodes.length - 14}`}
               </span>
             )}
           </div>
