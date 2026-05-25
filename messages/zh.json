@@ -74,8 +74,8 @@
     },
     "feature3": {
       "label": "状态",
-      "title": "告诉别人你正在接什么。",
-      "body": "三次点击就能在「接合作」「自由职业」「全职」「休息中」之间切换。永远在卡片首屏可见,永远不会过时。",
+      "title": "告诉别人你在做什么。",
+      "body": "选个预设(自由职业、全职等),或者自己写一句。永远在卡片首屏可见,永远不会过时。",
       "slowTravel": "慢旅行模式"
     },
     "comparison": {
@@ -249,7 +249,6 @@
         "role": "填写职业",
         "bio": "加一句简介",
         "city": "填写当前城市",
-        "hometown": "填写出生地",
         "countries": "标记去过的国家",
         "links": "至少加一条链接"
       }
@@ -281,10 +280,11 @@
     "collapse": "收起",
     "role": "职业",
     "status": "状态",
+    "statusNone": "—",
+    "statusCustom": "自定义…",
+    "statusCustomPlaceholder": "现在在做什么?",
     "bio": "一句话简介",
     "bioPlaceholder": "为远程生活打造工具。",
-    "hometown": "出生地",
-    "hometownPlaceholder": "大阪",
     "avatar": {
       "label": "头像",
       "upload": "上传",
@@ -398,12 +398,10 @@
     "shareTitle": "分享这张卡片",
     "copyLink": "复制链接",
     "copied": "已复制!",
-    "fromHometown": "来自 {city}",
     "countryOne": "国",
     "countryMany": "国",
     "memberSince": "加入时间",
     "workStatus": {
-      "available": "开放合作",
       "freelancing": "自由职业",
       "busy": "忙碌中",
       "fulltime": "全职"

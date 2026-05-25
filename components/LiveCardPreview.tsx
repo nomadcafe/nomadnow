@@ -16,9 +16,10 @@ export interface PreviewFormState {
   role: string
   bio: string
   current_city: string
-  hometown: string
   avatar_url: string
-  work_status: 'available' | 'busy' | 'fulltime' | 'freelancing'
+  // Free-form: preset slugs render through i18n in NomadCard, custom strings
+  // render verbatim. Empty hides the status pill entirely.
+  work_status: string
   timezone: string
 }
 
@@ -52,9 +53,8 @@ const SAMPLE_FORM: PreviewFormState = {
   role: 'Product Designer',
   bio: 'Designing tools for the new remote.\nBased between Bangkok, Lisbon, and Mexico City.',
   current_city: 'Bangkok',
-  hometown: 'Osaka',
   avatar_url: '',
-  work_status: 'available',
+  work_status: 'freelancing',
   timezone: 'Asia/Bangkok',
 }
 const SAMPLE_LINKS: PreviewLink[] = [
@@ -93,7 +93,6 @@ export function LiveCardPreview({
     avatar_url: effectiveForm.avatar_url || undefined,
     bio: effectiveForm.bio || undefined,
     role: effectiveForm.role || undefined,
-    hometown: effectiveForm.hometown || undefined,
     current_city: effectiveForm.current_city || undefined,
     work_status: effectiveForm.work_status,
     timezone: effectiveForm.timezone || undefined,

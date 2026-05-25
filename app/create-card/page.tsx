@@ -33,11 +33,8 @@ export default async function CreateCardPage() {
         role: (profile.role as string | null) ?? '',
         bio: (profile.bio as string | null) ?? '',
         current_city: (profile.current_city as string | null) ?? '',
-        hometown: (profile.hometown as string | null) ?? '',
         avatar_url: (profile.avatar_url as string | null) ?? '',
-        work_status:
-          (profile.work_status as 'available' | 'busy' | 'fulltime' | 'freelancing' | null) ??
-          'available',
+        work_status: (profile.work_status as string | null) ?? '',
         timezone: (profile.timezone as string | null) ?? '',
         visited_countries: (profile.visited_countries as string[] | null) ?? [],
         links: (links ?? []).map((l) => ({

@@ -74,8 +74,8 @@
     },
     "feature3": {
       "label": "ステータス",
-      "title": "今、何を受け付けているかを伝える。",
-      "body": "コラボ募集、フリーランス、フルタイム、休暇中。三回タップで切り替え。常にカード上部に表示され、古くなることがありません。",
+      "title": "今、何をしているかを伝える。",
+      "body": "フリーランスやフルタイムなどのプリセットを選ぶか、自由に書くか。常にカード上部に表示され、古くなることがありません。",
       "slowTravel": "スローたび"
     },
     "comparison": {
@@ -249,7 +249,6 @@
         "role": "職種を追加",
         "bio": "一言自己紹介を追加",
         "city": "現在地を追加",
-        "hometown": "出身地を追加",
         "countries": "訪問国をマーク",
         "links": "少なくとも 1 つリンクを追加"
       }
@@ -281,10 +280,11 @@
     "collapse": "詳細を隠す",
     "role": "職種",
     "status": "ステータス",
+    "statusNone": "—",
+    "statusCustom": "カスタム…",
+    "statusCustomPlaceholder": "今何してる?",
     "bio": "一言自己紹介",
     "bioPlaceholder": "リモートライフのためのツールを作っています。",
-    "hometown": "出身",
-    "hometownPlaceholder": "大阪",
     "avatar": {
       "label": "アバター",
       "upload": "アップロード",
@@ -398,12 +398,10 @@
     "shareTitle": "このカードをシェア",
     "copyLink": "リンクをコピー",
     "copied": "コピーしました!",
-    "fromHometown": "出身: {city}",
     "countryOne": "カ国",
     "countryMany": "カ国",
     "memberSince": "登録日",
     "workStatus": {
-      "available": "コラボ募集中",
       "freelancing": "フリーランス",
       "busy": "多忙",
       "fulltime": "フルタイム"

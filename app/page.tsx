@@ -212,10 +212,10 @@ export default async function Home() {
                   ✓ {t('previewCard.verified')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                  {tStatus('available')}
+                  {tStatus('freelancing')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                  {tStatus('freelancing')}
+                  {tStatus('fulltime')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-100">
                   {t('feature3.slowTravel')}

@@ -58,9 +58,10 @@ export interface InitialCardData {
   role: string
   bio: string
   current_city: string
-  hometown: string
   avatar_url: string
-  work_status: 'available' | 'busy' | 'fulltime' | 'freelancing'
+  // Free-form string. Preset slugs (busy / freelancing / fulltime) get
+  // their localised labels on the card; anything else renders verbatim.
+  work_status: string
   timezone: string
   visited_countries: string[]
   links: NomadLink[]
@@ -109,7 +110,11 @@ const ROLES = [
   'Other',
 ] as const
 
-const WORK_STATUS_KEYS = ['available', 'freelancing', 'busy', 'fulltime'] as const
+// Active presets offered in the form. 'available' was retired — old cards
+// that still have it render as "no status" via REMOVED_STATUS_KEYS in
+// NomadCard. Users can pick a preset or type their own via the "Custom…"
+// option (any string up to 60 chars is accepted server-side).
+const WORK_STATUS_PRESETS = ['freelancing', 'busy', 'fulltime'] as const
 
 const STORAGE_KEY = 'nomad-card-draft'
 
@@ -149,8 +154,9 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     role: initial?.role ?? savedDraft?.role ?? '',
     bio: initial?.bio ?? savedDraft?.bio ?? '',
     current_city: initial?.current_city ?? savedDraft?.current_city ?? '',
-    hometown: initial?.hometown ?? savedDraft?.hometown ?? '',
-    work_status: (initial?.work_status ?? savedDraft?.work_status ?? 'available') as 'available' | 'busy' | 'fulltime' | 'freelancing',
+    // work_status is now free-form. Default to '' (no status pill on the
+    // card) so new users aren't auto-assigned something they didn't pick.
+    work_status: initial?.work_status ?? savedDraft?.work_status ?? '',
     avatar_url: initial?.avatar_url ?? savedDraft?.avatar_url ?? '',
     // Default: existing card → keep its value; new card → detect from browser
     // so the live local-time feature on the card works out of the box for
@@ -158,6 +164,13 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     // zone intact even if they're traveling.
     timezone: initial?.timezone ?? savedDraft?.timezone ?? '',
   })
+  // Custom-status mode: true when work_status is a free-form string rather
+  // than one of the presets. Tracked separately so the "Custom…" dropdown
+  // option stays selected even when the user clears the text input mid-edit.
+  const [customStatusMode, setCustomStatusMode] = useState<boolean>(
+    Boolean(formData.work_status) &&
+      !(WORK_STATUS_PRESETS as readonly string[]).includes(formData.work_status),
+  )
   const [visitedCountries, setVisitedCountries] = useState<string[]>(
     initial?.visited_countries ?? savedDraft?.visitedCountries ?? [],
   )
@@ -170,7 +183,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
   useEffect(() => {
     if (
       savedDraft &&
-      (savedDraft.role || savedDraft.bio || savedDraft.hometown ||
+      (savedDraft.role || savedDraft.bio ||
         (savedDraft.visitedCountries?.length ?? 0) > 0 ||
         (savedDraft.links?.length ?? 0) > 0 ||
         savedDraft.avatar_url)
@@ -316,7 +329,6 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
         avatar_url: formData.avatar_url || undefined,
         country: undefined,
         role: formData.role || undefined,
-        hometown: formData.hometown || undefined,
         current_city: formData.current_city || undefined,
         work_status: formData.work_status,
         timezone: formData.timezone || undefined,
@@ -442,7 +454,6 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                   { key: 'role', filled: !!formData.role },
                   { key: 'bio', filled: !!formData.bio.trim() },
                   { key: 'city', filled: !!formData.current_city.trim() },
-                  { key: 'hometown', filled: !!formData.hometown.trim() },
                   { key: 'countries', filled: visitedCountries.length > 0 },
                   { key: 'links', filled: links.some((l) => l.url.trim()) },
                 ]}
@@ -620,16 +631,48 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                         {t('status')}
                       </label>
                       <select
-                        id="work_status"
-                        name="work_status"
-                        value={formData.work_status}
-                        onChange={handleChange}
+                        id="work_status_select"
+                        value={
+                          customStatusMode
+                            ? 'custom'
+                            : (WORK_STATUS_PRESETS as readonly string[]).includes(formData.work_status)
+                            ? formData.work_status
+                            : ''
+                        }
+                        onChange={(e) => {
+                          const v = e.target.value
+                          if (v === 'custom') {
+                            setCustomStatusMode(true)
+                            // Clear any preset value so the text input starts
+                            // empty; the user is about to type their own.
+                            if ((WORK_STATUS_PRESETS as readonly string[]).includes(formData.work_status)) {
+                              setFormData((prev) => ({ ...prev, work_status: '' }))
+                            }
+                          } else {
+                            setCustomStatusMode(false)
+                            setFormData((prev) => ({ ...prev, work_status: v }))
+                          }
+                        }}
                         className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
                       >
-                        {WORK_STATUS_KEYS.map((status) => (
+                        <option value="">{t('statusNone')}</option>
+                        {WORK_STATUS_PRESETS.map((status) => (
                           <option key={status} value={status}>{tStatus(status)}</option>
                         ))}
+                        <option value="custom">{t('statusCustom')}</option>
                       </select>
+                      {customStatusMode && (
+                        <input
+                          type="text"
+                          id="work_status"
+                          name="work_status"
+                          value={formData.work_status}
+                          onChange={handleChange}
+                          maxLength={60}
+                          placeholder={t('statusCustomPlaceholder')}
+                          className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -649,23 +692,6 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                       placeholder={t('bioPlaceholder')}
                     />
                     <p className="mt-1 text-xs text-gray-400 text-right">{formData.bio.length}/500</p>
-                  </div>
-
-                  {/* Hometown */}
-                  <div>
-                    <label htmlFor="hometown" className="block text-sm font-medium text-gray-900 mb-1.5">
-                      {t('hometown')}
-                    </label>
-                    <input
-                      type="text"
-                      id="hometown"
-                      name="hometown"
-                      value={formData.hometown}
-                      onChange={handleChange}
-                      maxLength={100}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                      placeholder={t('hometownPlaceholder')}
-                    />
                   </div>
 
                   {/* Avatar */}
