@@ -196,7 +196,13 @@ export function NomadCard({
   // when no video is open. Detected from link URLs on click.
   const [videoEmbed, setVideoEmbed] = useState<string | null>(null)
   const theme = getTheme(themeKey)
-  const displayLocation = user.current_city || user.location
+  // Prefer the current open-ended stay if there is one — it's more grounded
+  // data (city + start date proven) than the free-form current_city field,
+  // which has no time context. Falls back through current_city → location
+  // so users who haven't started using stays don't see anything break.
+  const currentStay = findCurrentStay(stays)
+  const displayLocation = currentStay?.city || user.current_city || user.location
+  const displayCountryFlag = currentStay ? getCountryFlag(currentStay.country) : null
   const localTime = useLocalTime(user.timezone)
   const visitedCount = user.visited_countries?.length ?? 0
 
@@ -294,7 +300,10 @@ export function NomadCard({
           {displayLocation && (
             <p className="text-base sm:text-lg">
               <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden="true">📍</span>
+                {/* Country flag if we derived from a stay; pin emoji
+                    otherwise. The flag carries more information at the
+                    same character cost. */}
+                <span aria-hidden="true">{displayCountryFlag || '📍'}</span>
                 <span className="font-medium">{displayLocation}</span>
                 {localTime && (
                   <>
