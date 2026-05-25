@@ -5,75 +5,12 @@ import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 import { safeLinkUrlSchema } from '@/lib/validation'
 
-const createNomadLinkSchema = z.object({
-  type: z.enum([
-    'website',
-    'instagram',
-    'twitter',
-    'linkedin',
-    'github',
-    'youtube',
-    'tiktok',
-    'threads',
-    'substack',
-    'telegram',
-    'spotify',
-    'other',
-  ]),
-  label: z.string().optional(),
-  url: safeLinkUrlSchema,
-  // Soft cap matches the form's LINK_CAP; large enough that no real user
-  // hits it, small enough that abuse can't blow up a row.
-  order_index: z.number().int().min(0).max(49),
-})
-
-export async function POST(request: NextRequest) {
-  try {
-    const { supabase, user } = await requireUser()
-    const body = await request.json()
-    const validation = createNomadLinkSchema.safeParse(body)
-
-    if (!validation.success) {
-      throw new ValidationError('Invalid nomad link data', validation.error.errors)
-    }
-
-    const { data, error } = await supabase
-      .from('nomad_links')
-      .insert({
-        user_id: user.id,
-        type: validation.data.type,
-        label: validation.data.label || null,
-        url: validation.data.url,
-        order_index: validation.data.order_index,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      if (error.code === '23505') {
-        throw new ValidationError('Link order index already exists for this user', { order_index: 'This position is already taken' })
-      }
-      logError(error, { operation: 'create_nomad_link', userId: user.id })
-      throw error
-    }
-
-    await bumpProfileCacheByUserId(supabase, user.id)
-    return NextResponse.json({ success: true, link: data })
-  } catch (error) {
-    logError(error, { operation: 'create_nomad_link' })
-    const errorResponse = formatErrorResponse(error)
-    return NextResponse.json(
-      { error: errorResponse.error, code: errorResponse.code, details: errorResponse.details },
-      { status: errorResponse.statusCode }
-    )
-  }
-}
-
 // Replace-all semantics: takes a links array and atomically replaces the
-// caller's nomad_links. Simpler than per-row PUT/DELETE for the form's edit
-// flow — the user always submits the full desired link set, and order_index
-// gets normalised from array position so reordering is free. Drops anything
-// with a blank URL so the form can pass partially-filled rows.
+// caller's nomad_links. Simpler than per-row create/update/delete for the
+// form's submit flow (both create and edit) — the form always submits the
+// full desired link set, and order_index gets normalised from array position
+// so reordering is free. Drops anything with a blank URL so the form can
+// pass partially-filled rows.
 const replaceLinksSchema = z.object({
   links: z
     .array(
@@ -89,6 +26,7 @@ const replaceLinksSchema = z.object({
           'threads',
           'substack',
           'telegram',
+          'spotify',
           'other',
         ]),
         label: z.string().optional().nullable(),

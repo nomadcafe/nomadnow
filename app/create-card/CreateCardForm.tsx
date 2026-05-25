@@ -381,11 +381,12 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
         throw new Error(data.error || t('errorGeneric'))
       }
 
-      // Links sync: edit mode uses replace-all semantics (PUT) so removals
-      // and reorders are handled in one round-trip. Create mode keeps the
-      // per-link POST pattern for now.
-      if (isEdit) {
-        const replaceResponse = await fetch('/api/nomad-links', {
+      // Links sync: replace-all in both modes. The server PUT atomically
+      // wipes + reinserts in array order, so reorders and removals come
+      // free. Skip the round-trip in create mode when there's nothing to
+      // insert (matching the stays branch below).
+      if (isEdit || validLinks.length > 0) {
+        const linksResponse = await fetch('/api/nomad-links', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -396,25 +397,10 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
             })),
           }),
         })
-        if (!replaceResponse.ok) {
-          const replaceData = await replaceResponse.json().catch(() => ({}))
-          throw new Error(replaceData.error || t('errorGeneric'))
+        if (!linksResponse.ok) {
+          const linksData = await linksResponse.json().catch(() => ({}))
+          throw new Error(linksData.error || t('errorGeneric'))
         }
-      } else if (validLinks.length > 0) {
-        await Promise.all(
-          validLinks.map((link, index) =>
-            fetch('/api/nomad-links', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                type: link.type,
-                label: link.type === 'other' ? link.label : undefined,
-                url: link.url,
-                order_index: index,
-              }),
-            })
-          )
-        )
       }
 
       // Stays sync: replace-all in both modes. The form always submits the
