@@ -249,6 +249,7 @@
         "role": "填写职业",
         "bio": "加一句简介",
         "city": "填写当前城市",
+        "stays": "添加城市停留记录",
         "countries": "标记去过的国家",
         "links": "至少加一条链接"
       }
@@ -392,6 +393,27 @@
     "copied": "已复制",
     "dismiss": "关闭",
     "tweetTemplate": "刚做了我的 Nomad Card @nomadnow —— 来看看: {url}"
+  },
+  "stays": {
+    "sectionTitle": "去过的地方",
+    "currentLabel": "现在在",
+    "editorTitle": "停留城市",
+    "editorHint": "你 nomad 过的城市。天数自动计算。",
+    "emptyHint": "还没有停留记录 —— 在下面添加第一条吧。",
+    "addStay": "+ 添加停留",
+    "remove": "删除",
+    "cityPlaceholder": "城市(例如曼谷)",
+    "countryPick": "国家…",
+    "startDate": "开始",
+    "endDate": "结束",
+    "endDateHint": "(空 = 当前还在)",
+    "notesPlaceholder": "备注(可选)",
+    "currentDuration": "已经 {days} 天",
+    "pastDuration": "{days} 天",
+    "currentBadge": "当前",
+    "durationDay": "{value} 天",
+    "durationWeek": "{value} 周",
+    "durationMonth": "{value} 个月"
   },
   "card": {
     "verified": "已认证",

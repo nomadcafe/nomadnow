@@ -249,6 +249,7 @@
         "role": "職種を追加",
         "bio": "一言自己紹介を追加",
         "city": "現在地を追加",
+        "stays": "都市の滞在記録を追加",
         "countries": "訪問国をマーク",
         "links": "少なくとも 1 つリンクを追加"
       }
@@ -392,6 +393,27 @@
     "copied": "コピーしました",
     "dismiss": "閉じる",
     "tweetTemplate": "Nomad Card を作りました @nomadnow — ぜひ見てください: {url}"
+  },
+  "stays": {
+    "sectionTitle": "滞在履歴",
+    "currentLabel": "現在の滞在",
+    "editorTitle": "滞在",
+    "editorHint": "ノマドした都市。日数は自動計算されます。",
+    "emptyHint": "まだ滞在がありません — 下から追加してください。",
+    "addStay": "+ 滞在を追加",
+    "remove": "削除",
+    "cityPlaceholder": "都市 (例: バンコク)",
+    "countryPick": "国…",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "endDateHint": "(空 = 現在滞在中)",
+    "notesPlaceholder": "メモ (任意)",
+    "currentDuration": "現在 {days} 日目",
+    "pastDuration": "{days} 日間",
+    "currentBadge": "現在",
+    "durationDay": "{value} 日",
+    "durationWeek": "{value} 週間",
+    "durationMonth": "{value} ヶ月"
   },
   "card": {
     "verified": "認証済み",

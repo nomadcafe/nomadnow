@@ -249,6 +249,7 @@
         "role": "add your role",
         "bio": "add a short bio",
         "city": "add your current city",
+        "stays": "add a city stay with dates",
         "countries": "mark visited countries",
         "links": "add at least one link"
       }
@@ -392,6 +393,27 @@
     "copied": "Link copied",
     "dismiss": "Dismiss",
     "tweetTemplate": "Just made my nomad card on @nomadnow — check it out: {url}"
+  },
+  "stays": {
+    "sectionTitle": "Where I've been",
+    "currentLabel": "Currently in",
+    "editorTitle": "Stays",
+    "editorHint": "Cities you've nomadded in. Day counts compute automatically.",
+    "emptyHint": "No stays yet — add your first one below.",
+    "addStay": "+ Add stay",
+    "remove": "Remove stay",
+    "cityPlaceholder": "City (e.g. Bangkok)",
+    "countryPick": "Country…",
+    "startDate": "Started",
+    "endDate": "Ended",
+    "endDateHint": "(empty = currently here)",
+    "notesPlaceholder": "Notes (optional)",
+    "currentDuration": "{days} days so far",
+    "pastDuration": "{days} days",
+    "currentBadge": "Now",
+    "durationDay": "{value, plural, =1 {1 day} other {# days}}",
+    "durationWeek": "{value, plural, =1 {1 week} other {# weeks}}",
+    "durationMonth": "{value, plural, =1 {1 month} other {# months}}"
   },
   "card": {
     "verified": "Verified",

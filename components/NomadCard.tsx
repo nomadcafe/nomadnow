@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { User, NomadLink } from '@/types/database'
+import { User, NomadLink, NomadStay } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
 import { WorldMap } from './WorldMap'
+import { getCountryFlag, getCountryName } from '@/lib/countries'
+import { stayDayCount, findCurrentStay } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { VideoLightbox, detectVideo } from './VideoLightbox'
@@ -15,6 +17,7 @@ import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
 interface NomadCardProps {
   user: User
   links: NomadLink[]
+  stays?: NomadStay[]
   themeKey?: ThemeKey | string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
@@ -189,8 +192,10 @@ export function NomadCard({
   hideMakeYoursCTA = false,
   isOwner = false,
   embedded = false,
+  stays = [],
 }: NomadCardProps) {
   const t = useTranslations('card')
+  const tStays = useTranslations('stays')
   const tStatus = useTranslations('card.workStatus')
   const tRole = useTranslations('roles')
   const getLinkLabel = useLinkLabel()
@@ -346,6 +351,76 @@ export function NomadCard({
           >
             &rdquo;
           </span>
+        </div>
+      )
+    },
+    stays: () => {
+      if (!stays || stays.length === 0) return null
+      const currentStay = findCurrentStay(stays)
+      // Past stays = everything except the current one. Already ordered
+      // most-recent-first by the API query.
+      const pastStays = stays.filter((s) => s !== currentStay)
+      return (
+        <div key="stays" className="my-6">
+          <h3 className={`text-xs uppercase tracking-wider mb-3 ${theme.textMuted}`}>
+            {tStays('sectionTitle')}
+          </h3>
+          {currentStay && (
+            <div
+              className={`rounded-xl p-4 mb-3 border ${theme.divider} bg-opacity-50 flex items-start gap-3`}
+            >
+              <span className="text-2xl leading-none mt-0.5" aria-hidden>
+                {getCountryFlag(currentStay.country) || '📍'}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="font-semibold text-base">
+                    {currentStay.city}, {getCountryName(currentStay.country)}
+                  </span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${theme.pillVerified}`}>
+                    {tStays('currentBadge')}
+                  </span>
+                </div>
+                <div className={`text-xs mt-0.5 ${theme.textMuted}`}>
+                  {tStays('currentDuration', {
+                    days: stayDayCount(currentStay.start_date, currentStay.end_date),
+                  })}
+                </div>
+                {currentStay.notes && (
+                  <p className={`text-xs mt-1 ${theme.textMuted}`}>{currentStay.notes}</p>
+                )}
+              </div>
+            </div>
+          )}
+          {pastStays.length > 0 && (
+            <ul className="space-y-2">
+              {pastStays.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex items-start gap-3 text-sm"
+                >
+                  <span className="text-lg leading-none mt-0.5" aria-hidden>
+                    {getCountryFlag(s.country) || '·'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <span className="font-medium">
+                        {s.city}, {getCountryName(s.country)}
+                      </span>
+                      <span className={`text-xs ${theme.textMuted}`}>
+                        {tStays('pastDuration', {
+                          days: stayDayCount(s.start_date, s.end_date),
+                        })}
+                      </span>
+                    </div>
+                    {s.notes && (
+                      <p className={`text-xs mt-0.5 ${theme.textMuted}`}>{s.notes}</p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )
     },

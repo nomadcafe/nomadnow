@@ -1,7 +1,7 @@
 'use client'
 
 import { NomadCard } from './NomadCard'
-import type { User, NomadLink } from '@/types/database'
+import type { User, NomadLink, NomadStay } from '@/types/database'
 
 // Live preview wrapper for /create-card. Takes the in-progress form values,
 // synthesises a User + NomadLink set, and feeds them to NomadCard in embedded
@@ -21,6 +21,14 @@ export interface PreviewFormState {
   // render verbatim. Empty hides the status pill entirely.
   work_status: string
   timezone: string
+}
+
+export interface PreviewStay {
+  city: string
+  country: string
+  start_date: string
+  end_date: string
+  notes: string
 }
 
 export interface PreviewLink {
@@ -63,6 +71,15 @@ const SAMPLE_LINKS: PreviewLink[] = [
   { type: 'website', url: 'https://kenji.example' },
 ]
 const SAMPLE_VISITED = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
+const SAMPLE_STAYS: PreviewStay[] = [
+  { city: 'Bangkok', country: 'TH', start_date: dateNDaysAgo(14), end_date: '', notes: '' },
+  { city: 'Lisbon', country: 'PT', start_date: dateNDaysAgo(60), end_date: dateNDaysAgo(28), notes: '' },
+  { city: 'Mexico City', country: 'MX', start_date: dateNDaysAgo(120), end_date: dateNDaysAgo(70), notes: '' },
+]
+function dateNDaysAgo(n: number): string {
+  const d = new Date(Date.now() - n * 86_400_000)
+  return d.toISOString().slice(0, 10)
+}
 
 export function isPreviewEmpty(form: PreviewFormState): boolean {
   // display_name is the trigger because handle exists in edit mode but
@@ -73,17 +90,20 @@ export function isPreviewEmpty(form: PreviewFormState): boolean {
 export function LiveCardPreview({
   form,
   links,
+  stays,
   visitedCountries,
   themeKey,
 }: {
   form: PreviewFormState
   links: PreviewLink[]
+  stays: PreviewStay[]
   visitedCountries: string[]
   themeKey?: string | null
 }) {
   const empty = isPreviewEmpty(form)
   const effectiveForm = empty ? SAMPLE_FORM : form
   const effectiveLinks = empty ? SAMPLE_LINKS : links
+  const effectiveStays = empty ? SAMPLE_STAYS : stays
   const effectiveCountries = empty ? SAMPLE_VISITED : visitedCountries
 
   const user: User = {
@@ -115,10 +135,25 @@ export function LiveCardPreview({
       updated_at: NOW_ISO,
     }))
 
+  const cardStays: NomadStay[] = effectiveStays
+    .filter((s) => s.city.trim() && s.country && s.start_date)
+    .map((s, i) => ({
+      id: `preview-stay-${i}`,
+      user_id: 'preview',
+      city: s.city,
+      country: s.country,
+      start_date: s.start_date,
+      end_date: s.end_date || null,
+      notes: s.notes || null,
+      created_at: NOW_ISO,
+      updated_at: NOW_ISO,
+    }))
+
   return (
     <NomadCard
       user={user}
       links={cardLinks}
+      stays={cardStays}
       themeKey={themeKey}
       embedded
     />
