@@ -42,9 +42,16 @@ const FEATURE_ROWS: { sectionKey: string; items: Feature[] }[] = [
       { key: 'publicProfile', basic: true, pro: true },
       { key: 'worldMap', basic: true, pro: true },
       { key: 'liveTimezone', basic: true, pro: true },
+      { key: 'stays', basic: true, pro: true },
+      { key: 'travelStats', basic: true, pro: true },
       { key: 'ogImage', basic: true, pro: true },
-      { key: 'themes', basic: 'themesBasic', basicKey: 'themesBasic', pro: 'themesPro', proKey: 'themesPro' },
+      // Customization: themes / button shape / background / font are all
+      // user-controllable on every plan today. If a future paywall gates
+      // any of these, flip these rows to label cells.
+      { key: 'themes', basic: true, pro: true },
+      { key: 'customization', basic: true, pro: true },
       { key: 'linksLabel', basic: true, pro: true },
+      { key: 'embeds', basic: true, pro: true },
       { key: 'verifiedBadge', basic: false, pro: true },
       { key: 'footerLabel', basic: 'footerOptional', basicKey: 'footerOptional', pro: 'footerOptional', proKey: 'footerOptional' },
     ],
@@ -138,11 +145,12 @@ function CellValue({
 
 const BASIC_BULLET_KEYS = [
   'premiumDomain',
-  'publicProfile',
   'worldMap',
   'liveTimezone',
+  'stays',
   'links',
   'themes',
+  'travelStats',
   'analytics',
   'ogImage',
   'footer',
@@ -151,7 +159,6 @@ const BASIC_BULLET_KEYS = [
 const PRO_BULLET_KEYS: { key: string; soon?: boolean }[] = [
   { key: 'everythingInBasic' },
   { key: 'customDomain', soon: true },
-  { key: 'customTheme' },
   { key: 'verifiedBadge' },
   { key: 'featured' },
   { key: 'analytics', soon: true },
