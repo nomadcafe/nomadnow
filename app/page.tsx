@@ -2,13 +2,70 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { WorldMap } from '@/components/WorldMap'
 import { LiveCityRow } from '@/components/LiveCityRow'
+import { LiveTimezoneCard } from '@/components/LiveTimezoneCard'
 import { MarqueeBand } from '@/components/MarqueeBand'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { AccountMenu } from '@/components/AccountMenu'
 import { GetYourCardButton } from '@/components/GetYourCardButton'
+import { NomadCard } from '@/components/NomadCard'
+import type { User, NomadLink } from '@/types/database'
 
 const previewVisited = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
+
+// Sample user the hero card preview uses. Same shape as a real DB row so
+// the hero renders the REAL NomadCard component (not a hand-drawn
+// approximation). Means every card-level visual upgrade ships on the
+// homepage automatically.
+const HERO_USER: User = {
+  id: 'hero-preview',
+  handle: 'kenji',
+  display_name: 'Kenji Tanaka',
+  avatar_url: 'https://i.pravatar.cc/240?img=12',
+  role: 'Product Designer',
+  current_city: 'Bangkok',
+  timezone: 'Asia/Bangkok',
+  work_status: 'freelancing',
+  visited_countries: previewVisited,
+  profile_type: 'nomad',
+  created_at: '2024-03-15T00:00:00.000Z',
+  updated_at: new Date().toISOString(),
+}
+const HERO_LINKS: NomadLink[] = [
+  {
+    id: 'h-l1',
+    user_id: HERO_USER.id,
+    type: 'instagram',
+    url: 'https://instagram.com/kenji',
+    order_index: 0,
+    created_at: '',
+    updated_at: '',
+  },
+  {
+    id: 'h-l2',
+    user_id: HERO_USER.id,
+    type: 'website',
+    label: 'Portfolio',
+    url: 'https://kenji.dev',
+    order_index: 1,
+    created_at: '',
+    updated_at: '',
+  },
+  {
+    id: 'h-l3',
+    user_id: HERO_USER.id,
+    type: 'linkedin',
+    url: 'https://linkedin.com/in/kenji',
+    order_index: 2,
+    created_at: '',
+    updated_at: '',
+  },
+]
+// Keep the hero card compact — bio / stays / status would push the card
+// past the viewport on smaller screens and bury the hero CTA. The
+// included sections cover the strongest value props (identity, real
+// time, country count, map, links).
+const HERO_SECTIONS = ['avatar', 'name', 'location', 'stats', 'map', 'links']
 
 export default async function Home() {
   const t = await getTranslations('home')
@@ -23,11 +80,16 @@ export default async function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Map and Explore hidden until there are enough cards to make
-                those pages feel populated. Routes still work for direct hits. */}
+            {/* Pricing visible everywhere now — it used to be hidden on
+                mobile which left phone visitors with no way to compare
+                plans from the landing page. AccountMenu and
+                LanguageSwitcher remain desktop-only (LanguageSwitcher is
+                duplicated in the footer for mobile reach; AccountMenu's
+                only purpose is sign-in/out which sign-in does on its
+                own page). */}
             <Link
               href="/pricing"
-              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
+              className="text-sm text-gray-600 hover:text-gray-900 px-2 sm:px-3 py-2 transition"
             >
               {tNav('pricing')}
             </Link>
@@ -65,9 +127,15 @@ export default async function Home() {
                 <span className="text-gray-300">{t('heroLine3')}</span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-lg leading-relaxed">
-                {t('heroSub1')}
-                <span className="font-mono text-gray-800">nomad.now/yourhandle</span>
-                {t('heroSub2')}
+                {t.rich('heroSub', {
+                  // Tag form lets translators put the URL placeholder
+                  // anywhere in the sentence — Japanese / Chinese flow
+                  // around it differently than English, and the old
+                  // heroSub1+URL+heroSub2 split forced a fixed order.
+                  handle: (chunks) => (
+                    <span className="font-mono text-gray-800">{chunks}</span>
+                  ),
+                })}
               </p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                 <GetYourCardButton
@@ -82,59 +150,29 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Right: stacked card preview */}
-            <div className="lg:col-span-5 relative h-[520px] sm:h-[560px]">
+            {/* Right: real NomadCard preview. Renders the actual public
+                component (not a hand-drawn approximation) so every visual
+                upgrade on /[handle] ships on the homepage automatically.
+                The angled back card stays as a static div for visual
+                depth — it's just shadow, no content. */}
+            <div className="lg:col-span-5 relative">
               <div
                 aria-hidden
-                className="absolute top-8 -right-4 sm:right-2 w-[88%] bg-white rounded-3xl border border-gray-200 shadow-xl shadow-gray-900/5 opacity-70"
-                style={{ transform: 'rotate(4deg)', height: '440px' }}
+                className="absolute top-10 -right-4 sm:right-2 w-[88%] h-[420px] bg-white rounded-3xl border border-gray-200 shadow-xl shadow-gray-900/5 opacity-70"
+                style={{ transform: 'rotate(4deg)' }}
               />
               <div
-                className="absolute top-0 left-0 right-0 sm:right-8 bg-white rounded-3xl border border-gray-200 shadow-2xl shadow-gray-900/10 p-6"
+                className="relative bg-white rounded-3xl border border-gray-200 shadow-2xl shadow-gray-900/10 overflow-hidden mx-auto max-w-md sm:mr-8 lg:mr-0"
                 style={{ transform: 'rotate(-2deg)' }}
               >
-                <div className="flex justify-center mb-3">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-200 to-pink-200 flex items-center justify-center text-xl font-semibold text-gray-700 border-2 border-gray-100">
-                    K
-                  </div>
-                </div>
-                <div className="text-center mb-2">
-                  <h2 className="text-lg font-semibold tracking-tight">{t('previewCard.name')}</h2>
-                  <p className="text-xs text-gray-600">{t('previewCard.role')}</p>
-                </div>
-                <p className="text-center text-xs mb-3">
-                  <span className="inline-flex items-center gap-1">
-                    📍 <span className="font-medium">{t('previewCard.city')}</span>
-                    <span className="text-gray-400 font-mono tabular-nums">· 14:35</span>
-                  </span>
-                </p>
-                <div className="flex items-center justify-center py-2 my-2 border-y border-gray-100">
-                  <div className="text-center">
-                    <div className="text-base font-semibold tabular-nums">10</div>
-                    <div className="text-[9px] uppercase tracking-wider text-gray-500">{t('previewCard.countries')}</div>
-                  </div>
-                </div>
-                <div className="my-2">
-                  <WorldMap visitedCodes={previewVisited} />
-                </div>
-                <div className="flex items-center justify-center gap-1.5 mb-3">
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-[10px] font-medium border border-green-100">
-                    ✓ {t('previewCard.verified')}
-                  </span>
-                  <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-[10px] font-medium">
-                    {t('previewCard.open')}
-                  </span>
-                </div>
-                <div className="space-y-1.5">
-                  {['Instagram', 'Portfolio', 'LinkedIn'].map((label) => (
-                    <div key={label} className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
-                      <span className="text-xs font-medium text-gray-900">{label}</span>
-                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
+                <NomadCard
+                  user={HERO_USER}
+                  links={HERO_LINKS}
+                  themeKey="classic"
+                  enabledSections={HERO_SECTIONS}
+                  sectionOrder={HERO_SECTIONS}
+                  embedded
+                />
               </div>
             </div>
           </div>
@@ -186,15 +224,13 @@ export default async function Home() {
             body={t('feature2.body')}
             reverse
             visual={
-              <div className="bg-white border border-gray-200 rounded-3xl p-10 shadow-sm text-center">
-                <div className="text-sm text-gray-500 mb-2">📍 Lisbon, Portugal</div>
-                <div className="text-7xl font-semibold font-mono tabular-nums tracking-tight text-gray-900">
-                  07:42
-                </div>
-                <div className="text-xs text-gray-400 uppercase tracking-wider mt-3">
-                  {t('feature2.currentlyIn')}
-                </div>
-              </div>
+              /* Ticks every minute — the whole feature row is about live
+                 local time, and a static "07:42" undermined the pitch. */
+              <LiveTimezoneCard
+                city="Lisbon, Portugal"
+                timezone="Europe/Lisbon"
+                caption={t('feature2.currentlyIn')}
+              />
             }
           />
 
