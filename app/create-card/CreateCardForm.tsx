@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
+import { AvatarUploader } from '@/components/AvatarUploader'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { debounce } from '@/lib/debounce'
@@ -651,17 +652,12 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
 
                   {/* Avatar */}
                   <div>
-                    <label htmlFor="avatar_url" className="block text-sm font-medium text-gray-900 mb-1.5">
-                      {t('avatarUrl')}
+                    <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                      {t('avatar.label')}
                     </label>
-                    <input
-                      type="url"
-                      id="avatar_url"
-                      name="avatar_url"
+                    <AvatarUploader
                       value={formData.avatar_url}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                      placeholder={t('avatarPlaceholder')}
+                      onChange={(url) => setFormData((prev) => ({ ...prev, avatar_url: url }))}
                     />
                   </div>
 
