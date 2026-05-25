@@ -1,20 +1,27 @@
--- Grant SELECT on the `verified` column to end-user roles.
+-- Add `verified` to public.users and grant SELECT to end-user roles.
 --
--- Companion to 0007, which revoked the table-level SELECT on public.users
--- and re-granted only an explicit allow-list of columns. The `verified`
--- column existed in the original schema but was omitted from 0007's
--- GRANT list. That was fine while no app code selected it.
+-- The column was declared in supabase/schema.sql (line 60) but never
+-- shipped as a migration, so deployed databases ran without it. That
+-- only became visible when application code started selecting the
+-- column (PUBLIC_USER_COLUMNS in lib/profile.ts and the OG handler
+-- in app/og/[handle]/route.tsx) — every public-profile lookup then
+-- failed at the database with "column does not exist" and silently
+-- fell through to 404 / ProfileNotFound.
 --
--- The public Nomad Card recently started rendering a "Verified" pill
--- gated on this column (see app/[handle]/page.tsx → lib/profile.ts →
--- PUBLIC_USER_COLUMNS, and app/og/[handle]/route.tsx). Postgres
--- column-level grants are all-or-nothing per SELECT: including a
--- column you can't read rejects the entire query, which silently
--- fell through to "profile not found" on every public-card load.
+-- Two halves to the fix:
+--   1. ADD the column. Nullable boolean defaulting FALSE matches the
+--      shape declared in schema.sql; admin-only-write means there's no
+--      need for end-user UPDATE/INSERT grants.
+--   2. GRANT SELECT on it to anon and authenticated. Migration 0007
+--      revoked the table-level SELECT and re-granted only an explicit
+--      allow-list — Postgres column-level grants are all-or-nothing per
+--      SELECT, so a query that includes a non-granted column is fully
+--      rejected. The `verified` pill is shown to every visitor by
+--      design, so exposing read access matches its intended visibility.
 --
--- `verified` is admin-only-write, shown to every visitor by design, so
--- exposing read access is consistent with its intended visibility. No
--- companion UPDATE/INSERT grant — writes still flow through the admin
--- client (createAdminSupabase()) as with the billing columns.
+-- IF NOT EXISTS so this is idempotent on databases that may already
+-- have the column from a manual schema sync.
+
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT FALSE;
 
 GRANT SELECT (verified) ON public.users TO anon, authenticated;
