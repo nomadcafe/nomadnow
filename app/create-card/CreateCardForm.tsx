@@ -27,6 +27,7 @@ type LinkType =
   | 'threads'
   | 'substack'
   | 'telegram'
+  | 'spotify'
   | 'other'
 
 // Slug-only; labels resolve through i18n at render time. Order matches the
@@ -42,6 +43,7 @@ const LINK_TYPE_SLUGS: LinkType[] = [
   'threads',
   'substack',
   'telegram',
+  'spotify',
   'other',
 ]
 

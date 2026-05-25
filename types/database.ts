@@ -93,6 +93,7 @@ export interface NomadLink {
     | 'threads'
     | 'substack'
     | 'telegram'
+    | 'spotify'
     | 'other'
   label?: string
   url: string

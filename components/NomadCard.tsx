@@ -13,6 +13,7 @@ import { VideoLightbox, detectVideo } from './VideoLightbox'
 import Link from 'next/link'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
+import { detectEmbed } from '@/lib/embeds'
 import { getFontClassName } from '@/lib/fonts'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
 
@@ -64,6 +65,7 @@ const LOCALISED_LINK_SLUGS = [
   'threads',
   'substack',
   'telegram',
+  'spotify',
 ] as const
 
 function useLinkLabel() {
@@ -88,6 +90,7 @@ export const LINK_BRAND_COLORS: Record<string, string> = {
   tiktok: '#FE2C55',
   substack: '#FF6719',
   telegram: '#26A5E4',
+  spotify: '#1DB954',
 }
 
 export const getLinkIcon = (type: string) => {
@@ -152,6 +155,12 @@ export const getLinkIcon = (type: string) => {
       return (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+        </svg>
+      )
+    case 'spotify':
+      return (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12C24 5.4 18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.84-.179-.959-.6-.12-.421.18-.84.601-.96 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.3 1.141zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z" />
         </svg>
       )
     default:
@@ -643,6 +652,30 @@ export function NomadCard({
           {links
             .filter((link) => link.url)
             .map((link, index) => {
+              // In-place embed (YouTube / Spotify) takes precedence over
+              // the click-out button and lightbox. detectEmbed returns
+              // null when the URL doesn't match a supported pattern, so
+              // arbitrary http://... links fall through to the regular
+              // button path below.
+              const embed = detectEmbed(link.url)
+              if (embed) {
+                const iframeStyle: React.CSSProperties = embed.aspectRatio
+                  ? { aspectRatio: embed.aspectRatio, width: '100%' }
+                  : { height: `${embed.height}px`, width: '100%' }
+                return (
+                  <iframe
+                    key={index}
+                    src={embed.embedUrl}
+                    title={embed.title}
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen
+                    className={`${shape.row} border-0 block`}
+                    style={iframeStyle}
+                  />
+                )
+              }
               const video = detectVideo(link.url)
               const brandColor = LINK_BRAND_COLORS[link.type]
               const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} font-medium group touch-manipulation transition-all duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-md ${theme.linkRow}`
