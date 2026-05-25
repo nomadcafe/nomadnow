@@ -2,28 +2,39 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
 
-// "Get your card" CTA that routes based on auth state instead of always
-// going to /pricing. The previous behavior surfaced /pricing to logged-in
-// subscribed users — confusing, since they already have a card.
+// "Get your card"-style CTA that adapts its label AND destination to the
+// viewer's state, so a logged-in user with an active card never sees a
+// button that asks them to "get" something they already have.
 //
-// Routing matrix:
-//   logged out                   → /pricing  (sell the value first)
-//   logged in, no handle         → /create-card
-//   logged in, handle, no plan   → /pricing  (claim was free, now subscribe)
-//   logged in, handle + plan     → /{handle} (their public card)
+// State matrix:
+//   guest                       → /pricing       · "Get your card"
+//   logged in, no handle        → /create-card   · "Get your card"
+//   logged in, handle, no plan  → /pricing       · "Finish setup"
+//   logged in, handle + plan    → /{handle}      · "My card"
 //
-// Renders as a plain anchor with the same className the static Link used,
-// so the visual style across the page stays identical.
+// Optional `showArrow` renders a right-arrow inside the button so the same
+// component works for both terse nav use and the marketing-y hero / dark
+// CTA buttons that wanted an arrow before.
+type Resolved =
+  | { href: string; labelKey: 'getCard' | 'finishSetup' | 'myCard' }
+
+const DEFAULT_RESOLVED: Resolved = { href: '/pricing', labelKey: 'getCard' }
+
 export function GetYourCardButton({
   className,
-  children,
+  showArrow = false,
 }: {
   className?: string
-  children: React.ReactNode
+  showArrow?: boolean
 }) {
-  const [href, setHref] = useState<string>('/pricing')
+  const tNav = useTranslations('nav')
+  // Default to the guest state so the button renders something useful before
+  // the auth lookup resolves. For SSR/hydration this is also the safest
+  // assumption — most homepage visitors are not signed in.
+  const [resolved, setResolved] = useState<Resolved>(DEFAULT_RESOLVED)
 
   useEffect(() => {
     let mounted = true
@@ -33,24 +44,28 @@ export function GetYourCardButton({
         data: { user },
       } = await supabase.auth.getUser()
       if (!mounted) return
+
       if (!user) {
-        setHref('/pricing')
+        setResolved({ href: '/pricing', labelKey: 'getCard' })
         return
       }
+
       const { data: profile } = await supabase
         .from('users')
         .select('handle, plan')
         .eq('id', user.id)
         .maybeSingle()
       if (!mounted) return
+
       const handle = (profile?.handle as string | undefined) ?? null
       const plan = (profile?.plan as string | undefined) ?? null
-      if (handle && plan) {
-        setHref(`/${handle}`)
-      } else if (!handle) {
-        setHref('/create-card')
+
+      if (!handle) {
+        setResolved({ href: '/create-card', labelKey: 'getCard' })
+      } else if (!plan) {
+        setResolved({ href: '/pricing', labelKey: 'finishSetup' })
       } else {
-        setHref('/pricing')
+        setResolved({ href: `/${handle}`, labelKey: 'myCard' })
       }
     }
     load()
@@ -60,8 +75,13 @@ export function GetYourCardButton({
   }, [])
 
   return (
-    <Link href={href} className={className}>
-      {children}
+    <Link href={resolved.href} className={className}>
+      {tNav(resolved.labelKey)}
+      {showArrow && (
+        <svg className="w-4 h-4 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      )}
     </Link>
   )
 }

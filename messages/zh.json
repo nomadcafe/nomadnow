@@ -29,6 +29,8 @@
     "account": "账户",
     "settings": "设置",
     "getCard": "创建卡片",
+    "finishSetup": "完成设置",
+    "myCard": "我的卡片",
     "viewProfile": "查看主页"
   },
   "footer": {

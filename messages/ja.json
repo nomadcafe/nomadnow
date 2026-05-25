@@ -29,6 +29,8 @@
     "account": "アカウント",
     "settings": "設定",
     "getCard": "カードを作る",
+    "finishSetup": "セットアップを完了",
+    "myCard": "マイカード",
     "viewProfile": "プロフィールを見る"
   },
   "footer": {
