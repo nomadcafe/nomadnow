@@ -49,6 +49,22 @@ export interface ProfileSettings {
   updated_at: string
 }
 
+// City-level nomad stay. Multiple per user; end_date NULL = currently at
+// this city. Day count is derived at render time.
+export interface NomadStay {
+  id: string
+  user_id: string
+  city: string
+  country: string // ISO 3166-1 alpha-2
+  lat?: number | null
+  lon?: number | null
+  start_date: string // YYYY-MM-DD
+  end_date?: string | null
+  notes?: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface NomadLink {
   id: string
   user_id: string
