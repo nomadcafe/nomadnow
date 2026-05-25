@@ -9,8 +9,8 @@ import { getCountryFlag, getCountryName } from '@/lib/countries'
 import { stayDayCount, mergedVisitedCodes, splitStays, computeTravelStats, formatTimeOnTheRoad } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
-import { PhotoLightbox } from './PhotoLightbox'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
@@ -204,6 +204,14 @@ function useLocalTime(timezone?: string) {
   }, [timezone])
   return time
 }
+
+// Lazy-loaded so the lightbox's code doesn't ship in NomadCard's main chunk.
+// Most visitors never click a photo, and even when they do, the small download
+// delay is invisible behind the click animation.
+const PhotoLightbox = dynamic(
+  () => import('./PhotoLightbox').then((m) => ({ default: m.PhotoLightbox })),
+  { ssr: false },
+)
 
 const MAP_BASE_FOR_DARK = '#374151'
 const MAP_BASE_FOR_GLASS = 'rgba(255,255,255,0.25)'
