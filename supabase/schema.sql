@@ -146,6 +146,26 @@ CREATE TABLE IF NOT EXISTS nomad_links (
 
 CREATE INDEX idx_nomad_links_user_id ON nomad_links(user_id);
 
+-- City-level nomad stays (added in migration 0004). Complements the
+-- country-level visited_countries[] on users with per-city duration data.
+-- end_date NULL = currently at this city; day count derived at render time.
+CREATE TABLE IF NOT EXISTS nomad_stays (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  city TEXT NOT NULL,
+  country TEXT NOT NULL, -- ISO 3166-1 alpha-2
+  lat NUMERIC,
+  lon NUMERIC,
+  start_date DATE NOT NULL,
+  end_date DATE,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_nomad_stays_user_id ON nomad_stays(user_id);
+CREATE INDEX idx_nomad_stays_user_start ON nomad_stays(user_id, start_date DESC);
+
 -- Enable Row Level Security (RLS) - public read, owner-only write via auth.uid()
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
@@ -155,6 +175,7 @@ ALTER TABLE profile_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE social_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE social_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nomad_stays ENABLE ROW LEVEL SECURITY;
 
 -- Ownership model:
 --   users.id MUST equal auth.uid() at insert time. Enforced by RLS, not FK,
@@ -224,4 +245,10 @@ CREATE POLICY "nomad_links_select_public" ON nomad_links FOR SELECT USING (true)
 CREATE POLICY "nomad_links_insert_self" ON nomad_links FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "nomad_links_update_self" ON nomad_links FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "nomad_links_delete_self" ON nomad_links FOR DELETE USING (auth.uid() = user_id);
+
+-- nomad_stays
+CREATE POLICY "nomad_stays_select_public" ON nomad_stays FOR SELECT USING (true);
+CREATE POLICY "nomad_stays_insert_self" ON nomad_stays FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_stays_update_self" ON nomad_stays FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_stays_delete_self" ON nomad_stays FOR DELETE USING (auth.uid() = user_id);
 
