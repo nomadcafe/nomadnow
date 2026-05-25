@@ -335,6 +335,13 @@
       "description": "完整的视觉风格 —— 背景、字体、按钮、强调色。",
       "previewHint": "实时预览任意主题: "
     },
+    "buttonShape": {
+      "title": "按钮形状",
+      "description": "链接按钮的圆角风格。与任意主题兼容。",
+      "pill": "胶囊",
+      "rounded": "圆角",
+      "square": "直角"
+    },
     "sections": {
       "title": "分节顺序",
       "advancedLabel": "高级",

@@ -335,6 +335,13 @@
       "description": "完成された見た目 — 背景、フォント、ボタン、アクセント。",
       "previewHint": "テーマをライブプレビュー: "
     },
+    "buttonShape": {
+      "title": "ボタンの形",
+      "description": "リンク行の角の形。どのテーマとも組み合わせ可能。",
+      "pill": "ピル",
+      "rounded": "丸み",
+      "square": "四角"
+    },
     "sections": {
       "title": "セクション順序",
       "advancedLabel": "詳細設定",

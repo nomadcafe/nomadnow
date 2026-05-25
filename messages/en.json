@@ -335,6 +335,13 @@
       "description": "A complete look — background, type, buttons, accent.",
       "previewHint": "Preview any theme live at "
     },
+    "buttonShape": {
+      "title": "Button shape",
+      "description": "Corner style for link rows. Works with any theme.",
+      "pill": "Pill",
+      "rounded": "Rounded",
+      "square": "Square"
+    },
     "sections": {
       "title": "Section order",
       "advancedLabel": "Advanced",

@@ -10,7 +10,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
-import { THEMES, THEME_KEYS, type ThemeKey } from '@/lib/themes'
+import { THEMES, THEME_KEYS, BUTTON_SHAPE_KEYS, type ThemeKey, type ButtonShape } from '@/lib/themes'
 import {
   NOMAD_SECTIONS,
   NOMAD_DEFAULT_ORDER,
@@ -21,6 +21,7 @@ import {
 interface ProfileSettings {
   // theme_color stores the preset key (legacy column). See lib/themes.ts.
   theme_color?: ThemeKey
+  button_shape?: ButtonShape
   section_order?: string[]
   hide_branding?: boolean
 }
@@ -59,6 +60,7 @@ export default function SettingsPage() {
   const [portalLoading, setPortalLoading] = useState(false)
   const [settings, setSettings] = useState<ProfileSettings>({
     theme_color: 'classic',
+    button_shape: 'rounded',
     section_order: NOMAD_DEFAULT_ORDER,
     hide_branding: false,
   })
@@ -104,8 +106,14 @@ export default function SettingsPage() {
           // Reconcile against the nomad section catalog so legacy creator IDs
           // get dropped and any new sections added since last save show up.
           const order = reconcileSectionOrder('nomad', data.settings.section_order)
+          const rawShape = data.settings.button_shape as string | null | undefined
+          const button_shape: ButtonShape =
+            rawShape && (BUTTON_SHAPE_KEYS as readonly string[]).includes(rawShape)
+              ? (rawShape as ButtonShape)
+              : 'rounded'
           setSettings({
             theme_color: normalizeTheme(data.settings.theme_color),
+            button_shape,
             section_order: order,
             hide_branding: Boolean(data.settings.hide_branding),
           })
@@ -347,7 +355,7 @@ export default function SettingsPage() {
               <p className="text-xs text-gray-500 mt-3">
                 {t('theme.previewHint')}
                 <a
-                  href={`/preview?theme=${settings.theme_color || 'classic'}`}
+                  href={`/preview?theme=${settings.theme_color || 'classic'}&shape=${settings.button_shape || 'rounded'}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-700 underline underline-offset-2 hover:text-gray-900"
@@ -356,6 +364,47 @@ export default function SettingsPage() {
                 </a>
                 .
               </p>
+            </Section>
+
+            {/* Button shape — orthogonal to theme color. Three radius
+                presets; the segmented control's visual preview (each
+                button's own corners) is the strongest signal of what
+                each option does without needing a label-only chip. */}
+            <Section
+              title={t('buttonShape.title')}
+              description={t('buttonShape.description')}
+            >
+              <div className="grid grid-cols-3 gap-2 max-w-md">
+                {BUTTON_SHAPE_KEYS.map((key) => {
+                  const active = settings.button_shape === key
+                  const shapeClass =
+                    key === 'pill'
+                      ? 'rounded-full'
+                      : key === 'square'
+                        ? 'rounded-none'
+                        : 'rounded-xl'
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSettings((prev) => ({ ...prev, button_shape: key }))}
+                      className={`flex flex-col items-center gap-2 p-3 border transition ${
+                        active
+                          ? 'border-gray-900 bg-gray-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      } ${shapeClass}`}
+                    >
+                      <div
+                        className={`w-full h-7 bg-gray-900 ${shapeClass}`}
+                        aria-hidden
+                      />
+                      <span className="text-xs font-medium text-gray-700">
+                        {t(`buttonShape.${key}`)}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
             </Section>
 
             {/* Sections — reorder only. Empty sections already auto-hide in
