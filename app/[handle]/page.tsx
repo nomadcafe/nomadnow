@@ -1,5 +1,5 @@
 import React from 'react'
-import { NomadCard } from '@/components/NomadCard'
+import { NomadCardServer } from '@/components/NomadCardServer'
 import { ProfileNotFound } from '@/components/ProfileNotFound'
 import { ProfileExpired } from '@/components/ProfileExpired'
 import { CelebrationBanner } from '@/components/CelebrationBanner'
@@ -141,7 +141,7 @@ export default async function ProfilePage({
           the server means the banner's JS doesn't ship to repeat visitors. */}
       {showCelebration && <CelebrationBanner handle={handle} />}
 
-      <NomadCard
+      <NomadCardServer
         user={user}
         links={nomadLinks || []}
         stays={nomadStays || []}

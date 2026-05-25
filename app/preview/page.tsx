@@ -1,4 +1,4 @@
-import { NomadCard } from '@/components/NomadCard'
+import { NomadCardServer } from '@/components/NomadCardServer'
 import type { User, NomadLink } from '@/types/database'
 import { THEME_KEYS, type ThemeKey } from '@/lib/themes'
 import Link from 'next/link'
@@ -99,7 +99,7 @@ export default async function PreviewPage({
           </Link>
         ))}
       </div>
-      <NomadCard
+      <NomadCardServer
         user={previewUser}
         links={previewLinks}
         themeKey={themeKey}
