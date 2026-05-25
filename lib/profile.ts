@@ -1,6 +1,7 @@
 import { cache } from 'react'
 import { createServerSupabase } from './supabase/server'
 import { handleSchema } from './validation'
+import { logError } from './errors'
 import type { User, ProfileSettings, NomadLink, NomadStay } from '@/types/database'
 
 // Single source of truth for the public-profile read. Used by:
@@ -39,7 +40,17 @@ export const getProfileByHandle = cache(
       .select(PUBLIC_USER_COLUMNS)
       .eq('handle', handle)
       .single()
-    if (userError || !user) return null
+    if (userError) {
+      // PGRST116 = "no rows returned" — that's the genuine 404 path and
+      // doesn't deserve a log spam. Anything else (permission denied,
+      // missing column, RLS rejection) is a real failure we want visible
+      // in logs instead of silently rendering ProfileNotFound forever.
+      if (userError.code !== 'PGRST116') {
+        logError(userError, { operation: 'getProfileByHandle', handle })
+      }
+      return null
+    }
+    if (!user) return null
 
     const [settingsResult, linksResult, staysResult] = await Promise.all([
       supabase.from('profile_settings').select('*').eq('user_id', user.id).maybeSingle(),
