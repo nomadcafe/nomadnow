@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { deriveBillingState } from '@/lib/billing'
 import { getCountryName } from '@/lib/countries'
+import { createServerSupabase } from '@/lib/supabase/server'
 
 async function getProfileData(handle: string) {
   try {
@@ -132,6 +133,14 @@ export default async function ProfilePage({
     return <ProfileExpired handle={handle} />
   }
 
+  // Owner-of-this-card check, so NomadCard can swap "Make yours" for an
+  // "Edit your card" floating CTA. Anonymous visitors skip the auth roundtrip.
+  const supabase = await createServerSupabase()
+  const {
+    data: { user: viewer },
+  } = await supabase.auth.getUser()
+  const isOwner = viewer?.id === user.id
+
   const currentLocation = user.current_city || user.location
   const visitedNames: string[] = (user.visited_countries ?? [])
     .map((code: string) => getCountryName(code))
@@ -205,6 +214,7 @@ export default async function ProfilePage({
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
         hideMakeYoursCTA={Boolean(settings?.hide_branding)}
+        isOwner={isOwner}
       />
     </>
   )

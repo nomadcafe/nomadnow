@@ -6,6 +6,7 @@ import { MarqueeBand } from '@/components/MarqueeBand'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { AccountMenu } from '@/components/AccountMenu'
+import { GetYourCardButton } from '@/components/GetYourCardButton'
 
 const previewVisited = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
 
@@ -42,12 +43,9 @@ export default async function Home() {
             </Link>
             <AccountMenu className="hidden sm:inline-flex" />
             <LanguageSwitcher className="hidden sm:inline-flex" />
-            <Link
-              href="/pricing"
-              className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
-            >
+            <GetYourCardButton className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition">
               {tNav('getCard')}
-            </Link>
+            </GetYourCardButton>
           </div>
         </div>
       </nav>
@@ -84,15 +82,12 @@ export default async function Home() {
                 {t('heroSub2')}
               </p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-                <Link
-                  href="/pricing"
-                  className="group inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium text-base hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
-                >
+                <GetYourCardButton className="group inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium text-base hover:bg-gray-800 transition shadow-lg shadow-gray-900/10">
                   {tNav('getCard')}
                   <svg className="w-4 h-4 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                </Link>
+                </GetYourCardButton>
                 <div className="text-sm text-gray-500">
                   {t('heroPriceNote')}
                   <br />
@@ -307,15 +302,12 @@ export default async function Home() {
           <p className="text-lg text-gray-300 mb-10 max-w-md mx-auto">
             {t('darkCta.body')}
           </p>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center gap-2 bg-white text-gray-900 px-7 py-4 rounded-full font-medium text-base hover:bg-gray-100 transition shadow-xl shadow-black/40"
-          >
+          <GetYourCardButton className="inline-flex items-center gap-2 bg-white text-gray-900 px-7 py-4 rounded-full font-medium text-base hover:bg-gray-100 transition shadow-xl shadow-black/40">
             {t('darkCta.cta')}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-          </Link>
+          </GetYourCardButton>
           <div className="mt-6 text-sm text-gray-500">
             {t('darkCta.note')}
           </div>

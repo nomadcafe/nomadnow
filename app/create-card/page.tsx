@@ -2,15 +2,14 @@ import { redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase/server'
 import CreateCardForm from './CreateCardForm'
 
-// Auth gate only — middleware handles unauth redirects to /login; this layer
-// catches the no-auth-but-direct-render case.
+// Auth + existing-card gate. Middleware bounces unauth visitors to /login;
+// we additionally redirect users who already claimed a handle straight to
+// their public card so they don't see an empty "Claim your card" form
+// after coming back from Checkout.
 //
-// Why no plan gate here: handle-claim creates the public.users row, and the
-// Stripe webhook UPDATEs that row by id. Requiring a plan to access this
-// page traps users in a chicken-and-egg: pay first → webhook has no row to
-// update → still no plan → gated out → can't claim handle. Order is now
-// claim-handle → subscribe; the post-submit redirect in CreateCardForm
-// pushes unpaid users to /pricing after they claim.
+// No plan gate here on purpose — see commit history for why. Order is now
+// claim-handle → subscribe; the CreateCardForm's post-submit redirect routes
+// unpaid users to /pricing.
 export default async function CreateCardPage() {
   const supabase = await createServerSupabase()
   const {
@@ -19,5 +18,18 @@ export default async function CreateCardPage() {
   if (!user) {
     redirect('/login?next=/create-card')
   }
+
+  // If this user already has a row in public.users, they've already claimed
+  // their handle. Showing the empty form again would be a UNIQUE-conflict
+  // trap (id is primary key). Send them to their existing card instead.
+  const { data: existing } = await supabase
+    .from('users')
+    .select('handle')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (existing?.handle) {
+    redirect(`/${existing.handle}`)
+  }
+
   return <CreateCardForm />
 }

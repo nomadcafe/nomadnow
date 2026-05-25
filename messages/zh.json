@@ -105,6 +105,8 @@
     }
   },
   "pricing": {
+    "currentPlanLabel": "当前套餐",
+    "manageSubscription": "管理订阅",
     "headline": "两个套餐。没广告。没抽成。",
     "subhead": "我们不提供免费档 — 这样平台才能保持干净、无广告、为游民而生而不是为广告主而生。",
     "mostPopular": "最受欢迎",
@@ -371,6 +373,10 @@
   "makeYoursCTA": {
     "cta": "做你自己的",
     "aria": "创建你自己的 Nomad Card"
+  },
+  "editCardCTA": {
+    "cta": "编辑卡片",
+    "aria": "编辑你的 Nomad Card 设置"
   },
   "roles": {
     "Designer": "设计师",

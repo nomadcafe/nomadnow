@@ -73,7 +73,7 @@ export default function CreateCardForm() {
   const tRole = useTranslations('roles')
   const tLinkType = useTranslations('card.linkTypes')
   const router = useRouter()
-  const { toasts, showSuccess, showError, removeToast } = useToast()
+  const { toasts, showError, removeToast } = useToast()
   const [loading, setLoading] = useState(false)
   const [handleStatus, setHandleStatus] = useState<HandleStatus>('idle')
   const [handleError, setHandleError] = useState<string>('')
@@ -278,17 +278,13 @@ export default function CreateCardForm() {
       }
 
       clearDraft()
-      showSuccess(t('successToast'))
-      // /api/users returns the row after Stripe-orphan-subscription recovery,
-      // so user.plan is populated if they paid before claiming the handle.
-      // Send unpaid users to /pricing to subscribe; paid users land on their
-      // public card.
+      // Skip the setTimeout-with-toast pattern — during the 1.2s wait the
+      // user could refresh / click again and end up double-submitting.
+      // The new URL (their card or /pricing) is its own confirmation.
       const claimedPlan = data?.user?.plan as 'basic' | 'pro' | null | undefined
       const handleSlug = formData.handle.trim().toLowerCase()
-      const nextPath = claimedPlan ? `/${handleSlug}` : '/pricing'
-      setTimeout(() => {
-        router.push(nextPath)
-      }, 1200)
+      const nextPath = claimedPlan ? `/${handleSlug}` : '/pricing?from=create'
+      router.push(nextPath)
     } catch (error) {
       showError(error instanceof Error ? error.message : t('errorGeneric'))
     } finally {

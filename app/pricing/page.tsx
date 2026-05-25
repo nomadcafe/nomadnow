@@ -6,6 +6,8 @@ import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { AccountMenu } from '@/components/AccountMenu'
 import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
+import { createServerSupabase } from '@/lib/supabase/server'
+import { getBillingState } from '@/lib/billing'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata')
@@ -168,6 +170,17 @@ export default async function PricingPage() {
   const tNav = await getTranslations('nav')
   const soonLabel = tCommon('soon').toUpperCase()
 
+  // Detect whether the viewer is already paying so we can dim the button on
+  // their current plan and route the other plan's CTA into the Customer
+  // Portal instead of creating a second Stripe subscription.
+  const supabase = await createServerSupabase()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const currentPlan = user
+    ? (await getBillingState(supabase, user.id)).plan
+    : null
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur">
@@ -238,6 +251,7 @@ export default async function PricingPage() {
             </ul>
             <PlanCheckoutButton
               plan="basic"
+              currentPlan={currentPlan}
               className="w-full block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
             >
               {t('basic.cta')}
@@ -267,6 +281,7 @@ export default async function PricingPage() {
             </ul>
             <PlanCheckoutButton
               plan="pro"
+              currentPlan={currentPlan}
               className="w-full block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
             >
               {t('pro.cta')}
@@ -363,6 +378,7 @@ export default async function PricingPage() {
           </p>
           <PlanCheckoutButton
             plan="basic"
+            currentPlan={currentPlan}
             className="inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
           >
             <span>{t('finalCta.cta')}</span>
