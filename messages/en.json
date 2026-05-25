@@ -107,6 +107,7 @@
   "pricing": {
     "currentPlanLabel": "Current plan",
     "manageSubscription": "Manage subscription",
+    "comingMore": "More features rolling out regularly.",
     "headline": "Two plans. No ads. No fees.",
     "subhead": "We don't offer a free tier — it's how we keep the platform clean, ad-free, and built for nomads instead of advertisers.",
     "mostPopular": "Most popular",
@@ -164,7 +165,7 @@
       "emailPro": "Priority"
     },
     "basicBullets": {
-      "premiumDomain": "Your handle on nomad.now — a premium .now domain",
+      "premiumDomain": "A premium handle on nomad.now",
       "publicProfile": "Public profile page",
       "worldMap": "Visited countries world map",
       "liveTimezone": "Current city + live timezone",

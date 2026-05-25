@@ -107,6 +107,7 @@
   "pricing": {
     "currentPlanLabel": "現在のプラン",
     "manageSubscription": "サブスクリプションを管理",
+    "comingMore": "新機能を順次追加していきます。",
     "headline": "2 つのプラン。広告なし。手数料なし。",
     "subhead": "無料プランは提供していません — 広告主のためじゃなく、ノマドのために作られたクリーンなサービスを保つために。",
     "mostPopular": "人気",
@@ -164,7 +165,7 @@
       "emailPro": "優先"
     },
     "basicBullets": {
-      "premiumDomain": "nomad.now であなたのハンドル — プレミアム .now ドメイン",
+      "premiumDomain": "nomad.now のプレミアムハンドル",
       "publicProfile": "公開プロフィールページ",
       "worldMap": "訪問国の世界地図",
       "liveTimezone": "現在の都市 + ライブタイムゾーン",
