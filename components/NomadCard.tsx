@@ -130,7 +130,12 @@ export const getLinkIcon = (type: string) => {
   }
 }
 
-const WORK_STATUS_KEYS = ['available', 'freelancing', 'busy', 'fulltime'] as const
+// Active preset slugs. Custom strings render verbatim — the form lets users
+// write their own status — and `available` was removed as a preset, so old
+// cards that still have it stored fall through to REMOVED_STATUS_KEYS and
+// don't render the pill at all.
+const WORK_STATUS_KEYS = ['freelancing', 'busy', 'fulltime'] as const
+const REMOVED_STATUS_KEYS = new Set(['available'])
 
 function useLocalTime(timezone?: string) {
   const [time, setTime] = useState<string | null>(null)
@@ -283,7 +288,7 @@ export function NomadCard({
       </div>
     ),
     location: () => {
-      if (!displayLocation && !user.hometown) return null
+      if (!displayLocation) return null
       return (
         <div key="location" className="text-center mb-2">
           {displayLocation && (
@@ -311,9 +316,6 @@ export function NomadCard({
                 )}
               </span>
             </p>
-          )}
-          {user.hometown && (
-            <p className={`text-sm mt-1 ${theme.textMuted}`}>{t('fromHometown', { city: user.hometown })}</p>
           )}
         </div>
       )
@@ -397,7 +399,7 @@ export function NomadCard({
           </svg>
           {t('verified')}
         </span>
-        {user.work_status && (
+        {user.work_status && !REMOVED_STATUS_KEYS.has(user.work_status) && (
           <span
             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${theme.pillNeutral}`}
           >

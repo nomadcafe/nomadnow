@@ -11,7 +11,10 @@ export interface User {
   role?: string
   hometown?: string
   current_city?: string
-  work_status?: 'available' | 'busy' | 'fulltime' | 'freelancing'
+  // Free-form. Preset slugs ('freelancing' | 'busy' | 'fulltime') get
+  // localised labels in NomadCard; anything else renders verbatim so
+  // users can write their own status (e.g., "slow travel mode").
+  work_status?: string
   timezone?: string
   visited_countries?: string[]
   // Kept as string for forward compat. App code treats every profile as nomad

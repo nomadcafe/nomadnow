@@ -17,7 +17,10 @@ const createUserSchema = z.object({
   role: z.string().max(100).optional(),
   hometown: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
-  work_status: z.enum(['available', 'busy', 'fulltime', 'freelancing']).optional(),
+  // Free-form string up to 60 chars. Preset slugs (busy, freelancing,
+  // fulltime) get translated by NomadCard; anything else renders verbatim
+  // so users can write custom statuses like "slow travel mode".
+  work_status: z.string().max(60).optional().or(z.literal('')),
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
@@ -33,7 +36,10 @@ const updateUserSchema = z.object({
   role: z.string().max(100).optional(),
   hometown: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
-  work_status: z.enum(['available', 'busy', 'fulltime', 'freelancing']).optional(),
+  // Free-form string up to 60 chars. Preset slugs (busy, freelancing,
+  // fulltime) get translated by NomadCard; anything else renders verbatim
+  // so users can write custom statuses like "slow travel mode".
+  work_status: z.string().max(60).optional().or(z.literal('')),
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),

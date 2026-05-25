@@ -15,7 +15,7 @@ export interface SectionDef {
 export const NOMAD_SECTIONS: SectionDef[] = [
   { id: 'avatar', label: 'Avatar', description: 'Profile picture or initial' },
   { id: 'name', label: 'Name & role', description: 'Display name and what you do', required: true },
-  { id: 'location', label: 'Currently in', description: 'City + live local time + hometown' },
+  { id: 'location', label: 'Currently in', description: 'City + live local time' },
   { id: 'bio', label: 'Bio', description: 'One-line introduction' },
   { id: 'stats', label: 'Stats', description: 'Countries visited + member since' },
   { id: 'map', label: 'World map', description: 'Visited countries plotted as constellation' },

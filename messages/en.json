@@ -74,8 +74,8 @@
     },
     "feature3": {
       "label": "Status",
-      "title": "Tell people what you're open to.",
-      "body": "Three taps to swap between open to collaboration, freelancing, full-time, or just resting. Visible above the fold, never out of date.",
+      "title": "Tell people what you're up to.",
+      "body": "Pick a preset like freelancing or full-time, or write your own. Visible above the fold, never out of date.",
       "slowTravel": "Slow travel mode"
     },
     "comparison": {
@@ -249,7 +249,6 @@
         "role": "add your role",
         "bio": "add a short bio",
         "city": "add your current city",
-        "hometown": "add your hometown",
         "countries": "mark visited countries",
         "links": "add at least one link"
       }
@@ -281,10 +280,11 @@
     "collapse": "Hide extras",
     "role": "Role",
     "status": "Status",
+    "statusNone": "—",
+    "statusCustom": "Custom…",
+    "statusCustomPlaceholder": "What you're up to",
     "bio": "One-line bio",
     "bioPlaceholder": "Building tools for remote life.",
-    "hometown": "From",
-    "hometownPlaceholder": "Osaka",
     "avatar": {
       "label": "Avatar",
       "upload": "Upload",
@@ -398,12 +398,10 @@
     "shareTitle": "Share this card",
     "copyLink": "Copy link",
     "copied": "Copied!",
-    "fromHometown": "From {city}",
     "countryOne": "country",
     "countryMany": "countries",
     "memberSince": "member since",
     "workStatus": {
-      "available": "Open to collaboration",
       "freelancing": "Freelancing",
       "busy": "Busy",
       "fulltime": "Full-time"
