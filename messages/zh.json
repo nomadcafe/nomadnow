@@ -108,6 +108,14 @@
     "subhead": "我们不提供免费档 — 这样平台才能保持干净、无广告、为游民而生而不是为广告主而生。",
     "mostPopular": "最受欢迎",
     "perMonth": "/月",
+    "perYear": "/年",
+    "billing": {
+      "aria": "计费周期",
+      "monthly": "按月",
+      "yearly": "按年",
+      "save": "最高省 32%"
+    },
+    "yearlyComingSoon": "年付即将上线",
     "basic": {
       "label": "Basic",
       "tagline": "登上地图。一张公开游民卡片所需的一切。",
@@ -118,7 +126,7 @@
       "tagline": "拥有你的游民品牌。自定义域名、认证徽章、高级分析。",
       "cta": "升级 Pro"
     },
-    "footnote": "美元价格。按月计费。随时可取消 — 卡片在当期结束前保持在线。",
+    "footnote": "美元价格。随时可取消 — 卡片在当期结束前保持在线。",
     "compareTitle": "套餐对比",
     "compare": {
       "feature": "功能",

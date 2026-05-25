@@ -108,6 +108,14 @@
     "subhead": "We don't offer a free tier — it's how we keep the platform clean, ad-free, and built for nomads instead of advertisers.",
     "mostPopular": "Most popular",
     "perMonth": "/mo",
+    "perYear": "/yr",
+    "billing": {
+      "aria": "Billing interval",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save": "Save up to 32%"
+    },
+    "yearlyComingSoon": "Annual billing — coming soon",
     "basic": {
       "label": "Basic",
       "tagline": "Get on the map. Everything you need for a public nomad card.",
@@ -118,7 +126,7 @@
       "tagline": "Own your nomad brand. Custom domain, verified badge, advanced analytics.",
       "cta": "Go Pro"
     },
-    "footnote": "Prices in USD. Billed monthly. Cancel any time — your card stays live to the end of the current period.",
+    "footnote": "Prices in USD. Cancel any time — your card stays live to the end of the current period.",
     "compareTitle": "Compare plans",
     "compare": {
       "feature": "Feature",
