@@ -19,11 +19,16 @@ export default async function CreateCardPage() {
     redirect('/login?next=/create-card')
   }
 
-  // Pull existing profile + links in parallel. Both queries hit RLS-public
-  // tables so no admin client needed.
-  const [{ data: profile }, { data: links }] = await Promise.all([
+  // Pull existing profile + links + stays in parallel. All queries hit
+  // RLS-public tables so no admin client needed.
+  const [{ data: profile }, { data: links }, { data: stays }] = await Promise.all([
     supabase.from('users').select('*').eq('id', user.id).maybeSingle(),
     supabase.from('nomad_links').select('*').eq('user_id', user.id).order('order_index'),
+    supabase
+      .from('nomad_stays')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('start_date', { ascending: false }),
   ])
 
   const initial: InitialCardData | null = profile
@@ -41,6 +46,15 @@ export default async function CreateCardPage() {
           type: l.type as InitialCardData['links'][number]['type'],
           label: (l.label as string | null) ?? '',
           url: l.url as string,
+        })),
+        stays: (stays ?? []).map((s) => ({
+          city: (s.city as string) ?? '',
+          country: (s.country as string) ?? '',
+          start_date: (s.start_date as string) ?? '',
+          // DATE column comes back as null when "currently here"; the form
+          // shape uses '' for empty so the <input type=date> stays clean.
+          end_date: (s.end_date as string | null) ?? '',
+          notes: (s.notes as string | null) ?? '',
         })),
       }
     : null

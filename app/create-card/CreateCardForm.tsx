@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
 import { AvatarUploader } from '@/components/AvatarUploader'
 import { LiveCardPreview, isPreviewEmpty } from '@/components/LiveCardPreview'
+import { StaysEditor, type StayDraft } from '@/components/StaysEditor'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { debounce } from '@/lib/debounce'
@@ -65,6 +66,7 @@ export interface InitialCardData {
   timezone: string
   visited_countries: string[]
   links: NomadLink[]
+  stays: StayDraft[]
 }
 
 // Cached at module scope so the dropdown doesn't recompute on every render.
@@ -121,6 +123,7 @@ const STORAGE_KEY = 'nomad-card-draft'
 export default function CreateCardForm({ initial }: { initial?: InitialCardData | null }) {
   const isEdit = Boolean(initial)
   const t = useTranslations('createCard')
+  const tStays = useTranslations('stays')
   const tStatus = useTranslations('card.workStatus')
   const tRole = useTranslations('roles')
   const tLinkType = useTranslations('card.linkTypes')
@@ -175,6 +178,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     initial?.visited_countries ?? savedDraft?.visitedCountries ?? [],
   )
   const [links, setLinks] = useState<NomadLink[]>(initial?.links ?? savedDraft?.links ?? [])
+  const [stays, setStays] = useState<StayDraft[]>(initial?.stays ?? savedDraft?.stays ?? [])
 
   // Auto-expand the optional section if the user has any saved draft data in it,
   // so they don't lose visibility into in-progress work.
@@ -214,12 +218,12 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
   useEffect(() => {
     if (isEdit || typeof window === 'undefined') return
     try {
-      const draft = { ...formData, visitedCountries, links }
+      const draft = { ...formData, visitedCountries, links, stays }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
     } catch {
       // Ignore storage errors
     }
-  }, [formData, visitedCountries, links, isEdit])
+  }, [formData, visitedCountries, links, stays, isEdit])
 
   const clearDraft = () => {
     if (typeof window === 'undefined') return
@@ -387,6 +391,30 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
         )
       }
 
+      // Stays sync: replace-all in both modes. The form always submits the
+      // full desired set; server wipes and re-inserts. Skip the PUT entirely
+      // when the user has no stays (saves a round-trip).
+      const validStays = stays.filter((s) => s.city.trim() && s.country && s.start_date)
+      if (isEdit || validStays.length > 0) {
+        const staysResponse = await fetch('/api/stays', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stays: validStays.map((s) => ({
+              city: s.city.trim(),
+              country: s.country,
+              start_date: s.start_date,
+              end_date: s.end_date || null,
+              notes: s.notes?.trim() || null,
+            })),
+          }),
+        })
+        if (!staysResponse.ok) {
+          const staysData = await staysResponse.json().catch(() => ({}))
+          throw new Error(staysData.error || t('errorGeneric'))
+        }
+      }
+
       clearDraft()
       const handleSlug = (initial?.handle ?? formData.handle).trim().toLowerCase()
       // Edit mode: back to public card, no celebration (their card was
@@ -454,6 +482,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                   { key: 'role', filled: !!formData.role },
                   { key: 'bio', filled: !!formData.bio.trim() },
                   { key: 'city', filled: !!formData.current_city.trim() },
+                  { key: 'stays', filled: stays.some((s) => s.city.trim() && s.country && s.start_date) },
                   { key: 'countries', filled: visitedCountries.length > 0 },
                   { key: 'links', filled: links.some((l) => l.url.trim()) },
                 ]}
@@ -764,6 +793,18 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                     </div>
                   </div>
 
+                  {/* Stays — city-level travel with day counts. Lives above
+                      the country-level multi-select because most users want
+                      to add city detail and the country list still has
+                      value as a quick "I've been here" picker. */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                      {tStays('editorTitle')}
+                    </label>
+                    <p className="mb-3 text-xs text-gray-500">{tStays('editorHint')}</p>
+                    <StaysEditor stays={stays} onChange={setStays} />
+                  </div>
+
                   {/* Visited countries */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1.5">
@@ -828,6 +869,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                   <LiveCardPreview
                     form={formData}
                     links={links}
+                    stays={stays}
                     visitedCountries={visitedCountries}
                     themeKey="classic"
                   />

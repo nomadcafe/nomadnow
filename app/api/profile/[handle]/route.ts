@@ -35,7 +35,7 @@ export async function GET(
       throw new NotFoundError('User')
     }
 
-    const [settingsResult, nomadLinksResult] = await Promise.all([
+    const [settingsResult, nomadLinksResult, nomadStaysResult] = await Promise.all([
       supabase
         .from('profile_settings')
         .select('*')
@@ -46,6 +46,11 @@ export async function GET(
         .select('*')
         .eq('user_id', user.id)
         .order('order_index', { ascending: true }),
+      supabase
+        .from('nomad_stays')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('start_date', { ascending: false }),
     ])
 
     return NextResponse.json(
@@ -53,6 +58,7 @@ export async function GET(
         user,
         settings: settingsResult.data || undefined,
         nomadLinks: nomadLinksResult.data || [],
+        nomadStays: nomadStaysResult.data || [],
       },
       {
         headers: {
