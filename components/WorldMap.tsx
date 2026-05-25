@@ -26,7 +26,7 @@ function project(lat: number, lon: number) {
   return { x, y }
 }
 
-// Map a weight to a dot radius. Uses sqrt so a country with 100 visitors
+// Maps a weight to a dot radius. Uses sqrt so a country with 100 visitors
 // isn't 10x bigger than one with 10 — it's ~3x. Clamped so single-visitor
 // countries are still visible and outliers don't dominate the canvas.
 function radiusForWeight(weight: number, maxWeight: number): number {
@@ -35,6 +35,20 @@ function radiusForWeight(weight: number, maxWeight: number): number {
   const maxR = 22
   const norm = Math.sqrt(weight) / Math.sqrt(maxWeight || 1)
   return minR + (maxR - minR) * norm
+}
+
+// ISO 3166-1 alpha-2 → regional indicator emoji pair (e.g. "JP" → 🇯🇵).
+// Works across modern browsers and most mobile platforms. Renders inside
+// SVG <text>; cross-platform fallback is the country name in the title.
+function flagFor(code: string): string {
+  if (!code || code.length !== 2) return ''
+  const A = 0x1f1e6
+  return String.fromCodePoint(
+    ...code
+      .toUpperCase()
+      .split('')
+      .map((c) => A + c.charCodeAt(0) - 65),
+  )
 }
 
 export function WorldMap({
@@ -51,6 +65,11 @@ export function WorldMap({
 
   const maxWeight = isDensity ? Math.max(...Object.values(weights!)) : 0
 
+  // Stable id for SVG defs — needed for filter / animation refs. Different
+  // accent colors get different ids so two WorldMaps on the same page (e.g.
+  // /map plus a preview) don't clash.
+  const idSuffix = accentColor.replace('#', '')
+
   return (
     <div className={`w-full ${className}`}>
       <svg
@@ -64,11 +83,30 @@ export function WorldMap({
         }
         className="w-full h-auto"
       >
-        {/* Latitude reference lines */}
+        <defs>
+          {/* Soft glow behind highlighted dots — radial gradient that fades
+              from the accent color to transparent. */}
+          <radialGradient id={`dot-glow-${idSuffix}`}>
+            <stop offset="0%" stopColor={accentColor} stopOpacity="0.35" />
+            <stop offset="60%" stopColor={accentColor} stopOpacity="0.08" />
+            <stop offset="100%" stopColor={accentColor} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Latitude reference lines: equator + tropics. */}
         <g stroke={latStroke} strokeWidth="1" fill="none">
           <line x1="0" y1={H / 2} x2={W} y2={H / 2} />
           <line x1="0" y1={((90 - 23.5) / 180) * H} x2={W} y2={((90 - 23.5) / 180) * H} />
           <line x1="0" y1={((90 + 23.5) / 180) * H} x2={W} y2={((90 + 23.5) / 180) * H} />
+        </g>
+
+        {/* Longitude reference lines: every 60°. Subtle — adds geographic
+            context without competing with the dots. */}
+        <g stroke={latStroke} strokeWidth="1" fill="none" strokeDasharray="2 4">
+          {[-120, -60, 0, 60, 120].map((lon) => {
+            const x = ((lon + 180) / 360) * W
+            return <line key={lon} x1={x} y1="0" x2={x} y2={H} />
+          })}
         </g>
 
         {/* Base constellation (only when not in density mode, or for countries with 0 weight) */}
@@ -95,7 +133,8 @@ export function WorldMap({
               const r = radiusForWeight(w, maxWeight)
               return (
                 <g key={c.code}>
-                  <circle cx={x} cy={y} r={r * 1.8} fill={accentColor} opacity="0.15" />
+                  {/* Soft glow halo */}
+                  <circle cx={x} cy={y} r={r * 2.4} fill={`url(#dot-glow-${idSuffix})`} />
                   <circle cx={x} cy={y} r={r} fill={accentColor}>
                     <title>{`${getCountryName(c.code)} — ${w} ${w === 1 ? 'nomad' : 'nomads'}`}</title>
                   </circle>
@@ -104,15 +143,45 @@ export function WorldMap({
             }
             if (!visited.has(c.code)) return null
             return (
-              <g key={c.code}>
-                <circle cx={x} cy={y} r={11} fill={accentColor} opacity="0.15" />
-                <circle cx={x} cy={y} r={5.5} fill={accentColor}>
+              <g key={c.code} className="motion-safe:animate-pulse-slow">
+                <circle cx={x} cy={y} r={16} fill={`url(#dot-glow-${idSuffix})`} />
+                <circle cx={x} cy={y} r={6} fill={accentColor} stroke="white" strokeWidth="1.5">
                   <title>{getCountryName(c.code)}</title>
                 </circle>
+                {/* Flag emoji floats just above the dot. Renders cross-platform
+                    in modern browsers; if a device doesn't have flag glyphs,
+                    the dot still conveys the location. */}
+                <text
+                  x={x}
+                  y={y - 12}
+                  fontSize="11"
+                  textAnchor="middle"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  {flagFor(c.code)}
+                </text>
               </g>
             )
           })}
         </g>
+
+        {/* Count overlay in bottom-right — gives the map a sense of scale
+            at a glance without forcing the user to count dots. */}
+        {visitedCount > 0 && !isDensity && (
+          <g>
+            <text
+              x={W - 12}
+              y={H - 12}
+              textAnchor="end"
+              fontSize="14"
+              fontWeight="600"
+              fill={baseColor === '#e5e7eb' ? '#374151' : 'white'}
+              opacity="0.7"
+            >
+              {visitedCount} {visitedCount === 1 ? 'country' : 'countries'}
+            </text>
+          </g>
+        )}
       </svg>
     </div>
   )
