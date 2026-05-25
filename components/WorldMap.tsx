@@ -1,4 +1,5 @@
 import { countries, getCountryName } from '@/lib/countries'
+import { mergedVisitedCodes } from '@/lib/stays'
 
 interface CityDot {
   // Display name (e.g. "Bangkok"). Used for the SVG <title> tooltip.
@@ -76,13 +77,11 @@ export function WorldMap({
   weights,
 }: WorldMapProps) {
   const isDensity = !!weights && Object.keys(weights).length > 0
-  const visited = new Set(visitedCodes ?? [])
-  const visitedCount = visited.size
   const latStroke = baseColor === '#e5e7eb' ? '#f3f4f6' : `${baseColor}33`
 
-  // Only use city dots when at least one stay has coordinates — partial
-  // data falls back to country-level so users who haven't completed all
-  // geocoded entries still see something.
+  // Only render city dots from stays that actually carry coordinates —
+  // a stay without lat/lon (user typed a city without picking an
+  // autocomplete suggestion) shouldn't render at (0, 0).
   const validCityDots = (cityDots ?? []).filter(
     (d) => typeof d.lat === 'number' && typeof d.lon === 'number',
   )
@@ -90,7 +89,14 @@ export function WorldMap({
   const dedupedCityDots = Array.from(
     new Map(validCityDots.map((d) => [`${d.city}-${d.country}`, d])).values(),
   )
-  const useCityMode = !isDensity && dedupedCityDots.length > 0
+  // Country highlights now come from the UNION of explicit visited_countries
+  // toggles and the countries derived from city stays. Before this merge, a
+  // user with stays would lose all country-level highlighting because the
+  // map flipped to "city mode" exclusively — losing visual context for
+  // countries they'd visited without recording a specific city.
+  const visited = isDensity ? new Set<string>() : mergedVisitedCodes(visitedCodes, dedupedCityDots)
+  const visitedCount = visited.size
+  const cityCount = dedupedCityDots.length
 
   const maxWeight = isDensity ? Math.max(...Object.values(weights!)) : 0
 
@@ -152,71 +158,69 @@ export function WorldMap({
           })}
         </g>
 
-        {/* Foreground dots */}
+        {/* Foreground country dots — density mode uses weights to size the
+            dots; otherwise renders one dot per code in the merged visited
+            set. City dots are layered on top in a separate <g> below. */}
         <g>
-          {useCityMode
-            ? // City mode — plot dots at exact stay coordinates. Smaller
-              // than country-mode dots so multiple cities in one country
-              // don't blob together. City name renders above the dot.
-              dedupedCityDots.map((d) => {
-                const { x, y } = project(d.lat, d.lon)
-                return (
-                  <g key={`${d.city}-${d.country}-${d.lat}-${d.lon}`} className="motion-safe:animate-pulse-slow">
-                    <circle cx={x} cy={y} r={12} fill={`url(#dot-glow-${idSuffix})`} />
-                    <circle cx={x} cy={y} r={4.5} fill={accentColor} stroke="white" strokeWidth="1.25">
-                      <title>{`${d.city}, ${getCountryName(d.country)}`}</title>
-                    </circle>
-                    <text
-                      x={x}
-                      y={y - 10}
-                      fontSize="10"
-                      textAnchor="middle"
-                      style={{ pointerEvents: 'none' }}
-                    >
-                      {flagFor(d.country)}
-                    </text>
-                  </g>
-                )
-              })
-            : countries.map((c) => {
-                const { x, y } = project(c.lat, c.lon)
-                if (isDensity) {
-                  const w = weights![c.code] ?? 0
-                  if (w <= 0) return null
-                  const r = radiusForWeight(w, maxWeight)
-                  return (
-                    <g key={c.code}>
-                      <circle cx={x} cy={y} r={r * 2.4} fill={`url(#dot-glow-${idSuffix})`} />
-                      <circle cx={x} cy={y} r={r} fill={accentColor}>
-                        <title>{`${getCountryName(c.code)} — ${w} ${w === 1 ? 'nomad' : 'nomads'}`}</title>
-                      </circle>
-                    </g>
-                  )
-                }
-                if (!visited.has(c.code)) return null
-                return (
-                  <g key={c.code} className="motion-safe:animate-pulse-slow">
-                    <circle cx={x} cy={y} r={16} fill={`url(#dot-glow-${idSuffix})`} />
-                    <circle cx={x} cy={y} r={6} fill={accentColor} stroke="white" strokeWidth="1.5">
-                      <title>{getCountryName(c.code)}</title>
-                    </circle>
-                    <text
-                      x={x}
-                      y={y - 12}
-                      fontSize="11"
-                      textAnchor="middle"
-                      style={{ pointerEvents: 'none' }}
-                    >
-                      {flagFor(c.code)}
-                    </text>
-                  </g>
-                )
-              })}
+          {countries.map((c) => {
+            const { x, y } = project(c.lat, c.lon)
+            if (isDensity) {
+              const w = weights![c.code] ?? 0
+              if (w <= 0) return null
+              const r = radiusForWeight(w, maxWeight)
+              return (
+                <g key={c.code}>
+                  <circle cx={x} cy={y} r={r * 2.4} fill={`url(#dot-glow-${idSuffix})`} />
+                  <circle cx={x} cy={y} r={r} fill={accentColor}>
+                    <title>{`${getCountryName(c.code)} — ${w} ${w === 1 ? 'nomad' : 'nomads'}`}</title>
+                  </circle>
+                </g>
+              )
+            }
+            if (!visited.has(c.code)) return null
+            return (
+              <g key={c.code} className="motion-safe:animate-pulse-slow">
+                <circle cx={x} cy={y} r={16} fill={`url(#dot-glow-${idSuffix})`} />
+                <circle cx={x} cy={y} r={6} fill={accentColor} stroke="white" strokeWidth="1.5">
+                  <title>{getCountryName(c.code)}</title>
+                </circle>
+                <text
+                  x={x}
+                  y={y - 12}
+                  fontSize="11"
+                  textAnchor="middle"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  {flagFor(c.code)}
+                </text>
+              </g>
+            )
+          })}
         </g>
 
-        {/* Count overlay in bottom-right. City mode counts the dots
-            themselves; country mode counts visited country codes. */}
-        {!isDensity && (useCityMode ? dedupedCityDots.length > 0 : visitedCount > 0) && (
+        {/* City-level dots layered on top — smaller than country dots so
+            multiple cities in one country don't blob into the country
+            highlight. City name flag renders above each dot. */}
+        {!isDensity && cityCount > 0 && (
+          <g>
+            {dedupedCityDots.map((d) => {
+              const { x, y } = project(d.lat, d.lon)
+              return (
+                <g key={`${d.city}-${d.country}-${d.lat}-${d.lon}`} className="motion-safe:animate-pulse-slow">
+                  <circle cx={x} cy={y} r={10} fill={`url(#dot-glow-${idSuffix})`} />
+                  <circle cx={x} cy={y} r={3.5} fill={accentColor} stroke="white" strokeWidth="1.25">
+                    <title>{`${d.city}, ${getCountryName(d.country)}`}</title>
+                  </circle>
+                </g>
+              )
+            })}
+          </g>
+        )}
+
+        {/* Count overlay in bottom-right. Shows both numbers when both
+            sources have data; falls back to whichever single number when
+            only one is present. */}
+        {!isDensity && (visitedCount > 0 || cityCount > 0) && (
           <g>
             <text
               x={W - 12}
@@ -227,9 +231,11 @@ export function WorldMap({
               fill={baseColor === '#e5e7eb' ? '#374151' : 'white'}
               opacity="0.7"
             >
-              {useCityMode
-                ? `${dedupedCityDots.length} ${dedupedCityDots.length === 1 ? 'city' : 'cities'}`
-                : `${visitedCount} ${visitedCount === 1 ? 'country' : 'countries'}`}
+              {cityCount > 0 && visitedCount > 0
+                ? `${cityCount} ${cityCount === 1 ? 'city' : 'cities'} · ${visitedCount} ${visitedCount === 1 ? 'country' : 'countries'}`
+                : cityCount > 0
+                  ? `${cityCount} ${cityCount === 1 ? 'city' : 'cities'}`
+                  : `${visitedCount} ${visitedCount === 1 ? 'country' : 'countries'}`}
             </text>
           </g>
         )}
