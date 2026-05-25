@@ -107,6 +107,7 @@
   "pricing": {
     "currentPlanLabel": "当前套餐",
     "manageSubscription": "管理订阅",
+    "comingMore": "更多新功能陆续推出。",
     "headline": "两个套餐。没广告。没抽成。",
     "subhead": "我们不提供免费档 — 这样平台才能保持干净、无广告、为游民而生而不是为广告主而生。",
     "mostPopular": "最受欢迎",
@@ -164,7 +165,7 @@
       "emailPro": "优先"
     },
     "basicBullets": {
-      "premiumDomain": "你的 handle 在 nomad.now —— 一个 premium .now 域名",
+      "premiumDomain": "nomad.now 上的优质 handle",
       "publicProfile": "公开主页",
       "worldMap": "去过国家的世界地图",
       "liveTimezone": "当前城市 + 实时时区",

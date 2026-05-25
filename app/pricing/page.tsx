@@ -240,7 +240,7 @@ export default async function PricingPage() {
               </div>
               <p className="mt-2 text-sm text-gray-300">{t('basic.tagline')}</p>
             </div>
-            <ul className="space-y-3 mb-8 flex-1">
+            <ul className="space-y-3 flex-1">
               {BASIC_BULLET_KEYS.map((key) => (
                 <li key={key} className="flex items-start gap-2.5 text-[15px] text-gray-100">
                   <Check className="text-amber-300 mt-0.5 shrink-0" />
@@ -248,6 +248,7 @@ export default async function PricingPage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-4 mb-8 text-xs text-gray-400 italic">{t('comingMore')}</p>
             <PlanCheckoutButton
               plan="basic"
               currentPlan={currentPlan}
@@ -267,7 +268,7 @@ export default async function PricingPage() {
               </div>
               <p className="mt-2 text-sm text-gray-600">{t('pro.tagline')}</p>
             </div>
-            <ul className="space-y-3 mb-8 flex-1">
+            <ul className="space-y-3 flex-1">
               {PRO_BULLET_KEYS.map(({ key, soon }) => (
                 <li key={key} className="flex items-start gap-2.5 text-[15px] text-gray-800">
                   <Check className="text-gray-700 mt-0.5 shrink-0" />
@@ -278,6 +279,7 @@ export default async function PricingPage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-4 mb-8 text-xs text-gray-500 italic">{t('comingMore')}</p>
             <PlanCheckoutButton
               plan="pro"
               currentPlan={currentPlan}
