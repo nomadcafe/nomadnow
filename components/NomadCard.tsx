@@ -10,6 +10,7 @@ import { stayDayCount, mergedVisitedCodes, splitStays, computeTravelStats, forma
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { VideoLightbox, detectVideo } from './VideoLightbox'
+import { PhotoLightbox } from './PhotoLightbox'
 import Link from 'next/link'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
@@ -237,6 +238,14 @@ export function NomadCard({
   // URL of the embed that's currently open in the video lightbox, or null
   // when no video is open. Detected from link URLs on click.
   const [videoEmbed, setVideoEmbed] = useState<string | null>(null)
+  // Lightbox open-state for stay photos. Null = closed. When set we render
+  // PhotoLightbox over the page with the given photo set + caption +
+  // starting index. State stays here (rather than inside the stays
+  // section renderer) so the lightbox survives across re-renders.
+  const [photoLightbox, setPhotoLightbox] = useState<
+    | { photos: string[]; index: number; caption: string }
+    | null
+  >(null)
   const theme = getTheme(themeKey)
   const shape = getButtonShape(buttonShape)
   const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
@@ -473,38 +482,59 @@ export function NomadCard({
           )}
           {currentStay && (() => {
             const photos = currentStay.photo_urls ?? []
+            const caption = `${currentStay.city}, ${getCountryName(currentStay.country)}`
+            const openLightboxAt = (index: number) =>
+              setPhotoLightbox({ photos, index, caption })
             return (
             <div className={`rounded-xl mb-3 border ${theme.divider} overflow-hidden`}>
               {photos.length === 1 && (
-                /* Single hero photo — full-width banner above the text. */
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={photos[0]}
-                  alt=""
-                  className="w-full h-40 sm:h-48 object-cover"
-                  loading="lazy"
-                />
+                /* Single hero photo — full-width banner above the text.
+                   Clickable to open the lightbox for a full-bleed view. */
+                <button
+                  type="button"
+                  onClick={() => openLightboxAt(0)}
+                  className="block w-full text-left focus:outline-none focus:ring-2 focus:ring-white/40"
+                  aria-label={`Open ${caption} photo`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photos[0]}
+                    alt={caption}
+                    className="w-full h-40 sm:h-48 object-cover"
+                    loading="lazy"
+                  />
+                </button>
               )}
               {photos.length > 1 && (
-                /* Horizontal scroll-snap carousel — no JS state. Native
-                   smooth scrolling, touch-friendly. Each card snaps into
-                   place so users land on whole photos rather than mid-
-                   scroll. snap-x on the container, snap-start on each
-                   item. */
-                <div className="relative">
+                /* Horizontal scroll-snap carousel — native smooth scrolling
+                   and touch swipe. Desktop visitors who don't realise it's
+                   scrollable get the prev/next chevrons + a "tap any photo
+                   to expand" lightbox affordance. */
+                <div
+                  className="relative"
+                  role="region"
+                  aria-label={`${caption} photos`}
+                >
                   <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-thin">
                     {photos.map((url, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <button
+                        type="button"
                         key={`${url}-${i}`}
-                        src={url}
-                        alt=""
-                        className="snap-start shrink-0 w-full h-40 sm:h-48 object-cover"
-                        loading="lazy"
-                      />
+                        onClick={() => openLightboxAt(i)}
+                        className="snap-start shrink-0 w-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/40"
+                        aria-label={`Open photo ${i + 1} of ${photos.length}`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt={`${caption} — photo ${i + 1} of ${photos.length}`}
+                          className="w-full h-40 sm:h-48 object-cover"
+                          loading="lazy"
+                        />
+                      </button>
                     ))}
                   </div>
-                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 text-white backdrop-blur-sm">
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 text-white backdrop-blur-sm pointer-events-none">
                     {photos.length}
                   </div>
                 </div>
@@ -547,14 +577,25 @@ export function NomadCard({
                     /* Square thumbnail when the stay has a photo — turns
                        the timeline into a stamp-collection style row.
                        Multi-photo stays get a small "+N" badge in the
-                       corner so visitors can tell there's more without
-                       expanding inline. */
-                    <div className="relative w-12 h-12 shrink-0">
+                       corner; clicking the thumbnail opens a lightbox
+                       so visitors can actually see the extra photos. */
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPhotoLightbox({
+                          photos,
+                          index: 0,
+                          caption: `${s.city}, ${getCountryName(s.country)}`,
+                        })
+                      }
+                      aria-label={`Open photos for ${s.city}, ${getCountryName(s.country)}`}
+                      className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-gray-400 transition hover:opacity-90"
+                    >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={firstPhoto}
-                        alt=""
-                        className="w-12 h-12 rounded-lg object-cover"
+                        alt={`${s.city}, ${getCountryName(s.country)}`}
+                        className="w-12 h-12 object-cover"
                         loading="lazy"
                       />
                       {extra > 0 && (
@@ -562,7 +603,7 @@ export function NomadCard({
                           +{extra}
                         </span>
                       )}
-                    </div>
+                    </button>
                   ) : (
                     <span className="text-lg leading-none mt-0.5 w-6 text-center" aria-hidden>
                       {getCountryFlag(s.country) || '·'}
@@ -825,6 +866,14 @@ export function NomadCard({
       style={customBg ? { background: customBg } : undefined}
     >
       {videoEmbed && <VideoLightbox url={videoEmbed} onClose={() => setVideoEmbed(null)} />}
+      {photoLightbox && (
+        <PhotoLightbox
+          photos={photoLightbox.photos}
+          startIndex={photoLightbox.index}
+          caption={photoLightbox.caption}
+          onClose={() => setPhotoLightbox(null)}
+        />
+      )}
       {isOwner ? <EditCardCTA /> : !hideMakeYoursCTA && <MakeYoursCTA />}
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
