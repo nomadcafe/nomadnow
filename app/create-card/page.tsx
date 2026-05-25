@@ -58,6 +58,7 @@ export default async function CreateCardPage() {
           // shape uses '' for empty so the <input type=date> stays clean.
           end_date: (s.end_date as string | null) ?? '',
           notes: (s.notes as string | null) ?? '',
+          photo_url: (s.photo_url as string | null) ?? '',
         })),
       }
     : null

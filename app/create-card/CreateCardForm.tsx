@@ -408,6 +408,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
               start_date: s.start_date,
               end_date: s.end_date || null,
               notes: s.notes?.trim() || null,
+              photo_url: s.photo_url || null,
             })),
           }),
         })

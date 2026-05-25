@@ -158,6 +158,7 @@ CREATE TABLE IF NOT EXISTS nomad_stays (
   start_date DATE NOT NULL,
   end_date DATE,
   notes TEXT,
+  photo_url TEXT, -- optional Supabase Storage URL for a single photo per stay
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

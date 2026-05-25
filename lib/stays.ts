@@ -59,17 +59,62 @@ export function mergedVisitedCodes(
 /**
  * Returns the user's current stay (the open-ended one — end_date null —
  * or the most-recent-start stay if multiple are open). Used by the card
- * to render "Currently in X" prominently.
+ * to render "Currently in X" prominently. Delegates to splitStays so the
+ * "future open-ended stay shouldn't count as current" rule stays in one
+ * place.
  */
 export function findCurrentStay<
   T extends { end_date?: string | null; start_date: string },
 >(stays: T[]): T | null {
   if (!stays || stays.length === 0) return null
-  const open = stays.filter((s) => !s.end_date)
-  if (open.length === 0) return null
-  // Multiple open stays is a data anomaly (user forgot to set end_date when
-  // they moved) — pick the latest start so the card stays meaningful.
-  return open.reduce((latest, s) =>
-    Date.parse(s.start_date) > Date.parse(latest.start_date) ? s : latest,
-  )
+  return splitStays(stays).current
+}
+
+export interface StayBuckets<T> {
+  /** Stays whose start_date is in the future, soonest first. */
+  upcoming: T[]
+  /**
+   * Open-ended stay (no end_date) whose start_date is today or earlier.
+   * If multiple, picks the most-recent start to match the rendering rule
+   * "Currently in X" — multi-open is treated as a data anomaly.
+   */
+  current: T | null
+  /** Everything else (closed past stays). Order preserved from input. */
+  past: T[]
+}
+
+/**
+ * Partitions stays into upcoming / current / past relative to today (UTC).
+ * Centralises the date logic so renderers don't each re-derive it and
+ * disagree about whether a future open-ended stay counts as "current"
+ * (it doesn't).
+ *
+ * The today comparison is string-based on YYYY-MM-DD which matches the
+ * column shape and dodges timezone surprises — stays are date-only by
+ * design (no time component).
+ */
+export function splitStays<
+  T extends { end_date?: string | null; start_date: string },
+>(stays: ReadonlyArray<T> | null | undefined): StayBuckets<T> {
+  const today = new Date().toISOString().slice(0, 10)
+  const upcoming: T[] = []
+  const past: T[] = []
+  const openCurrent: T[] = []
+  for (const s of stays ?? []) {
+    if (s.start_date > today) {
+      upcoming.push(s)
+    } else if (!s.end_date) {
+      openCurrent.push(s)
+    } else {
+      past.push(s)
+    }
+  }
+  upcoming.sort((a, b) => a.start_date.localeCompare(b.start_date))
+  const current =
+    openCurrent.length === 0
+      ? null
+      : openCurrent.reduce((latest, s) =>
+          s.start_date > latest.start_date ? s : latest,
+        )
+  return { upcoming, current, past }
 }
