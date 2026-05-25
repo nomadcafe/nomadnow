@@ -26,6 +26,10 @@ interface NomadCardProps {
   // MakeYoursCTA. The hide-branding setting only governs visitor view;
   // owners always get their edit affordance.
   isOwner?: boolean
+  // True when the card is rendered inside another page (e.g. the live
+  // preview panel on /create-card). Drops the full-screen page wrapper
+  // and floating CTAs so the card fits a constrained container.
+  embedded?: boolean
 }
 
 // Slugs we localise via the `card.linkTypes.*` namespace. The DB still stores
@@ -178,6 +182,7 @@ export function NomadCard({
   sectionOrder,
   hideMakeYoursCTA = false,
   isOwner = false,
+  embedded = false,
 }: NomadCardProps) {
   const t = useTranslations('card')
   const tStatus = useTranslations('card.workStatus')
@@ -448,6 +453,22 @@ export function NomadCard({
   const renderedSections = order
     .filter((id) => enabled.has(id) && id in sectionRenderers)
     .map((id) => sectionRenderers[id]())
+
+  // Embedded mode: drop the full-screen wrapper and floating CTAs so the
+  // card fits inside a constrained parent (e.g. the live preview panel).
+  // The inner card keeps its theme styling so users see the real look.
+  if (embedded) {
+    return (
+      <div className={`${theme.font}`}>
+        <div className={`${theme.card} ${theme.text} p-5 sm:p-6`}>
+          {renderedSections}
+          <div className={`mt-6 pt-6 border-t ${theme.divider} text-center`}>
+            <p className={`text-xs ${theme.textMuted}`}>nomad.now/{user.handle || 'yourhandle'}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`min-h-screen ${theme.page} ${theme.font}`}>

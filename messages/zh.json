@@ -230,6 +230,7 @@
   },
   "createCard": {
     "navCancel": "取消",
+    "previewLabel": "实时预览",
     "title": "占下你的卡片。",
     "subtitle": "三个字段即可开始。其他都是可选,稍后可改。",
     "editTitle": "编辑你的卡片。",
