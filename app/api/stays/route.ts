@@ -26,10 +26,14 @@ const replaceStaysSchema = z.object({
           .nullable()
           .or(z.literal('')),
         notes: z.string().max(280).optional().nullable(),
-        // The upload route returns a Supabase Storage public URL. We
-        // validate the structural URL shape — content checks (MIME,
-        // size, where it lives) already happened at upload time.
-        photo_url: z.string().url().max(2048).optional().nullable().or(z.literal('')),
+        // Up to 6 Supabase Storage URLs. Content checks (MIME, size,
+        // path) already ran at upload time; we just shape-validate the
+        // structural URL here. Cap matches the editor UI cap.
+        photo_urls: z
+          .array(z.string().url().max(2048))
+          .max(6)
+          .optional()
+          .nullable(),
       }),
     )
     .max(100),
@@ -73,7 +77,10 @@ export async function PUT(request: NextRequest) {
       // Empty string → null. Important because Postgres rejects '' as a DATE.
       end_date: stay.end_date && stay.end_date.length > 0 ? stay.end_date : null,
       notes: stay.notes || null,
-      photo_url: stay.photo_url && stay.photo_url.length > 0 ? stay.photo_url : null,
+      // Clear the legacy single column on every write — once a row has
+      // gone through the new editor, photo_urls is the source of truth.
+      photo_url: null,
+      photo_urls: stay.photo_urls ?? [],
     }))
 
     const { data, error } = await supabase

@@ -48,18 +48,29 @@ export default async function CreateCardPage() {
           label: (l.label as string | null) ?? '',
           url: l.url as string,
         })),
-        stays: (stays ?? []).map((s) => ({
-          city: (s.city as string) ?? '',
-          country: (s.country as string) ?? '',
-          lat: (s.lat as number | null) ?? null,
-          lon: (s.lon as number | null) ?? null,
-          start_date: (s.start_date as string) ?? '',
-          // DATE column comes back as null when "currently here"; the form
-          // shape uses '' for empty so the <input type=date> stays clean.
-          end_date: (s.end_date as string | null) ?? '',
-          notes: (s.notes as string | null) ?? '',
-          photo_url: (s.photo_url as string | null) ?? '',
-        })),
+        stays: (stays ?? []).map((s) => {
+          // Prefer the new photo_urls array; fall back to the legacy
+          // photo_url single-string column so rows that haven't been
+          // re-saved since migration 0012 still show their image.
+          const urls = Array.isArray(s.photo_urls)
+            ? (s.photo_urls as string[])
+            : []
+          const legacy = (s.photo_url as string | null) ?? ''
+          const photo_urls =
+            urls.length > 0 ? urls : legacy ? [legacy] : []
+          return {
+            city: (s.city as string) ?? '',
+            country: (s.country as string) ?? '',
+            lat: (s.lat as number | null) ?? null,
+            lon: (s.lon as number | null) ?? null,
+            start_date: (s.start_date as string) ?? '',
+            // DATE column comes back as null when "currently here"; the form
+            // shape uses '' for empty so the <input type=date> stays clean.
+            end_date: (s.end_date as string | null) ?? '',
+            notes: (s.notes as string | null) ?? '',
+            photo_urls,
+          }
+        }),
       }
     : null
 

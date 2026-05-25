@@ -22,10 +22,12 @@ export interface StayDraft {
   start_date: string // YYYY-MM-DD
   end_date: string // '' = currently here
   notes: string
-  // Public Supabase Storage URL once uploaded, empty string otherwise.
-  // Kept as a string (not null) so React's controlled inputs stay happy.
-  photo_url: string
+  // Up to PHOTO_CAP Supabase Storage URLs. Empty array = no photos.
+  // Order in the array drives carousel order on the public card.
+  photo_urls: string[]
 }
+
+const PHOTO_CAP = 6
 
 export function emptyStay(): StayDraft {
   return {
@@ -36,7 +38,7 @@ export function emptyStay(): StayDraft {
     start_date: '',
     end_date: '',
     notes: '',
-    photo_url: '',
+    photo_urls: [],
   }
 }
 
@@ -72,6 +74,8 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
   }
 
   const uploadPhoto = async (idx: number, file: File) => {
+    const stay = stays[idx]
+    if (!stay || stay.photo_urls.length >= PHOTO_CAP) return
     setUploadingIdx(idx)
     setUploadErrorIdx(null)
     try {
@@ -87,12 +91,22 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
         setUploadErrorIdx(idx)
         return
       }
-      update(idx, { photo_url: data.url })
+      // Append rather than replace so multiple files can be added one at
+      // a time without losing earlier picks.
+      update(idx, { photo_urls: [...stays[idx].photo_urls, data.url] })
     } catch {
       setUploadErrorIdx(idx)
     } finally {
       setUploadingIdx((cur) => (cur === idx ? null : cur))
     }
+  }
+
+  const removePhoto = (idx: number, photoIdx: number) => {
+    const stay = stays[idx]
+    if (!stay) return
+    update(idx, {
+      photo_urls: stay.photo_urls.filter((_, i) => i !== photoIdx),
+    })
   }
 
   return (
@@ -185,18 +199,17 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm"
             />
 
-            <div className="flex items-center gap-3">
-              {stay.photo_url ? (
-                <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+            <div className="flex flex-wrap items-start gap-2">
+              {stay.photo_urls.map((url, photoIdx) => (
+                <div
+                  key={`${url}-${photoIdx}`}
+                  className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 shrink-0"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={stay.photo_url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={url} alt="" className="w-full h-full object-cover" />
                   <button
                     type="button"
-                    onClick={() => update(idx, { photo_url: '' })}
+                    onClick={() => removePhoto(idx, photoIdx)}
                     aria-label={t('photoRemove')}
                     className="absolute top-1 right-1 bg-white/90 hover:bg-white rounded-full w-5 h-5 flex items-center justify-center shadow text-gray-700"
                   >
@@ -205,7 +218,8 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
                     </svg>
                   </button>
                 </div>
-              ) : (
+              ))}
+              {stay.photo_urls.length < PHOTO_CAP && (
                 <label className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 flex items-center justify-center cursor-pointer transition shrink-0 text-gray-400 hover:text-gray-600">
                   <input
                     type="file"
@@ -214,7 +228,6 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
                     onChange={(e) => {
                       const f = e.target.files?.[0]
                       if (f) uploadPhoto(idx, f)
-                      // Reset so picking the same file again re-fires onChange.
                       e.target.value = ''
                     }}
                   />
@@ -229,12 +242,14 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
                   )}
                 </label>
               )}
-              <div className="text-xs text-gray-500 flex-1">
-                {stay.photo_url ? t('photoHint') : t('photoEmptyHint')}
-                {uploadErrorIdx === idx && (
-                  <p className="text-red-600 mt-1">{t('photoError')}</p>
-                )}
-              </div>
+              {stay.photo_urls.length === 0 && (
+                <p className="text-xs text-gray-500 flex-1 self-center">
+                  {t('photoEmptyHint')}
+                </p>
+              )}
+              {uploadErrorIdx === idx && (
+                <p className="text-xs text-red-600 w-full">{t('photoError')}</p>
+              )}
             </div>
 
             {days > 0 && (

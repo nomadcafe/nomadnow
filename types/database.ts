@@ -72,9 +72,13 @@ export interface NomadStay {
   start_date: string // YYYY-MM-DD
   end_date?: string | null
   notes?: string | null
-  // Public Supabase Storage URL for an optional single photo per stay.
-  // Null/undefined means the stay renders without imagery.
+  // Legacy single-photo URL (migration 0008). Kept readable for one
+  // release; new writes go through photo_urls.
   photo_url?: string | null
+  // Up to 6 Supabase Storage URLs. Empty array (or undefined) means
+  // the stay renders without imagery. Rendered as a scroll-snap
+  // carousel on the public card when length > 1.
+  photo_urls?: string[] | null
   created_at: string
   updated_at: string
 }
