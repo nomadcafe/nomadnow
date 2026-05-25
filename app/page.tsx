@@ -52,21 +52,15 @@ const HERO_LINKS: NomadLink[] = [
     created_at: '',
     updated_at: '',
   },
-  {
-    id: 'h-l3',
-    user_id: HERO_USER.id,
-    type: 'linkedin',
-    url: 'https://linkedin.com/in/kenji',
-    order_index: 2,
-    created_at: '',
-    updated_at: '',
-  },
 ]
-// Keep the hero card compact — bio / stays / status would push the card
-// past the viewport on smaller screens and bury the hero CTA. The
-// included sections cover the strongest value props (identity, real
-// time, country count, map, links).
-const HERO_SECTIONS = ['avatar', 'name', 'location', 'stats', 'map', 'links']
+// Keep the hero card compact. Earlier iterations also rendered stats
+// and a third link — together they pushed the card past 700px tall,
+// which buried the hero CTA on shorter viewports. Now: identity
+// (avatar/name/location), the strongest visual hook (the map), and
+// just enough link rows to signal "link in bio" without bloat. Bio,
+// stays, status, and the stat strip stay off the hero — they all
+// get their own treatment in the editorial Feature rows below.
+const HERO_SECTIONS = ['avatar', 'name', 'location', 'map', 'links']
 
 export default async function Home() {
   const t = await getTranslations('home')
