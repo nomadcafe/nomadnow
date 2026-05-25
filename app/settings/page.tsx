@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
@@ -103,6 +104,12 @@ export default function SettingsPage() {
     () => JSON.stringify(settings) !== savedSerialized,
     [settings, savedSerialized],
   )
+  // Dragging the color / angle inputs fires onChange on every pixel of
+  // movement, and the embedded NomadCard preview (theme, fonts, WorldMap
+  // SVG, etc.) is expensive to re-render. useDeferredValue lets React
+  // keep the input responsive by rendering the preview with a slightly
+  // stale settings snapshot that catches up when the user pauses.
+  const deferredSettings = useDeferredValue(settings)
 
   useEffect(() => {
     async function load() {
@@ -113,35 +120,34 @@ export default function SettingsPage() {
         return
       }
 
-      // Handle is in the publicly-readable column set. Billing fields are
-      // not — they go through /api/billing/state which uses the admin
-      // client server-side. See migration 0007 for the column lockdown.
-      const { data: profile } = await supabase
-        .from('users')
-        .select('handle')
-        .eq('id', user.id)
-        .maybeSingle()
-      if (profile?.handle) setHandle(profile.handle as string)
+      // Handle is in the publicly-readable column set; billing fields are
+      // not (migration 0007 locked them down), so /api/billing/state uses
+      // the admin client server-side. All three of these reads are
+      // independent of each other, so fire them in parallel.
+      const [handleResult, billingRes, settingsRes] = await Promise.all([
+        supabase.from('users').select('handle').eq('id', user.id).maybeSingle(),
+        fetch('/api/billing/state').catch(() => null),
+        fetch('/api/settings').catch(() => null),
+      ])
 
-      try {
-        const billingRes = await fetch('/api/billing/state')
-        if (billingRes.ok) {
+      if (handleResult.data?.handle) setHandle(handleResult.data.handle as string)
+
+      if (billingRes && billingRes.ok) {
+        try {
           const billingData = await billingRes.json()
           setBilling({
             plan: billingData.plan ?? null,
             status: billingData.status ?? null,
             currentPeriodEnd: billingData.currentPeriodEnd ?? null,
           })
+        } catch {
+          // Non-fatal — UI treats billing=null as "no active subscription".
         }
-      } catch {
-        // Non-fatal — settings page still renders with billing=null,
-        // which the UI treats as "no active subscription".
       }
 
       try {
-        const response = await fetch('/api/settings')
-        const data = await response.json()
-        if (data.success && data.settings) {
+        const data = settingsRes ? await settingsRes.json() : null
+        if (data?.success && data.settings) {
           // Reconcile against the nomad section catalog so legacy creator IDs
           // get dropped and any new sections added since last save show up.
           const order = reconcileSectionOrder('nomad', data.settings.section_order)
@@ -907,13 +913,13 @@ export default function SettingsPage() {
                     user={previewData.user}
                     links={previewData.links}
                     stays={previewData.stays}
-                    themeKey={settings.theme_color}
-                    buttonShape={settings.button_shape}
-                    backgroundMode={settings.background_mode}
-                    backgroundValue={settings.background_value}
-                    fontFamily={settings.font_family}
-                    sectionOrder={settings.section_order}
-                    hideMakeYoursCTA={Boolean(settings.hide_branding)}
+                    themeKey={deferredSettings.theme_color}
+                    buttonShape={deferredSettings.button_shape}
+                    backgroundMode={deferredSettings.background_mode}
+                    backgroundValue={deferredSettings.background_value}
+                    fontFamily={deferredSettings.font_family}
+                    sectionOrder={deferredSettings.section_order}
+                    hideMakeYoursCTA={Boolean(deferredSettings.hide_branding)}
                     embedded
                   />
                 ) : previewLoading ? (
@@ -1049,10 +1055,12 @@ function ThemeTile({
       <div className={`${theme.page} ${theme.font} p-3 h-28 flex items-center justify-center`}>
         <div className={`${theme.card} ${theme.text} w-full p-2.5 flex flex-col items-center gap-1.5`}>
           {user?.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={user.avatar_url}
               alt=""
+              width={28}
+              height={28}
+              sizes="28px"
               className="w-7 h-7 rounded-full object-cover"
             />
           ) : initials ? (
