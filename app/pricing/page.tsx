@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { AccountMenu } from '@/components/AccountMenu'
 import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -179,9 +180,7 @@ export default async function PricingPage() {
             <Link href="/explore" className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition">
               {tNav('explore')}
             </Link>
-            <Link href="/login" className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition">
-              {tNav('signin')}
-            </Link>
+            <AccountMenu className="hidden sm:inline-flex" />
             <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/create-card"

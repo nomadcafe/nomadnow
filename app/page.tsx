@@ -5,6 +5,7 @@ import { LiveCityRow } from '@/components/LiveCityRow'
 import { MarqueeBand } from '@/components/MarqueeBand'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { AccountMenu } from '@/components/AccountMenu'
 
 const previewVisited = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
 
@@ -39,12 +40,7 @@ export default async function Home() {
             >
               {tNav('pricing')}
             </Link>
-            <Link
-              href="/login"
-              className="hidden sm:inline-block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition"
-            >
-              {tNav('signin')}
-            </Link>
+            <AccountMenu className="hidden sm:inline-flex" />
             <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/pricing"

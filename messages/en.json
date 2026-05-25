@@ -25,6 +25,9 @@
     "explore": "Explore",
     "pricing": "Pricing",
     "signin": "Sign in",
+    "signout": "Sign out",
+    "account": "Account",
+    "settings": "Settings",
     "getCard": "Get your card",
     "viewProfile": "View profile"
   },

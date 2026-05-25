@@ -25,6 +25,9 @@
     "explore": "发现",
     "pricing": "价格",
     "signin": "登录",
+    "signout": "退出登录",
+    "account": "账户",
+    "settings": "设置",
     "getCard": "创建卡片",
     "viewProfile": "查看主页"
   },

@@ -25,6 +25,9 @@
     "explore": "見つける",
     "pricing": "料金",
     "signin": "ログイン",
+    "signout": "ログアウト",
+    "account": "アカウント",
+    "settings": "設定",
     "getCard": "カードを作る",
     "viewProfile": "プロフィールを見る"
   },
