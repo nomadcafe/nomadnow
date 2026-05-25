@@ -92,6 +92,9 @@ CREATE TABLE IF NOT EXISTS profile_settings (
       enabled_sections JSONB DEFAULT '["header", "revenue", "projects", "chart", "milestones"]'::jsonb,
       -- Section order (JSON array defining display order)
       section_order JSONB DEFAULT '["header", "revenue", "projects", "chart", "milestones"]'::jsonb,
+  -- Button shape for link rows on the public card. 'pill' | 'rounded' (default) | 'square'.
+  -- See lib/themes.ts for the rendering map.
+  button_shape TEXT DEFAULT 'rounded',
   -- When true, suppresses the "Make yours" / "Made on nomad.now" branding on the public profile.
   -- Available to all paid plans (Basic and Pro) — pricing is set in /pricing.
   hide_branding BOOLEAN DEFAULT FALSE,

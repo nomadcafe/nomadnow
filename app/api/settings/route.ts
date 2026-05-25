@@ -11,6 +11,8 @@ import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 const updateSettingsSchema = z.object({
   // theme_color stores the preset key (legacy column name). See lib/themes.ts.
   theme_color: z.enum(['classic', 'midnight', 'sunset', 'mono', 'vivid', 'forest', 'cream']).optional(),
+  // Corner-radius preset for link buttons. Defaults to 'rounded' at the DB level.
+  button_shape: z.enum(['pill', 'rounded', 'square']).optional(),
   // The Nomad Card catalog has ~8 section IDs and each is a short string —
   // anything bigger is junk or abuse. Defensive caps so a malformed POST
   // can't blow up a row size or shove a giant JSONB blob into the DB.
@@ -108,6 +110,7 @@ export async function GET() {
         settings: {
           user_id: user.id,
           theme_color: 'classic',
+          button_shape: 'rounded',
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
           hide_branding: false,
         },

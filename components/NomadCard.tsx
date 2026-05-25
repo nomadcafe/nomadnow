@@ -11,7 +11,7 @@ import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { VideoLightbox, detectVideo } from './VideoLightbox'
 import Link from 'next/link'
-import { getTheme, type ThemeKey } from '@/lib/themes'
+import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
 
 interface NomadCardProps {
@@ -19,6 +19,9 @@ interface NomadCardProps {
   links: NomadLink[]
   stays?: NomadStay[]
   themeKey?: ThemeKey | string | null
+  // Corner-radius preset for link buttons — see lib/themes.ts. Orthogonal
+  // to theme color so any theme works with any shape.
+  buttonShape?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
   // When true, the floating "Make yours →" CTA is suppressed. Use on the
@@ -194,6 +197,7 @@ export function NomadCard({
   user,
   links,
   themeKey,
+  buttonShape,
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
@@ -211,6 +215,7 @@ export function NomadCard({
   // when no video is open. Detected from link URLs on click.
   const [videoEmbed, setVideoEmbed] = useState<string | null>(null)
   const theme = getTheme(themeKey)
+  const shape = getButtonShape(buttonShape)
   const locale = useLocale()
   // Split stays into upcoming / current / past once and re-use the buckets
   // throughout the render — the rules for "what is current" (open-ended,
@@ -622,7 +627,7 @@ export function NomadCard({
             .map((link, index) => {
               const video = detectVideo(link.url)
               const brandColor = LINK_BRAND_COLORS[link.type]
-              const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-medium group touch-manipulation transition-all duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-md ${theme.linkRow}`
+              const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} font-medium group touch-manipulation transition-all duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-md ${theme.linkRow}`
               const inner = (
                 <>
                   {/* Brand-colored icon chip when the platform has a
@@ -631,7 +636,7 @@ export function NomadCard({
                       the brand color so it reads as "branded" without
                       overpowering the themed card background. */}
                   <span
-                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition group-hover:scale-105"
+                    className={`inline-flex items-center justify-center w-9 h-9 ${shape.chip} shrink-0 transition group-hover:scale-105`}
                     style={
                       brandColor
                         ? { backgroundColor: `${brandColor}1f`, color: brandColor }

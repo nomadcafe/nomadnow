@@ -41,6 +41,10 @@ export interface ProfileSettings {
   theme_color?: string
   enabled_sections?: string[]
   section_order?: string[]
+  // Corner-radius preset for link buttons on the public card. See
+  // lib/themes.ts for the className map. Defaults to 'rounded' so existing
+  // cards render unchanged.
+  button_shape?: 'pill' | 'rounded' | 'square'
   // When true, the floating "Make yours" CTA / nomad.now branding is hidden on the
   // public profile. Available to all paid plans (see /pricing).
   hide_branding?: boolean

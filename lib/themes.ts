@@ -13,6 +13,31 @@ export type ThemeKey =
   | 'forest'
   | 'cream'
 
+// Button shape preset — orthogonal to theme color so users can pair any
+// theme with any shape. Stored in profile_settings.button_shape.
+export type ButtonShape = 'pill' | 'rounded' | 'square'
+export const BUTTON_SHAPE_KEYS = ['pill', 'rounded', 'square'] as const
+
+export interface ButtonShapeClasses {
+  /** Outer link row corner radius. */
+  row: string
+  /** Inner brand-icon chip corner radius — kept consistent with the row. */
+  chip: string
+}
+
+const BUTTON_SHAPE_CLASS_MAP: Record<ButtonShape, ButtonShapeClasses> = {
+  pill: { row: 'rounded-full', chip: 'rounded-full' },
+  rounded: { row: 'rounded-xl', chip: 'rounded-lg' },
+  square: { row: 'rounded-none', chip: 'rounded-none' },
+}
+
+export function getButtonShape(shape?: string | null): ButtonShapeClasses {
+  if (shape && shape in BUTTON_SHAPE_CLASS_MAP) {
+    return BUTTON_SHAPE_CLASS_MAP[shape as ButtonShape]
+  }
+  return BUTTON_SHAPE_CLASS_MAP.rounded
+}
+
 // CSS values applied via inline style by app/og/[handle]/route.tsx.
 // satori cannot use Tailwind classes, so each theme needs raw CSS too.
 export interface ThemeOg {
