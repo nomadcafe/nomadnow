@@ -430,6 +430,11 @@
     "copied": "Copied!",
     "countryOne": "country",
     "countryMany": "countries",
+    "cityOne": "city",
+    "cityMany": "cities",
+    "unitDay": "days on the road",
+    "unitMonth": "months traveling",
+    "unitYear": "years nomading",
     "workStatus": {
       "freelancing": "Freelancing",
       "busy": "Busy",

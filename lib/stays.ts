@@ -30,6 +30,53 @@ export function formatDuration(days: number): { value: number; unit: 'day' | 'we
   return { value: Math.round(days / 30), unit: 'month' }
 }
 
+export interface TravelStats {
+  /** Distinct cities visited (de-duped by city+country). */
+  cityCount: number
+  /** Sum of stayDayCount across the supplied stays. */
+  totalDays: number
+}
+
+/**
+ * Derives stat-strip numbers from a list of stays. Pass the same
+ * "visited" slice the rest of the card uses (current + past, not
+ * upcoming) so the strip agrees with the map and the country count.
+ */
+export function computeTravelStats<
+  T extends {
+    city?: string | null
+    country?: string | null
+    start_date: string
+    end_date?: string | null
+  },
+>(stays: ReadonlyArray<T> | null | undefined): TravelStats {
+  const cities = new Set<string>()
+  let totalDays = 0
+  for (const s of stays ?? []) {
+    if (s.city && s.country) cities.add(`${s.city}|${s.country}`)
+    totalDays += stayDayCount(s.start_date, s.end_date ?? null)
+  }
+  return { cityCount: cities.size, totalDays }
+}
+
+/**
+ * Picks the right unit (day / month / year) for a "time on the road"
+ * display so the stat strip can show "247 days" or "3.4 years" instead
+ * of always-days. Switches at thresholds tuned for the social-card
+ * narrative — short trips read as days, multi-month nomads in months,
+ * and committed nomads in years with one decimal place.
+ */
+export function formatTimeOnTheRoad(
+  totalDays: number,
+): { value: number | string; unit: 'day' | 'month' | 'year' } {
+  if (totalDays < 120) return { value: totalDays, unit: 'day' }
+  if (totalDays < 730) return { value: Math.round(totalDays / 30), unit: 'month' }
+  // Years with one decimal place — "3.4 years" reads more honestly than
+  // a flat "3 years" once someone is past the 2-year mark.
+  const years = totalDays / 365
+  return { value: years.toFixed(1), unit: 'year' }
+}
+
 /**
  * Union of country-level toggles (`users.visited_countries`) with the
  * countries derived from city-level stays. Lets a user who only filled out

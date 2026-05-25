@@ -6,7 +6,7 @@ import { User, NomadLink, NomadStay } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
 import { WorldMap } from './WorldMap'
 import { getCountryFlag, getCountryName } from '@/lib/countries'
-import { stayDayCount, mergedVisitedCodes, splitStays } from '@/lib/stays'
+import { stayDayCount, mergedVisitedCodes, splitStays, computeTravelStats, formatTimeOnTheRoad } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { VideoLightbox, detectVideo } from './VideoLightbox'
@@ -522,21 +522,44 @@ export function NomadCard({
     stats: () => {
       // Stats used to also show "member since {date}" — dropped because it
       // doesn't carry information visitors care about and adds visual
-      // weight competing with the actual content (countries, stays).
-      if (visitedCount === 0) return null
+      // weight competing with the actual content. The strip is the
+      // nomad-flavored equivalent of a creator's "followers / posts /
+      // likes" header: countries · cities · time on the road.
+      const { cityCount, totalDays } = computeTravelStats(visitedStays)
+      // Hide the whole strip if there's literally nothing to show. Once any
+      // one bucket has data we render the full strip and the empty buckets
+      // simply read "0" — easier to scan than "sometimes 1, sometimes 3
+      // columns".
+      if (visitedCount === 0 && cityCount === 0 && totalDays === 0) return null
+      const road = formatTimeOnTheRoad(totalDays)
+      const roadUnitLabel =
+        road.unit === 'year'
+          ? t('unitYear')
+          : road.unit === 'month'
+            ? t('unitMonth')
+            : t('unitDay')
+      const Stat = ({ value, label }: { value: React.ReactNode; label: string }) => (
+        <div className="text-center min-w-0">
+          <div className="text-2xl sm:text-3xl font-semibold tabular-nums">{value}</div>
+          <div className={`text-[10px] sm:text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
+            {label}
+          </div>
+        </div>
+      )
       return (
         <div
           key="stats"
-          className={`flex items-center justify-center gap-6 sm:gap-10 my-6 py-4 border-y ${theme.divider}`}
+          className={`flex items-center justify-center gap-4 sm:gap-10 my-6 py-4 border-y ${theme.divider}`}
         >
-          <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-semibold tabular-nums">
-              {visitedCount}
-            </div>
-            <div className={`text-xs uppercase tracking-wide mt-0.5 ${theme.textMuted}`}>
-              {visitedCount === 1 ? t('countryOne') : t('countryMany')}
-            </div>
-          </div>
+          <Stat
+            value={visitedCount}
+            label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
+          />
+          <Stat
+            value={cityCount}
+            label={cityCount === 1 ? t('cityOne') : t('cityMany')}
+          />
+          <Stat value={road.value} label={roadUnitLabel} />
         </div>
       )
     },

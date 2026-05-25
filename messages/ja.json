@@ -430,6 +430,11 @@
     "copied": "コピーしました!",
     "countryOne": "カ国",
     "countryMany": "カ国",
+    "cityOne": "都市",
+    "cityMany": "都市",
+    "unitDay": "旅暮らし日数",
+    "unitMonth": "旅暮らし月数",
+    "unitYear": "ノマド歴",
     "workStatus": {
       "freelancing": "フリーランス",
       "busy": "多忙",

@@ -430,6 +430,11 @@
     "copied": "已复制!",
     "countryOne": "国",
     "countryMany": "国",
+    "cityOne": "城市",
+    "cityMany": "城市",
+    "unitDay": "天在路上",
+    "unitMonth": "个月在路上",
+    "unitYear": "年游牧",
     "workStatus": {
       "freelancing": "自由职业",
       "busy": "忙碌中",
