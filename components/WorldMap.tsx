@@ -186,8 +186,8 @@ export function WorldMap({
                 </circle>
                 <text
                   x={x}
-                  y={y - 12}
-                  fontSize="11"
+                  y={y - 14}
+                  fontSize="22"
                   textAnchor="middle"
                   style={{ pointerEvents: 'none' }}
                 >
