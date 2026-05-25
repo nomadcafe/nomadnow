@@ -211,8 +211,8 @@
       }
     },
     "finalCta": {
-      "title": "Claim your handle.",
-      "body": "nomad.now/<handle>yourhandle</handle> — pick one before someone else does.",
+      "title": "Create your username.",
+      "body": "nomad.now/<handle>yourname</handle> — pick one before someone else does.",
       "cta": "Get started"
     }
   },

@@ -211,8 +211,8 @@
       }
     },
     "finalCta": {
-      "title": "占下你的 handle。",
-      "body": "nomad.now/<handle>yourhandle</handle> —— 在别人抢走之前。",
+      "title": "创建你的用户名。",
+      "body": "nomad.now/<handle>yourname</handle> —— 在别人抢走之前。",
       "cta": "开始"
     }
   },

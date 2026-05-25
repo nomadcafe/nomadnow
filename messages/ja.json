@@ -211,8 +211,8 @@
       }
     },
     "finalCta": {
-      "title": "ハンドルを確保しよう。",
-      "body": "nomad.now/<handle>yourhandle</handle> — 誰かに取られる前に。",
+      "title": "ユーザー名を作成。",
+      "body": "nomad.now/<handle>yourname</handle> — 誰かに取られる前に。",
       "cta": "始める"
     }
   },
