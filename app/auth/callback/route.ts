@@ -18,13 +18,27 @@ import { getEnvSafe } from '@/lib/env'
 //   pass the @supabase/ssr client a setAll() that writes directly to that
 //   response's cookies. Then everything Supabase sets lands on the response
 //   we actually return.
+// Only allow relative paths anchored to our origin. Rejects:
+//   - absolute URLs (http://evil.com, javascript:...)
+//   - protocol-relative URLs (//evil.com — which would resolve as
+//     `${base}//evil.com` and silently redirect off-domain)
+//   - paths that fail to start with a forward slash
+// Anything else falls back to /settings so a tampered magic link still
+// lands on a sensible page.
+function safeNextPath(raw: string | null): string {
+  const fallback = '/settings'
+  if (!raw) return fallback
+  if (!raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\')) return fallback
+  return raw
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   // Same default as /login — meaningful landing page that proves the
   // session worked. Hardcoded fallback so a malformed magic link still
   // ends up somewhere sensible.
-  const next = searchParams.get('next') || '/settings'
+  const next = safeNextPath(searchParams.get('next'))
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`)

@@ -7,6 +7,17 @@ import { NotFoundError, formatErrorResponse, logError } from '@/lib/errors'
 // user row, profile_settings, nomad_links. The legacy creator joins (projects,
 // revenues, milestones, social_accounts, social_metrics) were removed with the
 // Creator Profile wedge.
+
+// Explicit allow-list of columns safe to return on a public profile request.
+// NEVER add billing columns (stripe_customer_id, subscription_id,
+// subscription_status, current_period_end) — they leak Stripe identifiers
+// to any visitor. `plan` is intentionally included so the public card can
+// render Pro-only features; that one is fine to expose.
+// Supabase's typed client parses this as a comma-separated list — keep
+// it as a single no-whitespace string so the generated row type stays
+// inferable (whitespace makes it fall back to `GenericStringError`).
+const PUBLIC_USER_COLUMNS =
+  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,profile_type,plan,created_at,updated_at' as const
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ handle: string }> }
@@ -27,7 +38,7 @@ export async function GET(
 
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('*')
+      .select(PUBLIC_USER_COLUMNS)
       .eq('handle', handle)
       .single()
 

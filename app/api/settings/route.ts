@@ -11,7 +11,10 @@ import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 const updateSettingsSchema = z.object({
   // theme_color stores the preset key (legacy column name). See lib/themes.ts.
   theme_color: z.enum(['classic', 'midnight', 'sunset', 'mono', 'vivid', 'forest', 'cream']).optional(),
-  section_order: z.array(z.string()).optional(),
+  // The Nomad Card catalog has ~8 section IDs and each is a short string —
+  // anything bigger is junk or abuse. Defensive caps so a malformed POST
+  // can't blow up a row size or shove a giant JSONB blob into the DB.
+  section_order: z.array(z.string().max(50)).max(20).optional(),
   hide_branding: z.boolean().optional(),
 })
 

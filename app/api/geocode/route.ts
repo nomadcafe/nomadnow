@@ -15,6 +15,11 @@ import { logError } from '@/lib/errors'
 // (ISO α-2), and coordinates. Empty / too-short queries return [].
 
 const MIN_QUERY_LEN = 2
+// Real city names top out around 60 chars including diacritics. 120 leaves
+// plenty of slack while preventing this proxy being used to amplify abuse
+// against Nominatim — they rate-limit by User-Agent, so a huge q from us
+// could get us throttled and break geocoding for everyone.
+const MAX_QUERY_LEN = 120
 const MAX_RESULTS = 5
 
 interface NominatimResult {
@@ -44,7 +49,7 @@ export interface GeocodeSuggestion {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const q = (searchParams.get('q') || '').trim()
-  if (q.length < MIN_QUERY_LEN) {
+  if (q.length < MIN_QUERY_LEN || q.length > MAX_QUERY_LEN) {
     return NextResponse.json({ results: [] })
   }
 

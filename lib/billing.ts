@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { createAdminSupabase } from './supabase/admin'
 import type { Plan } from './stripe/server'
 
 // "Active" subscription state: Stripe says the customer is paid up AND the
@@ -52,14 +52,16 @@ export function deriveBillingState(row: BillingRow | null | undefined): BillingS
   return { plan, status, isActive, isExpired }
 }
 
-// Fetches billing state for an authenticated user from the DB. Pass a
-// session-scoped Supabase client so RLS applies — admin queries should use
-// supabaseAdmin directly with the columns instead.
-export async function getBillingState(
-  supabase: SupabaseClient,
-  userId: string,
-): Promise<BillingState> {
-  const { data, error } = await supabase
+// Fetches billing state for a user from the DB. Uses the admin (service_role)
+// client because end-user roles (anon, authenticated) had SELECT on the
+// billing columns revoked in migration 0007 — see lib/db-columns.ts. Only
+// the derived state (plan, status, isActive, isExpired) is returned to the
+// caller, so it's safe to call on behalf of any visitor (e.g. to gate a
+// public profile page on the OWNER's subscription) without leaking the
+// raw Stripe identifiers.
+export async function getBillingState(userId: string): Promise<BillingState> {
+  const admin = createAdminSupabase()
+  const { data, error } = await admin
     .from('users')
     .select('plan, subscription_status, current_period_end')
     .eq('id', userId)

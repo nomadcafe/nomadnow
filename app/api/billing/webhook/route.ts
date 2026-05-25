@@ -110,10 +110,31 @@ export async function POST(request: Request) {
         // event that does the heavy lifting; we just make sure we've
         // associated the customer ID with the user row in case it wasn't
         // present before Checkout.
-        const userId = session.client_reference_id ?? session.metadata?.user_id
+        //
+        // Defence in depth: client_reference_id and metadata.user_id are
+        // both set by /api/billing/checkout when we create the session.
+        // If both are present and DON'T match, refuse to bind — that's a
+        // shape we never produce, so seeing it means either Stripe data
+        // corruption or a forged event (which signature verification has
+        // already blocked, but the secret could be leaked in future).
+        const refId = session.client_reference_id ?? null
+        const metaId = session.metadata?.user_id ?? null
+        const userId = refId ?? metaId
+        if (refId && metaId && refId !== metaId) {
+          logError(
+            new Error('checkout session client_reference_id / metadata.user_id mismatch'),
+            { operation: 'webhook_bind_customer', refId, metaId, sessionId: session.id },
+          )
+          break
+        }
         const customerId =
           typeof session.customer === 'string' ? session.customer : session.customer?.id
         if (userId && customerId) {
+          // `.is('stripe_customer_id', null)` is the real protection — it
+          // means we never rebind a customer onto a user that already has
+          // one. Combined with the UNIQUE constraint on stripe_customer_id,
+          // a forged event can at most bind a fresh customer to a user
+          // who never paid (annoying, not a takeover).
           const admin = createAdminSupabase()
           await admin
             .from('users')

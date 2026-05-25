@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase/server'
+import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
 import CreateCardForm, { type InitialCardData } from './CreateCardForm'
 
 // /create-card serves both modes:
@@ -22,7 +23,7 @@ export default async function CreateCardPage() {
   // Pull existing profile + links + stays in parallel. All queries hit
   // RLS-public tables so no admin client needed.
   const [{ data: profile }, { data: links }, { data: stays }] = await Promise.all([
-    supabase.from('users').select('*').eq('id', user.id).maybeSingle(),
+    supabase.from('users').select(SAFE_USER_COLUMNS).eq('id', user.id).maybeSingle(),
     supabase.from('nomad_links').select('*').eq('user_id', user.id).order('order_index'),
     supabase
       .from('nomad_stays')
