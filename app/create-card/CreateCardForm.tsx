@@ -227,12 +227,13 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     })
   }
 
-  // Basic plan cap. Pro lifts this to unlimited (see /pricing). Enforcement
-  // server-side will land with the billing wiring; today the cap is purely UI.
-  const BASIC_LINK_CAP = 1
+  // Soft cap to prevent abuse / accidental thousands; both plans treat links
+  // as unlimited in practice. The Zod schema on the API matches this number
+  // so the form and the backend agree on what's acceptable.
+  const LINK_CAP = 50
 
   const addLink = () => {
-    if (links.length < BASIC_LINK_CAP) {
+    if (links.length < LINK_CAP) {
       setLinks([...links, { type: 'website', url: '' }])
     }
   }
@@ -254,8 +255,8 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     }
 
     const validLinks = links.filter((link) => link.url.trim())
-    if (validLinks.length > BASIC_LINK_CAP) {
-      showError(t('errorTooManyLinks', { cap: BASIC_LINK_CAP }))
+    if (validLinks.length > LINK_CAP) {
+      showError(t('errorTooManyLinks', { cap: LINK_CAP }))
       return
     }
 
@@ -602,7 +603,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                   {/* Links */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                      {t('linksLabel')} <span className="text-gray-400">({t('linksHint')})</span>
+                      {t('linksLabel')}
                     </label>
                     <div className="space-y-2">
                       {links.map((link, index) => (
@@ -646,7 +647,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                           </button>
                         </div>
                       ))}
-                      {links.length < BASIC_LINK_CAP && (
+                      {links.length < LINK_CAP && (
                         <button
                           type="button"
                           onClick={addLink}
@@ -654,15 +655,6 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                         >
                           {t('addLink')}
                         </button>
-                      )}
-                      {links.length >= BASIC_LINK_CAP && (
-                        <p className="text-xs text-gray-500">
-                          {t('proHintPrefix')}
-                          <Link href="/pricing" className="underline hover:text-gray-900">
-                            {t('proHintLink')}
-                          </Link>
-                          {t('proHintSuffix')}
-                        </p>
                       )}
                     </div>
                   </div>

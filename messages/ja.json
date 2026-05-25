@@ -118,7 +118,7 @@
     },
     "pro": {
       "label": "Pro",
-      "tagline": "ノマドブランドを所有する。カスタムドメイン、無制限リンク、詳細分析。",
+      "tagline": "ノマドブランドを所有する。カスタムドメイン、カスタムテーマ、詳細分析。",
       "cta": "Pro へアップグレード"
     },
     "footnote": "USD 表示。月額課金。いつでも解約可 — 当該期間終了までカードは表示されます。",
@@ -168,7 +168,7 @@
       "publicProfile": "公開プロフィールページ",
       "worldMap": "訪問国の世界地図",
       "liveTimezone": "現在の都市 + ライブタイムゾーン",
-      "oneLink": "1 リンク(10 のブランドアイコンから選択)",
+      "links": "ブランドアイコン付き無制限リンク(Instagram、X、LinkedIn、GitHub…)",
       "themes": "4 つの組み込みテーマ",
       "analytics": "基本分析",
       "ogImage": "自動生成シェア画像",
@@ -177,7 +177,6 @@
     "proBullets": {
       "everythingInBasic": "Basic のすべて",
       "customDomain": "カスタムドメイン",
-      "unlimitedLinks": "無制限リンク",
       "customTheme": "カスタムテーマ色 + 背景",
       "verifiedBadge": "認証バッジ",
       "featured": "/map と /in/{country} のおすすめ枠",
@@ -262,15 +261,11 @@
     "avatarUrl": "アバター URL",
     "avatarPlaceholder": "https://example.com/avatar.jpg",
     "linksLabel": "リンク",
-    "linksHint": "Basic — 1 リンク",
     "linkTypeOther": "その他",
     "addLink": "+ リンクを追加",
     "linkUrlPlaceholder": "https://…",
     "linkLabelPlaceholder": "ラベル",
     "removeLink": "リンクを削除",
-    "proHintPrefix": "もっと欲しい? ",
-    "proHintLink": "Pro なら無制限リンク",
-    "proHintSuffix": "。",
     "visitedCountries": "訪れた国",
     "visitedCountriesHint": "カードの地図に表示されます。すべて思い出せない場合は、後から追加できます。",
     "submit": "カードを確保",
@@ -279,7 +274,7 @@
     "successToast": "カードを作成しました! リダイレクト中…",
     "errorHandle": "利用可能なハンドルを選んでください",
     "errorName": "名前は必須です",
-    "errorTooManyLinks": "Basic プランは {cap} リンクまで — Pro で無制限",
+    "errorTooManyLinks": "1 枚のカードにつき最大 {cap} リンクまで",
     "errorGeneric": "カードを作成できませんでした"
   },
   "settings": {
