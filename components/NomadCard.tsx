@@ -471,19 +471,49 @@ export function NomadCard({
               </ul>
             </div>
           )}
-          {currentStay && (
+          {currentStay && (() => {
+            // Prefer the photo_urls array; fall back to legacy photo_url
+            // so rows that pre-date migration 0012 still render imagery.
+            const photos = currentStay.photo_urls && currentStay.photo_urls.length > 0
+              ? currentStay.photo_urls
+              : currentStay.photo_url
+                ? [currentStay.photo_url]
+                : []
+            return (
             <div className={`rounded-xl mb-3 border ${theme.divider} overflow-hidden`}>
-              {currentStay.photo_url && (
-                /* Hero photo for the current stay — full-width banner above
-                   the text, like a postcard. Object-cover crops oddly-sized
-                   uploads to a consistent aspect ratio. */
+              {photos.length === 1 && (
+                /* Single hero photo — full-width banner above the text. */
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
-                  src={currentStay.photo_url}
+                  src={photos[0]}
                   alt=""
                   className="w-full h-40 sm:h-48 object-cover"
                   loading="lazy"
                 />
+              )}
+              {photos.length > 1 && (
+                /* Horizontal scroll-snap carousel — no JS state. Native
+                   smooth scrolling, touch-friendly. Each card snaps into
+                   place so users land on whole photos rather than mid-
+                   scroll. snap-x on the container, snap-start on each
+                   item. */
+                <div className="relative">
+                  <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-thin">
+                    {photos.map((url, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={`${url}-${i}`}
+                        src={url}
+                        alt=""
+                        className="snap-start shrink-0 w-full h-40 sm:h-48 object-cover"
+                        loading="lazy"
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 text-white backdrop-blur-sm">
+                    {photos.length}
+                  </div>
+                </div>
               )}
               <div className="p-4 flex items-start gap-3">
                 <span className="text-2xl leading-none mt-0.5" aria-hidden>
@@ -509,21 +539,40 @@ export function NomadCard({
                 </div>
               </div>
             </div>
-          )}
+            )
+          })()}
           {pastStays.length > 0 && (
             <ul className="space-y-2">
-              {pastStays.map((s) => (
+              {pastStays.map((s) => {
+                const photos = s.photo_urls && s.photo_urls.length > 0
+                  ? s.photo_urls
+                  : s.photo_url
+                    ? [s.photo_url]
+                    : []
+                const firstPhoto = photos[0]
+                const extra = photos.length - 1
+                return (
                 <li key={s.id} className="flex items-start gap-3 text-sm">
-                  {s.photo_url ? (
+                  {firstPhoto ? (
                     /* Square thumbnail when the stay has a photo — turns
-                       the timeline into a stamp-collection style row. */
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={s.photo_url}
-                      alt=""
-                      className="w-12 h-12 rounded-lg object-cover shrink-0"
-                      loading="lazy"
-                    />
+                       the timeline into a stamp-collection style row.
+                       Multi-photo stays get a small "+N" badge in the
+                       corner so visitors can tell there's more without
+                       expanding inline. */
+                    <div className="relative w-12 h-12 shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={firstPhoto}
+                        alt=""
+                        className="w-12 h-12 rounded-lg object-cover"
+                        loading="lazy"
+                      />
+                      {extra > 0 && (
+                        <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-black/70 text-white backdrop-blur-sm">
+                          +{extra}
+                        </span>
+                      )}
+                    </div>
                   ) : (
                     <span className="text-lg leading-none mt-0.5 w-6 text-center" aria-hidden>
                       {getCountryFlag(s.country) || '·'}
@@ -545,7 +594,8 @@ export function NomadCard({
                     )}
                   </div>
                 </li>
-              ))}
+                )
+              })}
             </ul>
           )}
         </div>

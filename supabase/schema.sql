@@ -167,7 +167,8 @@ CREATE TABLE IF NOT EXISTS nomad_stays (
   start_date DATE NOT NULL,
   end_date DATE,
   notes TEXT,
-  photo_url TEXT, -- optional Supabase Storage URL for a single photo per stay
+  photo_url TEXT, -- legacy single photo column (kept for one release; superseded by photo_urls)
+  photo_urls TEXT[] DEFAULT '{}', -- up to 6 Supabase Storage URLs; gallery rendered as scroll-snap carousel on the card
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
