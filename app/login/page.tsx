@@ -14,7 +14,12 @@ function LoginForm() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('next') || '/'
+  // Default landing after login is /settings — it's the most useful
+  // logged-in page (shows account state, billing, profile knobs) and makes
+  // it visually obvious the session worked. Callers that want a different
+  // destination (e.g. middleware bouncing protected routes to /login)
+  // override via ?next=…
+  const redirectTo = searchParams.get('next') || '/settings'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

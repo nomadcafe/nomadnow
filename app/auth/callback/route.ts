@@ -21,7 +21,10 @@ import { getEnvSafe } from '@/lib/env'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') || '/'
+  // Same default as /login — meaningful landing page that proves the
+  // session worked. Hardcoded fallback so a malformed magic link still
+  // ends up somewhere sensible.
+  const next = searchParams.get('next') || '/settings'
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`)
