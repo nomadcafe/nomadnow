@@ -8,7 +8,7 @@ import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { AccountMenu } from '@/components/AccountMenu'
 import { GetYourCardButton } from '@/components/GetYourCardButton'
-import { NomadCard } from '@/components/NomadCard'
+import { NomadCardServer } from '@/components/NomadCardServer'
 import { THEMES, THEME_KEYS } from '@/lib/themes'
 import type { User, NomadLink } from '@/types/database'
 
@@ -197,7 +197,7 @@ export default async function Home() {
                 className="relative bg-white rounded-3xl border border-gray-200 shadow-2xl shadow-gray-900/10 overflow-hidden mx-auto max-w-md sm:mr-8 lg:mr-0"
                 style={{ transform: 'rotate(-2deg)' }}
               >
-                <NomadCard
+                <NomadCardServer
                   user={HERO_USER}
                   links={HERO_LINKS}
                   themeKey="classic"
