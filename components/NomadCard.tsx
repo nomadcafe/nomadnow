@@ -472,13 +472,7 @@ export function NomadCard({
             </div>
           )}
           {currentStay && (() => {
-            // Prefer the photo_urls array; fall back to legacy photo_url
-            // so rows that pre-date migration 0012 still render imagery.
-            const photos = currentStay.photo_urls && currentStay.photo_urls.length > 0
-              ? currentStay.photo_urls
-              : currentStay.photo_url
-                ? [currentStay.photo_url]
-                : []
+            const photos = currentStay.photo_urls ?? []
             return (
             <div className={`rounded-xl mb-3 border ${theme.divider} overflow-hidden`}>
               {photos.length === 1 && (
@@ -544,11 +538,7 @@ export function NomadCard({
           {pastStays.length > 0 && (
             <ul className="space-y-2">
               {pastStays.map((s) => {
-                const photos = s.photo_urls && s.photo_urls.length > 0
-                  ? s.photo_urls
-                  : s.photo_url
-                    ? [s.photo_url]
-                    : []
+                const photos = s.photo_urls ?? []
                 const firstPhoto = photos[0]
                 const extra = photos.length - 1
                 return (

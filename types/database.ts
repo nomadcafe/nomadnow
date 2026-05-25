@@ -72,9 +72,6 @@ export interface NomadStay {
   start_date: string // YYYY-MM-DD
   end_date?: string | null
   notes?: string | null
-  // Legacy single-photo URL (migration 0008). Kept readable for one
-  // release; new writes go through photo_urls.
-  photo_url?: string | null
   // Up to 6 Supabase Storage URLs. Empty array (or undefined) means
   // the stay renders without imagery. Rendered as a scroll-snap
   // carousel on the public card when length > 1.

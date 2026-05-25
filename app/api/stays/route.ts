@@ -77,9 +77,6 @@ export async function PUT(request: NextRequest) {
       // Empty string → null. Important because Postgres rejects '' as a DATE.
       end_date: stay.end_date && stay.end_date.length > 0 ? stay.end_date : null,
       notes: stay.notes || null,
-      // Clear the legacy single column on every write — once a row has
-      // gone through the new editor, photo_urls is the source of truth.
-      photo_url: null,
       photo_urls: stay.photo_urls ?? [],
     }))
 
