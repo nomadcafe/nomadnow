@@ -118,7 +118,7 @@
     },
     "pro": {
       "label": "Pro",
-      "tagline": "Own your nomad brand. Custom domain, unlimited links, advanced analytics.",
+      "tagline": "Own your nomad brand. Custom domain, custom theme, advanced analytics.",
       "cta": "Go Pro"
     },
     "footnote": "Prices in USD. Billed monthly. Cancel any time — your card stays live to the end of the current period.",
@@ -168,7 +168,7 @@
       "publicProfile": "Public profile page",
       "worldMap": "Visited countries world map",
       "liveTimezone": "Current city + live timezone",
-      "oneLink": "1 link (choose from 10 brand icons)",
+      "links": "Unlimited links with brand icons (Instagram, X, LinkedIn, GitHub…)",
       "themes": "4 built-in themes",
       "analytics": "Basic analytics",
       "ogImage": "Auto-generated share image",
@@ -177,7 +177,6 @@
     "proBullets": {
       "everythingInBasic": "Everything in Basic",
       "customDomain": "Custom domain",
-      "unlimitedLinks": "Unlimited links",
       "customTheme": "Custom theme color + background",
       "verifiedBadge": "Verified badge",
       "featured": "Featured on /map and /in/{country}",
@@ -261,16 +260,12 @@
     "hometownPlaceholder": "Osaka",
     "avatarUrl": "Avatar URL",
     "avatarPlaceholder": "https://example.com/avatar.jpg",
-    "linksLabel": "Link",
-    "linksHint": "Basic — 1 link",
+    "linksLabel": "Links",
     "linkTypeOther": "Other",
     "addLink": "+ Add link",
     "linkUrlPlaceholder": "https://…",
     "linkLabelPlaceholder": "Label",
     "removeLink": "Remove link",
-    "proHintPrefix": "Want more? ",
-    "proHintLink": "Pro unlocks unlimited links",
-    "proHintSuffix": ".",
     "visitedCountries": "Countries you've been to",
     "visitedCountriesHint": "Plotted on the map on your card. Add the rest later if you don't remember them all now.",
     "submit": "Claim my card",
@@ -279,7 +274,7 @@
     "successToast": "Card created! Redirecting…",
     "errorHandle": "Please pick an available handle",
     "errorName": "Name is required",
-    "errorTooManyLinks": "Basic plan allows {cap} link — upgrade to Pro for unlimited",
+    "errorTooManyLinks": "Maximum {cap} links per card",
     "errorGeneric": "Failed to create nomad card"
   },
   "settings": {

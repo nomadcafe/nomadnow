@@ -19,7 +19,9 @@ const createNomadLinkSchema = z.object({
   ]),
   label: z.string().optional(),
   url: z.string().url('Invalid URL'),
-  order_index: z.number().int().min(0).max(2),
+  // Soft cap matches the form's LINK_CAP; large enough that no real user
+  // hits it, small enough that abuse can't blow up a row.
+  order_index: z.number().int().min(0).max(49),
 })
 
 export async function POST(request: NextRequest) {
@@ -89,7 +91,7 @@ const replaceLinksSchema = z.object({
         url: z.string().url('Invalid URL'),
       }),
     )
-    .max(10),
+    .max(50),
 })
 
 export async function PUT(request: NextRequest) {
