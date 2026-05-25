@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Logo } from './Logo'
@@ -19,7 +17,6 @@ interface ProfileNotFoundProps {
 //      for anyone who clicked an aspirational / dead link)
 export function ProfileNotFound({ handle }: ProfileNotFoundProps) {
   const t = useTranslations('profileNotFound')
-  const tNav = useTranslations('nav')
   const lower = handle.toLowerCase()
   const validFormat = handleSchema.safeParse(lower).success
   const reserved = isReservedHandle(lower)

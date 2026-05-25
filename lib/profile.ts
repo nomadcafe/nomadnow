@@ -26,7 +26,10 @@ export interface PublicProfile {
 
 export const getProfileByHandle = cache(
   async (rawHandle: string): Promise<PublicProfile | null> => {
-    const validation = handleSchema.safeParse(rawHandle)
+    // Normalize before validate so "Kenji" and "kenji" share a cache entry
+    // and hit the same DB row. Handles are stored lowercase by signup.
+    const lower = rawHandle.toLowerCase()
+    const validation = handleSchema.safeParse(lower)
     if (!validation.success) return null
     const handle = validation.data
 
