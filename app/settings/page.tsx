@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -9,6 +9,7 @@ import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { NomadCard } from '@/components/NomadCard'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
 import { THEMES, THEME_KEYS, BUTTON_SHAPE_KEYS, type ThemeKey, type ButtonShape } from '@/lib/themes'
 import {
@@ -24,6 +25,13 @@ import {
   reconcileSectionOrder,
   type SectionDef,
 } from '@/lib/sections'
+import type { User, NomadLink, NomadStay } from '@/types/database'
+
+interface ProfileData {
+  user: User
+  links: NomadLink[]
+  stays: NomadStay[]
+}
 
 interface ProfileSettings {
   // theme_color stores the preset key (legacy column). See lib/themes.ts.
@@ -71,7 +79,7 @@ export default function SettingsPage() {
     currentPeriodEnd: null,
   })
   const [portalLoading, setPortalLoading] = useState(false)
-  const [settings, setSettings] = useState<ProfileSettings>({
+  const DEFAULT_SETTINGS: ProfileSettings = {
     theme_color: 'classic',
     button_shape: 'rounded',
     background_mode: 'theme',
@@ -79,7 +87,22 @@ export default function SettingsPage() {
     font_family: 'theme',
     section_order: NOMAD_DEFAULT_ORDER,
     hide_branding: false,
-  })
+  }
+  const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_SETTINGS)
+  // Snapshot of the last saved state, used to compute the dirty flag and
+  // to power the Reset button. JSON string for a cheap deep-equal.
+  const [savedSerialized, setSavedSerialized] = useState<string>(
+    JSON.stringify(DEFAULT_SETTINGS),
+  )
+  // Real profile payload for the live preview. Fetched from /api/profile/[handle]
+  // after we know the user's handle. Null = no card yet (point to /create-card).
+  const [previewData, setPreviewData] = useState<ProfileData | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+
+  const isDirty = useMemo(
+    () => JSON.stringify(settings) !== savedSerialized,
+    [settings, savedSerialized],
+  )
 
   useEffect(() => {
     async function load() {
@@ -137,7 +160,7 @@ export default function SettingsPage() {
             rawFont && (FONT_KEYS as readonly string[]).includes(rawFont)
               ? (rawFont as FontKey)
               : 'theme'
-          setSettings({
+          const loaded: ProfileSettings = {
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
             background_mode,
@@ -145,7 +168,9 @@ export default function SettingsPage() {
             font_family,
             section_order: order,
             hide_branding: Boolean(data.settings.hide_branding),
-          })
+          }
+          setSettings(loaded)
+          setSavedSerialized(JSON.stringify(loaded))
         }
       } catch (error) {
         console.error('Error loading settings:', error)
@@ -154,7 +179,52 @@ export default function SettingsPage() {
       }
     }
     load()
+    // DEFAULT_SETTINGS is a stable object literal — re-creating it each
+    // render is fine since the effect only depends on router.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
+
+  // Live-preview profile fetch — pulls the user's actual user / links /
+  // stays so the embedded NomadCard reflects real content, not mock data.
+  // Triggered once we know the handle. Lookup uses the public API which
+  // already caches with the same ETag the public /[handle] page uses.
+  useEffect(() => {
+    if (!handle) return
+    let alive = true
+    setPreviewLoading(true)
+    fetch(`/api/profile/${handle}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!alive || !data?.user) return
+        setPreviewData({
+          user: data.user as User,
+          links: (data.nomadLinks ?? []) as NomadLink[],
+          stays: (data.nomadStays ?? []) as NomadStay[],
+        })
+      })
+      .catch(() => {
+        // Preview is non-essential — the settings UI itself still works.
+      })
+      .finally(() => {
+        if (alive) setPreviewLoading(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [handle])
+
+  // Browser-native unsaved-changes guard. Custom messages aren't shown by
+  // any modern browser; setting returnValue is enough to trigger the
+  // generic "leave site?" prompt.
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
 
   const handleSave = async () => {
     setSaving(true)
@@ -170,17 +240,26 @@ export default function SettingsPage() {
         throw new Error(data.error || 'Failed to save settings')
       }
 
+      // Stay on the page after save — the previous behaviour bounced the
+      // user to /{handle} after 1.2s which was disorienting (they often
+      // wanted to keep tweaking). The toast confirms the save; a separate
+      // "View live card" link is always visible if they want to switch.
       showSuccess(t('saved'))
-      if (handle) {
-        setTimeout(() => {
-          router.push(`/${handle}`)
-        }, 1200)
-      }
+      setSavedSerialized(JSON.stringify(settings))
     } catch (error) {
       console.error('Error saving settings:', error)
       showError(error instanceof Error ? error.message : t('saveError'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleReset = () => {
+    try {
+      const restored = JSON.parse(savedSerialized) as ProfileSettings
+      setSettings(restored)
+    } catch {
+      setSettings(DEFAULT_SETTINGS)
     }
   }
 
@@ -270,7 +349,7 @@ export default function SettingsPage() {
         {/* Bottom padding has to clear the fixed save bar at the bottom; the
             previous pb-32 (8rem) left almost no breathing room and the last
             section's content was getting visually clipped. */}
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 pb-48">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 pb-48">
           <header className="mb-10">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
               {t('title')}
@@ -280,7 +359,12 @@ export default function SettingsPage() {
             </p>
           </header>
 
-          <div className="space-y-10">
+          {/* Two columns on lg+ — controls on the left, live preview on the
+              right (sticky so it stays visible while scrolling through
+              long sections). Below lg the preview drops to the bottom
+              of the controls. */}
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 lg:gap-12">
+            <div className="space-y-10">
             {/* Profile info — the most-edited surface area. Routes to
                 /create-card (edit mode) since that's where the actual
                 profile fields live. Keeping settings as the central hub
@@ -713,24 +797,101 @@ export default function SettingsPage() {
                 </div>
               </label>
             </Section>
+            </div>
 
+            {/* Live preview column — sticky on lg+ so it stays in view while
+                the user scrolls through the long control list. Renders the
+                user's actual card with the current draft settings, so every
+                tweak (theme / shape / bg / font / section order /
+                branding) is visible before the user commits via Save. */}
+            <aside className="lg:sticky lg:top-24 lg:self-start lg:h-fit">
+              <div className="mb-3 flex items-baseline justify-between">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+                  {t('preview.title')}
+                </h2>
+                {handle && (
+                  <a
+                    href={`/${handle}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gray-500 hover:text-gray-900 transition inline-flex items-center gap-1"
+                  >
+                    {t('preview.openFull')}
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+              <div className="rounded-2xl border border-gray-200 overflow-hidden bg-gray-50">
+                {previewData ? (
+                  <NomadCard
+                    user={previewData.user}
+                    links={previewData.links}
+                    stays={previewData.stays}
+                    themeKey={settings.theme_color}
+                    buttonShape={settings.button_shape}
+                    backgroundMode={settings.background_mode}
+                    backgroundValue={settings.background_value}
+                    fontFamily={settings.font_family}
+                    sectionOrder={settings.section_order}
+                    hideMakeYoursCTA={Boolean(settings.hide_branding)}
+                    embedded
+                  />
+                ) : previewLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <LoadingSpinner size="md" />
+                  </div>
+                ) : (
+                  <div className="p-8 text-center text-sm text-gray-500">
+                    <p className="mb-3">{t('preview.noCard')}</p>
+                    <Link
+                      href="/create-card"
+                      className="inline-flex items-center gap-1.5 text-gray-900 font-medium hover:underline"
+                    >
+                      {t('preview.createCard')}
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </Link>
+                  </div>
+                )}
+              </div>
+              {isDirty && previewData && (
+                <p className="mt-3 text-xs text-amber-600 inline-flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  {t('preview.unsavedHint')}
+                </p>
+              )}
+            </aside>
           </div>
         </main>
 
-        {/* Sticky save bar */}
+        {/* Sticky save bar — shows a dirty pill on the left so the user
+            knows their changes haven't gone out yet. Save is disabled
+            when clean (no-op POSTs are wasted round-trips); Reset shows
+            up only when dirty (no point in resetting a clean state). */}
         <div className="fixed bottom-0 inset-x-0 z-40 border-t border-gray-100 bg-white/95 backdrop-blur">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-            {handle && (
-              <Link
-                href={`/${handle}`}
-                className="px-5 py-3 text-gray-600 hover:text-gray-900 rounded-full font-medium transition text-sm"
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+            {isDirty && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                {t('unsavedChanges')}
+              </span>
+            )}
+            {isDirty && (
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={saving}
+                className="px-4 py-3 text-gray-600 hover:text-gray-900 rounded-full font-medium transition text-sm disabled:opacity-40"
               >
-                {tCommon('cancel')}
-              </Link>
+                {t('reset')}
+              </button>
             )}
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || !isDirty}
               className="flex-1 sm:flex-none sm:ml-auto bg-gray-900 text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
             >
               {saving ? (

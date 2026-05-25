@@ -318,6 +318,15 @@
     "navView": "查看主页",
     "title": "设置。",
     "subtitle": "自定义主页布局、主题、显示内容。",
+    "unsavedChanges": "有未保存的修改",
+    "reset": "撤销修改",
+    "preview": {
+      "title": "实时预览",
+      "openFull": "查看完整卡片",
+      "unsavedHint": "预览展示未保存的修改",
+      "noCard": "你还没有创建卡片。",
+      "createCard": "去创建"
+    },
     "profile": {
       "title": "卡片信息",
       "description": "姓名、Bio、当前城市、链接、访问国家。",
