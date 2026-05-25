@@ -219,7 +219,10 @@ export default function SettingsPage() {
           </div>
         </nav>
 
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 pb-32">
+        {/* Bottom padding has to clear the fixed save bar at the bottom; the
+            previous pb-32 (8rem) left almost no breathing room and the last
+            section's content was getting visually clipped. */}
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 pb-48">
           <header className="mb-10">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
               {t('title')}
