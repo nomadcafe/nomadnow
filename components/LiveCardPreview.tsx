@@ -29,6 +29,12 @@ export interface PreviewStay {
   start_date: string
   end_date: string
   notes: string
+  // Optional so callers with only the minimum shape (e.g. SAMPLE_STAYS below)
+  // don't need to pass them. Both unlock real-card fidelity: lat/lon plot a
+  // dot on the WorldMap, photo_urls light up the stays section.
+  lat?: number | null
+  lon?: number | null
+  photo_urls?: string[]
 }
 
 export interface PreviewLink {
@@ -143,9 +149,12 @@ export function LiveCardPreview({
       user_id: 'preview',
       city: s.city,
       country: s.country,
+      lat: s.lat ?? null,
+      lon: s.lon ?? null,
       start_date: s.start_date,
       end_date: s.end_date || null,
       notes: s.notes || null,
+      photo_urls: s.photo_urls ?? [],
       created_at: NOW_ISO,
       updated_at: NOW_ISO,
     }))

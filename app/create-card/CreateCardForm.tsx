@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useDeferredValue, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -71,14 +71,15 @@ export interface InitialCardData {
   stays: StayDraft[]
 }
 
-// Cached at module scope so the dropdown doesn't recompute on every render.
-// `Intl.supportedValuesOf` is supported in all modern browsers + Node 18+.
-function getTimezoneList(): string[] {
+// Computed once per module load — the timezone <select> renders ~400 options
+// and the previous wrapper function (despite a misleading "cached" comment)
+// actually re-ran Intl.supportedValuesOf on every render.
+// Intl.supportedValuesOf is supported in all modern browsers + Node 18+;
+// Safari < 16 throws, so we fall back to a curated nomad-friendly list.
+const TIMEZONE_LIST: string[] = (() => {
   try {
     return Intl.supportedValuesOf('timeZone')
   } catch {
-    // Safari < 16 doesn't ship the API. Fall back to a minimal nomad-friendly
-    // list so the form still renders something pickable.
     return [
       'UTC',
       'America/Los_Angeles', 'America/New_York', 'America/Mexico_City',
@@ -89,7 +90,7 @@ function getTimezoneList(): string[] {
       'Australia/Sydney',
     ]
   }
-}
+})()
 
 function detectBrowserTimezone(): string {
   try {
@@ -182,6 +183,15 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
   const [links, setLinks] = useState<NomadLink[]>(initial?.links ?? savedDraft?.links ?? [])
   const [stays, setStays] = useState<StayDraft[]>(initial?.stays ?? savedDraft?.stays ?? [])
 
+  // Every keystroke in the bio textarea / name / city inputs triggers a full
+  // re-render of the embedded NomadCard preview (and its WorldMap SVG).
+  // useDeferredValue lets React keep the inputs responsive — the preview
+  // renders against a slightly stale snapshot that catches up when idle.
+  const deferredFormData = useDeferredValue(formData)
+  const deferredLinks = useDeferredValue(links)
+  const deferredStays = useDeferredValue(stays)
+  const deferredVisitedCountries = useDeferredValue(visitedCountries)
+
   // Auto-expand the optional section if the user has any saved draft data in it,
   // so they don't lose visibility into in-progress work.
   // Also: if the page was opened with ?handle=xxx (e.g. from the 404 "Claim this"
@@ -236,6 +246,10 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     }
   }
 
+  // Tracks the in-flight handle-check request so a slow response for an
+  // older handle (network jitter) can't overwrite a fresh fast response.
+  const handleCheckAbortRef = useRef<AbortController | null>(null)
+
   const checkHandleAvailability = useCallback(
     debounce(async (handle: string) => {
       if (!handle.trim()) {
@@ -250,9 +264,16 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
         return
       }
 
+      handleCheckAbortRef.current?.abort()
+      const controller = new AbortController()
+      handleCheckAbortRef.current = controller
+
       setHandleStatus('checking')
       try {
-        const response = await fetch(`/api/users/check-handle?handle=${encodeURIComponent(handle.toLowerCase())}`)
+        const response = await fetch(
+          `/api/users/check-handle?handle=${encodeURIComponent(handle.toLowerCase())}`,
+          { signal: controller.signal },
+        )
         const data = await response.json()
 
         if (data.available) {
@@ -262,7 +283,10 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
           setHandleStatus('unavailable')
           setHandleError(t('handleTaken'))
         }
-      } catch {
+      } catch (err) {
+        // AbortError fires when a newer keystroke superseded this check —
+        // not an error to surface to the user; the next call's response wins.
+        if (err instanceof DOMException && err.name === 'AbortError') return
         setHandleStatus('idle')
         setHandleError(t('handleCheckError'))
       }
@@ -610,7 +634,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
                 >
-                  {getTimezoneList().map((tz) => (
+                  {TIMEZONE_LIST.map((tz) => (
                     <option key={tz} value={tz}>{tz}</option>
                   ))}
                 </select>
@@ -864,7 +888,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
             <aside className="hidden lg:block">
               <div className="sticky top-24">
                 <div className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-3">
-                  {isPreviewEmpty(formData) ? t('previewExampleLabel') : t('previewLabel')}
+                  {isPreviewEmpty(deferredFormData) ? t('previewExampleLabel') : t('previewLabel')}
                 </div>
                 <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                   {/* Theme isn't part of this form (lives in /settings as
@@ -872,10 +896,10 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                       uses the default. Users can switch themes from /settings
                       and visit /{handle} to see the themed version. */}
                   <LiveCardPreview
-                    form={formData}
-                    links={links}
-                    stays={stays}
-                    visitedCountries={visitedCountries}
+                    form={deferredFormData}
+                    links={deferredLinks}
+                    stays={deferredStays}
+                    visitedCountries={deferredVisitedCountries}
                     themeKey="classic"
                   />
                 </div>
