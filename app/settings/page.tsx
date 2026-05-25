@@ -230,6 +230,25 @@ export default function SettingsPage() {
           </header>
 
           <div className="space-y-10">
+            {/* Profile info — the most-edited surface area. Routes to
+                /create-card (edit mode) since that's where the actual
+                profile fields live. Keeping settings as the central hub
+                even though the form is hosted elsewhere. */}
+            <Section
+              title={t('profile.title')}
+              description={t('profile.description')}
+            >
+              <Link
+                href="/create-card"
+                className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border border-gray-300 hover:border-gray-900 transition"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                {t('profile.edit')}
+              </Link>
+            </Section>
+
             {/* Billing */}
             <Section
               title={tBilling('title')}
@@ -327,11 +346,13 @@ export default function SettingsPage() {
 
             {/* Sections — reorder only. Empty sections already auto-hide in
                 NomadCard, so the old show/hide toggle was redundant.
-                Reordering is niche so we tuck it behind a disclosure. */}
+                Reordering is niche so we tuck it behind a disclosure with
+                a sliders icon + "Advanced" pill to signal "power-user
+                territory; safe to skip". */}
             <details className="group">
               <summary className="cursor-pointer list-none flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition">
                 <svg
-                  className="w-4 h-4 transition group-open:rotate-90"
+                  className="w-4 h-4 transition group-open:rotate-90 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -339,7 +360,20 @@ export default function SettingsPage() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.8}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h12M3 12h7m-7 6h12M17 4v4m0 4v4m0 4v0M21 8h-8m8 8h-8" />
+                </svg>
                 {t('sections.title')}
+                <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wide bg-gray-100 text-gray-500 border border-gray-200">
+                  {t('sections.advancedLabel')}
+                </span>
               </summary>
               <p className="mt-2 ml-6 text-xs text-gray-500">{t('sections.description')}</p>
               <div className="mt-4 space-y-2">

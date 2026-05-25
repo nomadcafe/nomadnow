@@ -286,6 +286,11 @@
     "navView": "View profile",
     "title": "Settings.",
     "subtitle": "Customize your profile layout, theme, and what's shown.",
+    "profile": {
+      "title": "Profile info",
+      "description": "Your name, bio, current city, links, visited countries.",
+      "edit": "Edit profile"
+    },
     "layout": {
       "title": "Layout",
       "description": "Choose how your profile is arranged.",
@@ -300,8 +305,9 @@
       "previewHint": "Preview any theme live at "
     },
     "sections": {
-      "title": "Sections",
-      "description": "Toggle visibility and reorder.",
+      "title": "Section order",
+      "advancedLabel": "Advanced",
+      "description": "Rearrange how blocks appear on your card. Empty blocks auto-hide.",
       "moveUp": "Move up",
       "moveDown": "Move down",
       "show": "Show"
