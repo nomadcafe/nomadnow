@@ -12,6 +12,7 @@ import { EditCardCTA } from './EditCardCTA'
 import { VideoLightbox, detectVideo } from './VideoLightbox'
 import Link from 'next/link'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
+import { resolveBackgroundCss } from '@/lib/card-background'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
 
 interface NomadCardProps {
@@ -22,6 +23,12 @@ interface NomadCardProps {
   // Corner-radius preset for link buttons — see lib/themes.ts. Orthogonal
   // to theme color so any theme works with any shape.
   buttonShape?: string | null
+  // Optional override for the outer page background. When set, replaces
+  // the theme's bg class with a CSS color or linear-gradient. Resolved
+  // through lib/card-background.ts; invalid values fall through to the
+  // theme default rather than throwing.
+  backgroundMode?: string | null
+  backgroundValue?: unknown
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
   // When true, the floating "Make yours →" CTA is suppressed. Use on the
@@ -198,6 +205,8 @@ export function NomadCard({
   links,
   themeKey,
   buttonShape,
+  backgroundMode,
+  backgroundValue,
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
@@ -216,6 +225,7 @@ export function NomadCard({
   const [videoEmbed, setVideoEmbed] = useState<string | null>(null)
   const theme = getTheme(themeKey)
   const shape = getButtonShape(buttonShape)
+  const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
   const locale = useLocale()
   // Split stays into upcoming / current / past once and re-use the buckets
   // throughout the render — the rules for "what is current" (open-ended,
@@ -729,7 +739,10 @@ export function NomadCard({
   }
 
   return (
-    <div className={`min-h-screen ${theme.page} ${theme.font}`}>
+    <div
+      className={`min-h-screen ${customBg ? '' : theme.page} ${theme.font}`}
+      style={customBg ? { background: customBg } : undefined}
+    >
       {videoEmbed && <VideoLightbox url={videoEmbed} onClose={() => setVideoEmbed(null)} />}
       {isOwner ? <EditCardCTA /> : !hideMakeYoursCTA && <MakeYoursCTA />}
 

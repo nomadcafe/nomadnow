@@ -45,6 +45,11 @@ export interface ProfileSettings {
   // lib/themes.ts for the className map. Defaults to 'rounded' so existing
   // cards render unchanged.
   button_shape?: 'pill' | 'rounded' | 'square'
+  // Optional custom outer background — see lib/card-background.ts. Mode
+  // 'theme' (default) uses the theme.page Tailwind class; 'solid' and
+  // 'gradient' read the structured value.
+  background_mode?: 'theme' | 'solid' | 'gradient'
+  background_value?: unknown
   // When true, the floating "Make yours" CTA / nomad.now branding is hidden on the
   // public profile. Available to all paid plans (see /pricing).
   hide_branding?: boolean

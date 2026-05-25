@@ -342,6 +342,16 @@
       "rounded": "丸み",
       "square": "四角"
     },
+    "background": {
+      "title": "背景",
+      "description": "テーマの背景を単色またはグラデーションで上書き。",
+      "theme": "テーマのまま",
+      "solid": "単色",
+      "gradient": "グラデーション",
+      "from": "開始色",
+      "to": "終了色",
+      "angle": "角度"
+    },
     "sections": {
       "title": "セクション順序",
       "advancedLabel": "詳細設定",

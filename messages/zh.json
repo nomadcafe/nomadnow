@@ -342,6 +342,16 @@
       "rounded": "圆角",
       "square": "直角"
     },
+    "background": {
+      "title": "背景",
+      "description": "用纯色或渐变覆盖主题背景。",
+      "theme": "跟随主题",
+      "solid": "纯色",
+      "gradient": "渐变",
+      "from": "起色",
+      "to": "终色",
+      "angle": "角度"
+    },
     "sections": {
       "title": "分节顺序",
       "advancedLabel": "高级",
