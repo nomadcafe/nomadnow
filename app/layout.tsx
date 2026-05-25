@@ -9,6 +9,11 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
+  // Skip the <link rel="preload"> tag. Inter only covers Latin glyphs, so
+  // JA/ZH visitors fall back to system fonts anyway and the preload is
+  // wasted bandwidth + a Chrome console warning for them. EN visitors still
+  // get the font via display:swap, just without the head-of-page preload.
+  preload: false,
 })
 
 const OG_LOCALE: Record<string, string> = {
