@@ -393,6 +393,9 @@
     "dismiss": "关闭",
     "tweetTemplate": "刚做了我的 Nomad Card @nomadnow —— 来看看: {url}"
   },
+  "cityAutocomplete": {
+    "searching": "搜索中…"
+  },
   "stays": {
     "sectionTitle": "去过的地方",
     "currentLabel": "现在在",

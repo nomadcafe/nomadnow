@@ -50,6 +50,8 @@ export default async function CreateCardPage() {
         stays: (stays ?? []).map((s) => ({
           city: (s.city as string) ?? '',
           country: (s.country as string) ?? '',
+          lat: (s.lat as number | null) ?? null,
+          lon: (s.lon as number | null) ?? null,
           start_date: (s.start_date as string) ?? '',
           // DATE column comes back as null when "currently here"; the form
           // shape uses '' for empty so the <input type=date> stays clean.
