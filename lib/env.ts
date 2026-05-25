@@ -10,7 +10,11 @@ import { z } from 'zod'
 const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL'),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'Supabase anon key is required'),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Supabase service role key is required'),
+  // Optional in the schema so a missing service-role key doesn't crash
+  // anon-only paths (createServerSupabase, public reads). Routes that need
+  // it should call requireServiceRoleKey() at point of use to fail loudly
+  // when it's actually required.
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_BASE_URL: z.string().url().optional(),
   // Optional — when both are set, API rate limiting uses Upstash Redis.
   // When unset, rate limiting silently no-ops (fine for local dev / preview deploys).
