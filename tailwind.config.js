@@ -14,6 +14,12 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
+      animation: {
+        // Slower, gentler than the default animate-pulse — used for the
+        // halo behind visited-country dots on the world map. Three-second
+        // cycle is calm enough to not steal attention from the dot itself.
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
     },
   },
   plugins: [],
