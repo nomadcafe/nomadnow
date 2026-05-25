@@ -286,6 +286,11 @@
     "navView": "查看主页",
     "title": "设置。",
     "subtitle": "自定义主页布局、主题、显示内容。",
+    "profile": {
+      "title": "卡片信息",
+      "description": "姓名、Bio、当前城市、链接、访问国家。",
+      "edit": "编辑卡片"
+    },
     "layout": {
       "title": "布局",
       "description": "选择主页如何排列。",
@@ -300,8 +305,9 @@
       "previewHint": "实时预览任意主题: "
     },
     "sections": {
-      "title": "分节",
-      "description": "切换显示与重新排序。",
+      "title": "分节顺序",
+      "advancedLabel": "高级",
+      "description": "调整卡片上各块的显示顺序。空内容块自动隐藏。",
       "moveUp": "上移",
       "moveDown": "下移",
       "show": "显示"
