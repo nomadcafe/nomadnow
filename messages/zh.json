@@ -218,7 +218,11 @@
   },
   "login": {
     "title": "登录。",
-    "subtitle": "Magic link —— 不需要密码。",
+    "subtitle": "不需要密码 —— 选一种方式登录。",
+    "google": "用 Google 继续",
+    "googleSigningIn": "跳转中…",
+    "googleError": "Google 登录失败,请稍后再试。",
+    "or": "或",
     "emailLabel": "邮箱",
     "emailPlaceholder": "you@example.com",
     "submit": "发送登录链接",
