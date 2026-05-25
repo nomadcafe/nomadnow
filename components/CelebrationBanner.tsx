@@ -1,28 +1,23 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-// Renders a one-time celebratory banner on /{handle} when the page is
-// arrived at with ?celebrate=1 — fired by CreateCardForm after a fresh
-// card is saved. Mission: catch the high-attention moment right after
-// payment + setup, and convert it into outbound shares (free distribution).
+// Celebratory share banner shown right after /create-card finishes. The
+// parent decides when to mount this (gated on ?celebrate=1 server-side),
+// so the JS only ships during that one high-attention moment — repeat
+// visitors never download the bundle.
 //
-// Auto-dismisses after 8 seconds so it doesn't outstay its welcome, and
-// can be closed manually. Renders nothing on subsequent visits.
+// Auto-dismisses after 8 seconds and can be closed manually.
 export function CelebrationBanner({ handle }: { handle: string }) {
   const t = useTranslations('celebrate')
-  const searchParams = useSearchParams()
-  const shouldShow = searchParams.get('celebrate') === '1'
-  const [visible, setVisible] = useState(shouldShow)
+  const [visible, setVisible] = useState(true)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (!shouldShow) return
     const timer = window.setTimeout(() => setVisible(false), 8000)
     return () => window.clearTimeout(timer)
-  }, [shouldShow])
+  }, [])
 
   if (!visible) return null
 
