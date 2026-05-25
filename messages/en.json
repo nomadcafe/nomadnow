@@ -251,6 +251,8 @@
     "currentCity": "Currently in",
     "currentCityPlaceholder": "Bangkok",
     "currentCityHint": "Shown live on your card. Change when you move.",
+    "timezone": "Timezone",
+    "timezoneHint": "Drives the live clock on your card. Auto-detected from your browser — change if you want your card to show a different one.",
     "expand": "Customize more (optional)",
     "collapse": "Hide extras",
     "role": "Role",

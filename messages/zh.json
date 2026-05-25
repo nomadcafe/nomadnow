@@ -251,6 +251,8 @@
     "currentCity": "现在位于",
     "currentCityPlaceholder": "曼谷",
     "currentCityHint": "实时显示在你的卡片上。换地方时记得更新。",
+    "timezone": "时区",
+    "timezoneHint": "驱动卡片上的实时时钟。从你的浏览器自动检测 —— 想让卡片显示其他时区可手动改。",
     "expand": "更多自定义(可选)",
     "collapse": "收起",
     "role": "职业",
