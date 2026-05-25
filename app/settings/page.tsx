@@ -47,6 +47,7 @@ interface BillingDisplayState {
 export default function SettingsPage() {
   const t = useTranslations('settings')
   const tCommon = useTranslations('common')
+  const tNav = useTranslations('nav')
   const tBilling = useTranslations('settings.billing')
   const tBillingStatus = useTranslations('settings.billing.status')
   const locale = useLocale()
@@ -236,8 +237,13 @@ export default function SettingsPage() {
                   {t('navView')}
                 </Link>
               ) : (
-                <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition">
-                  {tCommon('cancel')}
+                // No handle yet means the user hasn't claimed a card — the
+                // action they actually need is "create one", not "cancel".
+                <Link
+                  href="/pricing"
+                  className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
+                >
+                  {tNav('getCard')}
                 </Link>
               )}
             </div>
