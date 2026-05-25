@@ -12,6 +12,12 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
 import { THEMES, THEME_KEYS, BUTTON_SHAPE_KEYS, type ThemeKey, type ButtonShape } from '@/lib/themes'
 import {
+  BACKGROUND_MODE_KEYS,
+  GRADIENT_PRESETS,
+  resolveBackgroundCss,
+  type BackgroundMode,
+} from '@/lib/card-background'
+import {
   NOMAD_SECTIONS,
   NOMAD_DEFAULT_ORDER,
   reconcileSectionOrder,
@@ -22,6 +28,11 @@ interface ProfileSettings {
   // theme_color stores the preset key (legacy column). See lib/themes.ts.
   theme_color?: ThemeKey
   button_shape?: ButtonShape
+  background_mode?: BackgroundMode
+  background_value?:
+    | { color: string }
+    | { from: string; to: string; angle: number }
+    | null
   section_order?: string[]
   hide_branding?: boolean
 }
@@ -61,6 +72,8 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<ProfileSettings>({
     theme_color: 'classic',
     button_shape: 'rounded',
+    background_mode: 'theme',
+    background_value: null,
     section_order: NOMAD_DEFAULT_ORDER,
     hide_branding: false,
   })
@@ -111,9 +124,16 @@ export default function SettingsPage() {
             rawShape && (BUTTON_SHAPE_KEYS as readonly string[]).includes(rawShape)
               ? (rawShape as ButtonShape)
               : 'rounded'
+          const rawBgMode = data.settings.background_mode as string | null | undefined
+          const background_mode: BackgroundMode =
+            rawBgMode && (BACKGROUND_MODE_KEYS as readonly string[]).includes(rawBgMode)
+              ? (rawBgMode as BackgroundMode)
+              : 'theme'
           setSettings({
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
+            background_mode,
+            background_value: data.settings.background_value ?? null,
             section_order: order,
             hide_branding: Boolean(data.settings.hide_branding),
           })
@@ -364,6 +384,154 @@ export default function SettingsPage() {
                 </a>
                 .
               </p>
+            </Section>
+
+            {/* Background — solid or gradient overrides the theme's
+                outer bg. Six preset gradients give a one-click "looks
+                nice" path; two color inputs let users fine-tune. The
+                live preview swatch above the picker reflects the
+                current setting so users don't have to leave the page. */}
+            <Section
+              title={t('background.title')}
+              description={t('background.description')}
+            >
+              {(() => {
+                const mode = settings.background_mode ?? 'theme'
+                const bgValue = settings.background_value ?? null
+                const previewCss = resolveBackgroundCss(mode, bgValue)
+                const gradient =
+                  bgValue && 'from' in bgValue
+                    ? bgValue
+                    : { from: '#667eea', to: '#764ba2', angle: 135 }
+                const solidColor = bgValue && 'color' in bgValue ? bgValue.color : '#1a1a1a'
+                return (
+                  <div className="space-y-4">
+                    <div
+                      className="h-20 rounded-xl border border-gray-200"
+                      style={previewCss ? { background: previewCss } : { background: '#f3f4f6' }}
+                      aria-hidden
+                    />
+                    <div className="grid grid-cols-3 gap-2 max-w-md">
+                      {BACKGROUND_MODE_KEYS.map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setSettings((prev) => ({
+                              ...prev,
+                              background_mode: key,
+                              background_value:
+                                key === 'theme'
+                                  ? null
+                                  : key === 'solid'
+                                    ? { color: solidColor }
+                                    : gradient,
+                            }))
+                          }}
+                          className={`px-3 py-2 rounded-lg border text-sm font-medium transition ${
+                            mode === key
+                              ? 'border-gray-900 bg-gray-900 text-white'
+                              : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          {t(`background.${key}`)}
+                        </button>
+                      ))}
+                    </div>
+
+                    {mode === 'solid' && (
+                      <label className="flex items-center gap-3 text-sm text-gray-700">
+                        <input
+                          type="color"
+                          value={solidColor}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              background_value: { color: e.target.value },
+                            }))
+                          }
+                          className="w-12 h-12 rounded-lg border border-gray-200 cursor-pointer"
+                        />
+                        <span className="font-mono">{solidColor}</span>
+                      </label>
+                    )}
+
+                    {mode === 'gradient' && (
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap gap-2">
+                          {GRADIENT_PRESETS.map((p, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              aria-label={`Gradient preset ${i + 1}`}
+                              onClick={() =>
+                                setSettings((prev) => ({
+                                  ...prev,
+                                  background_value: { ...p },
+                                }))
+                              }
+                              className="w-10 h-10 rounded-lg border border-gray-200 hover:border-gray-400 transition"
+                              style={{
+                                background: `linear-gradient(${p.angle}deg, ${p.from}, ${p.to})`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-4 flex-wrap">
+                          <label className="flex items-center gap-2 text-sm text-gray-700">
+                            <span className="text-xs uppercase tracking-wide text-gray-500">{t('background.from')}</span>
+                            <input
+                              type="color"
+                              value={gradient.from}
+                              onChange={(e) =>
+                                setSettings((prev) => ({
+                                  ...prev,
+                                  background_value: { ...gradient, from: e.target.value },
+                                }))
+                              }
+                              className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+                            />
+                          </label>
+                          <label className="flex items-center gap-2 text-sm text-gray-700">
+                            <span className="text-xs uppercase tracking-wide text-gray-500">{t('background.to')}</span>
+                            <input
+                              type="color"
+                              value={gradient.to}
+                              onChange={(e) =>
+                                setSettings((prev) => ({
+                                  ...prev,
+                                  background_value: { ...gradient, to: e.target.value },
+                                }))
+                              }
+                              className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+                            />
+                          </label>
+                          <label className="flex items-center gap-2 text-sm text-gray-700">
+                            <span className="text-xs uppercase tracking-wide text-gray-500">{t('background.angle')}</span>
+                            <input
+                              type="range"
+                              min={0}
+                              max={360}
+                              value={gradient.angle}
+                              onChange={(e) =>
+                                setSettings((prev) => ({
+                                  ...prev,
+                                  background_value: {
+                                    ...gradient,
+                                    angle: Number(e.target.value),
+                                  },
+                                }))
+                              }
+                              className="w-32"
+                            />
+                            <span className="font-mono text-xs w-10 text-right">{gradient.angle}°</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             </Section>
 
             {/* Button shape — orthogonal to theme color. Three radius

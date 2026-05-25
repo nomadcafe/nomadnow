@@ -95,6 +95,10 @@ CREATE TABLE IF NOT EXISTS profile_settings (
   -- Button shape for link rows on the public card. 'pill' | 'rounded' (default) | 'square'.
   -- See lib/themes.ts for the rendering map.
   button_shape TEXT DEFAULT 'rounded',
+  -- Custom card background. mode 'theme' (default) uses the theme's bg;
+  -- 'solid' / 'gradient' use background_value. See lib/card-background.ts.
+  background_mode TEXT DEFAULT 'theme',
+  background_value JSONB,
   -- When true, suppresses the "Make yours" / "Made on nomad.now" branding on the public profile.
   -- Available to all paid plans (Basic and Pro) — pricing is set in /pricing.
   hide_branding BOOLEAN DEFAULT FALSE,

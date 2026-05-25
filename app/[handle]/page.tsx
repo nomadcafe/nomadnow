@@ -229,6 +229,8 @@ export default async function ProfilePage({
         stays={nomadStays || []}
         themeKey={settings?.theme_color}
         buttonShape={settings?.button_shape}
+        backgroundMode={settings?.background_mode}
+        backgroundValue={settings?.background_value}
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
         hideMakeYoursCTA={Boolean(settings?.hide_branding)}

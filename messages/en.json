@@ -342,6 +342,16 @@
       "rounded": "Rounded",
       "square": "Square"
     },
+    "background": {
+      "title": "Background",
+      "description": "Override the theme background with a solid color or gradient.",
+      "theme": "Theme default",
+      "solid": "Solid",
+      "gradient": "Gradient",
+      "from": "From",
+      "to": "To",
+      "angle": "Angle"
+    },
     "sections": {
       "title": "Section order",
       "advancedLabel": "Advanced",
