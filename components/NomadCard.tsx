@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { User, NomadLink, NomadStay } from '@/types/database'
 import { OptimizedImage } from './OptimizedImage'
@@ -9,9 +9,10 @@ import { getCountryFlag, getCountryName } from '@/lib/countries'
 import { stayDayCount, mergedVisitedCodes, splitStays, computeTravelStats, formatTimeOnTheRoad } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
-import Link from 'next/link'
-import dynamic from 'next/dynamic'
-import Image from 'next/image'
+import { LiveLocalTime } from './nomad-card/LiveLocalTime'
+import { CardCopyLink } from './nomad-card/CardCopyLink'
+import { CurrentStayPhotos } from './nomad-card/CurrentStayPhotos'
+import { PastStayThumbnail } from './nomad-card/PastStayThumbnail'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
 import { detectEmbed } from '@/lib/embeds'
@@ -180,39 +181,6 @@ export const getLinkIcon = (type: string) => {
 const WORK_STATUS_KEYS = ['freelancing', 'busy', 'fulltime'] as const
 const REMOVED_STATUS_KEYS = new Set(['available'])
 
-function useLocalTime(timezone?: string) {
-  const [time, setTime] = useState<string | null>(null)
-  useEffect(() => {
-    if (!timezone) return
-    function tick() {
-      try {
-        setTime(
-          new Date().toLocaleTimeString('en-US', {
-            timeZone: timezone,
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: false,
-          })
-        )
-      } catch {
-        setTime(null)
-      }
-    }
-    tick()
-    const id = window.setInterval(tick, 60_000)
-    return () => window.clearInterval(id)
-  }, [timezone])
-  return time
-}
-
-// Lazy-loaded so the lightbox's code doesn't ship in NomadCard's main chunk.
-// Most visitors never click a photo, and even when they do, the small download
-// delay is invisible behind the click animation.
-const PhotoLightbox = dynamic(
-  () => import('./PhotoLightbox').then((m) => ({ default: m.PhotoLightbox })),
-  { ssr: false },
-)
-
 const MAP_BASE_FOR_DARK = '#374151'
 const MAP_BASE_FOR_GLASS = 'rgba(255,255,255,0.25)'
 
@@ -264,17 +232,6 @@ export function NomadCard({
   const tStatus = useTranslations('card.workStatus')
   const tRole = useTranslations('roles')
   const getLinkLabel = useLinkLabel()
-  const [copied, setCopied] = useState(false)
-  // URL of the embed that's currently open in the video lightbox, or null
-  // when no video is open. Detected from link URLs on click.
-  // Lightbox open-state for stay photos. Null = closed. When set we render
-  // PhotoLightbox over the page with the given photo set + caption +
-  // starting index. State stays here (rather than inside the stays
-  // section renderer) so the lightbox survives across re-renders.
-  const [photoLightbox, setPhotoLightbox] = useState<
-    | { photos: string[]; index: number; caption: string }
-    | null
-  >(null)
   const theme = getTheme(themeKey)
   const shape = getButtonShape(buttonShape)
   const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
@@ -294,7 +251,6 @@ export function NomadCard({
   const visitedStays = currentStay ? [currentStay, ...pastStays] : pastStays
   const displayLocation = currentStay?.city || user.current_city || user.location
   const displayCountryFlag = currentStay ? getCountryFlag(currentStay.country) : null
-  const localTime = useLocalTime(user.timezone)
   // Stats badge counts the UNION of country-level toggles and the countries
   // derived from city-level stays — so a user who used the Stays UI without
   // also ticking the country picker still sees a meaningful number, and a
@@ -330,17 +286,6 @@ export function NomadCard({
 
   const order = reconcileSectionOrder(user.profile_type, sectionOrder)
   const enabled = reconcileEnabledSections(user.profile_type, enabledSections)
-
-  const handleCopyLink = async () => {
-    const url = `https://nomad.now/${user.handle}`
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Clipboard API can fail on insecure origins; degrade silently.
-    }
-  }
 
   // Each section is rendered independently so the order can be reshuffled.
   // Sections return null when their data is empty so reordering an empty block
@@ -400,24 +345,7 @@ export function NomadCard({
                     same character cost. */}
                 <span aria-hidden="true">{displayCountryFlag || '📍'}</span>
                 <span className="font-medium">{displayLocation}</span>
-                {localTime && (
-                  <>
-                    <span className={`${theme.textMuted}`} aria-hidden>
-                      ·
-                    </span>
-                    {/* Live pulse dot — same language as the Logo, signals "now". */}
-                    <span className="relative inline-flex items-center" aria-hidden>
-                      <span className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-green-500 opacity-70 motion-safe:animate-ping" />
-                      <span className="relative w-1.5 h-1.5 rounded-full bg-green-500" />
-                    </span>
-                    <span
-                      className={`font-mono tabular-nums text-sm sm:text-base ${theme.textMuted}`}
-                      aria-label={`Local time ${localTime}`}
-                    >
-                      {localTime}
-                    </span>
-                  </>
-                )}
+                <LiveLocalTime timezone={user.timezone} mutedClass={theme.textMuted} />
               </span>
             </p>
           )}
@@ -500,69 +428,12 @@ export function NomadCard({
               </ul>
             </div>
           )}
-          {currentStay && (() => {
-            const photos = currentStay.photo_urls ?? []
-            const caption = `${currentStay.city}, ${getCountryName(currentStay.country)}`
-            const openLightboxAt = (index: number) =>
-              setPhotoLightbox({ photos, index, caption })
-            return (
+          {currentStay && (
             <div className={`rounded-xl mb-3 border ${theme.divider} overflow-hidden`}>
-              {photos.length === 1 && (
-                /* Single hero photo — full-width banner above the text.
-                   Clickable to open the lightbox for a full-bleed view. */
-                <button
-                  type="button"
-                  onClick={() => openLightboxAt(0)}
-                  className="block w-full text-left focus:outline-none focus:ring-2 focus:ring-white/40"
-                  aria-label={`Open ${caption} photo`}
-                >
-                  <div className="relative w-full h-40 sm:h-48">
-                    <Image
-                      src={photos[0]}
-                      alt={caption}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 640px"
-                      className="object-cover"
-                    />
-                  </div>
-                </button>
-              )}
-              {photos.length > 1 && (
-                /* Horizontal scroll-snap carousel — native smooth scrolling
-                   and touch swipe. Desktop visitors who don't realise it's
-                   scrollable get the prev/next chevrons + a "tap any photo
-                   to expand" lightbox affordance. */
-                <div
-                  className="relative"
-                  role="region"
-                  aria-label={`${caption} photos`}
-                >
-                  <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-thin">
-                    {photos.map((url, i) => (
-                      <button
-                        type="button"
-                        key={`${url}-${i}`}
-                        onClick={() => openLightboxAt(i)}
-                        className="snap-start shrink-0 w-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/40"
-                        aria-label={`Open photo ${i + 1} of ${photos.length}`}
-                      >
-                        <div className="relative w-full h-40 sm:h-48">
-                          <Image
-                            src={url}
-                            alt={`${caption} — photo ${i + 1} of ${photos.length}`}
-                            fill
-                            sizes="(max-width: 640px) 100vw, 640px"
-                            className="object-cover"
-                          />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 text-white backdrop-blur-sm pointer-events-none">
-                    {photos.length}
-                  </div>
-                </div>
-              )}
+              <CurrentStayPhotos
+                photos={currentStay.photo_urls ?? []}
+                caption={`${currentStay.city}, ${getCountryName(currentStay.country)}`}
+              />
               <div className="p-4 flex items-start gap-3">
                 <span className="text-2xl leading-none mt-0.5" aria-hidden>
                   {getCountryFlag(currentStay.country) || '📍'}
@@ -587,48 +458,18 @@ export function NomadCard({
                 </div>
               </div>
             </div>
-            )
-          })()}
+          )}
           {pastStays.length > 0 && (
             <ul className="space-y-2">
               {pastStays.map((s) => {
                 const photos = s.photo_urls ?? []
-                const firstPhoto = photos[0]
-                const extra = photos.length - 1
                 return (
                 <li key={s.id} className="flex items-start gap-3 text-sm">
-                  {firstPhoto ? (
-                    /* Square thumbnail when the stay has a photo — turns
-                       the timeline into a stamp-collection style row.
-                       Multi-photo stays get a small "+N" badge in the
-                       corner; clicking the thumbnail opens a lightbox
-                       so visitors can actually see the extra photos. */
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPhotoLightbox({
-                          photos,
-                          index: 0,
-                          caption: `${s.city}, ${getCountryName(s.country)}`,
-                        })
-                      }
-                      aria-label={`Open photos for ${s.city}, ${getCountryName(s.country)}`}
-                      className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-gray-400 transition hover:opacity-90"
-                    >
-                      <Image
-                        src={firstPhoto}
-                        alt={`${s.city}, ${getCountryName(s.country)}`}
-                        width={48}
-                        height={48}
-                        sizes="48px"
-                        className="w-12 h-12 object-cover"
-                      />
-                      {extra > 0 && (
-                        <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-black/70 text-white backdrop-blur-sm">
-                          +{extra}
-                        </span>
-                      )}
-                    </button>
+                  {photos.length > 0 ? (
+                    <PastStayThumbnail
+                      photos={photos}
+                      caption={`${s.city}, ${getCountryName(s.country)}`}
+                    />
                   ) : (
                     <span className="text-lg leading-none mt-0.5 w-6 text-center" aria-hidden>
                       {getCountryFlag(s.country) || '·'}
@@ -869,14 +710,6 @@ export function NomadCard({
       className={`min-h-screen ${customBg ? '' : theme.page} ${customFontClass || theme.font}`}
       style={customBg ? { background: customBg } : undefined}
     >
-      {photoLightbox && (
-        <PhotoLightbox
-          photos={photoLightbox.photos}
-          startIndex={photoLightbox.index}
-          caption={photoLightbox.caption}
-          onClose={() => setPhotoLightbox(null)}
-        />
-      )}
       {isOwner ? <EditCardCTA /> : !hideMakeYoursCTA && <MakeYoursCTA />}
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
@@ -886,40 +719,7 @@ export function NomadCard({
           {/* Share — always last, not reorderable. */}
           <div className={`mt-8 pt-8 border-t ${theme.divider} text-center`}>
             <p className={`text-sm mb-2 ${theme.textMuted}`}>{t('shareTitle')}</p>
-            <div className="flex items-center justify-center gap-2">
-              <Link
-                href={`https://nomad.now/${user.handle}`}
-                className={`text-sm font-mono ${theme.textMuted} hover:opacity-100 opacity-80 transition`}
-              >
-                nomad.now/{user.handle}
-              </Link>
-              <button
-                onClick={handleCopyLink}
-                className={`p-2 sm:p-2.5 transition relative touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center opacity-60 hover:opacity-100 ${theme.textMuted}`}
-                aria-label={t('copyLink')}
-                title={copied ? t('copied') : t('copyLink')}
-              >
-                {copied ? (
-                  <svg
-                    className="w-4 h-4 text-green-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
+            <CardCopyLink handle={user.handle} mutedClass={theme.textMuted} />
           </div>
         </div>
       </div>
