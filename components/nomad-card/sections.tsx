@@ -461,21 +461,31 @@ export function createSectionRenderers(
             ? t('unitMonth')
             : t('unitDay')
       return (
-        <div
-          key="stats"
-          className={`flex items-center justify-center gap-4 sm:gap-10 my-6 py-4 border-y ${theme.divider}`}
-        >
-          <Stat
-            value={visitedCount}
-            label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
-            mutedClass={theme.textMuted}
-          />
-          <Stat
-            value={cityCount}
-            label={cityCount === 1 ? t('cityOne') : t('cityMany')}
-            mutedClass={theme.textMuted}
-          />
-          <Stat value={road.value} label={roadUnitLabel} mutedClass={theme.textMuted} />
+        <div key="stats" className="my-6">
+          {/* Section title disambiguates the strip below — "23 countries"
+              on its own is ambiguous (visited? want to visit?) until the
+              eye lands on the "years nomading" stat or the map further
+              down the card. */}
+          <h3
+            className={`text-xs uppercase tracking-wider mb-3 text-center ${theme.textMuted}`}
+          >
+            {t('travelTitle')}
+          </h3>
+          <div
+            className={`flex items-center justify-center gap-4 sm:gap-10 py-4 border-y ${theme.divider}`}
+          >
+            <Stat
+              value={visitedCount}
+              label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
+              mutedClass={theme.textMuted}
+            />
+            <Stat
+              value={cityCount}
+              label={cityCount === 1 ? t('cityOne') : t('cityMany')}
+              mutedClass={theme.textMuted}
+            />
+            <Stat value={road.value} label={roadUnitLabel} mutedClass={theme.textMuted} />
+          </div>
         </div>
       )
     },
