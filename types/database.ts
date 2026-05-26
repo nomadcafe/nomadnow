@@ -66,6 +66,9 @@ export interface ProfileSettings {
   // Font override key (null / 'theme' = inherit theme.font).
   // See lib/fonts.ts for the curated list.
   font_family?: string | null
+  // Hex accent override (#RRGGBB / #RGB / #RRGGBBAA). NULL = inherit the
+  // theme preset's accentHex. Applied at render time via getTheme override.
+  accent_color?: string | null
   created_at: string
   updated_at: string
 }

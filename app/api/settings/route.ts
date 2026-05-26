@@ -38,6 +38,9 @@ const updateSettingsSchema = z.object({
   // Font override key. 'theme' is equivalent to NULL (use the theme's
   // font). See lib/fonts.ts for the curated list.
   font_family: z.enum(['theme', 'inter', 'jakarta', 'fraunces', 'mono']).nullable().optional(),
+  // Hex accent override (e.g. #FF6B35). Null clears the override and falls
+  // back to the theme preset's accentHex. Same HEX shape as background_value.
+  accent_color: z.string().regex(HEX, 'Invalid hex color').nullable().optional(),
   // The Nomad Card catalog has ~8 section IDs and each is a short string —
   // anything bigger is junk or abuse. Defensive caps so a malformed POST
   // can't blow up a row size or shove a giant JSONB blob into the DB.

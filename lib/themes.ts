@@ -389,9 +389,25 @@ export const THEMES: Record<ThemeKey, Theme> = {
   },
 }
 
-export function getTheme(key: string | undefined | null): Theme {
-  if (key && key in THEMES) return THEMES[key as ThemeKey]
-  return THEMES.classic
+// Accent override format. Accepts #RGB / #RRGGBB / #RRGGBBAA — same lenient
+// shape as background_value's color fields. Anything else is dropped silently
+// so a malformed value can't break the card render; the preset's accentHex
+// survives unchanged.
+const ACCENT_HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
+
+export function getTheme(
+  key: string | undefined | null,
+  accentOverride?: string | null,
+): Theme {
+  const base = key && key in THEMES ? THEMES[key as ThemeKey] : THEMES.classic
+  if (!accentOverride) return base
+  if (!ACCENT_HEX.test(accentOverride)) return base
+  // Shallow-clone so we don't mutate the singleton THEMES record (NomadCard
+  // server-renders use the same module instance across requests). Only
+  // accentHex changes; og.* stays the preset's baked colour for now —
+  // overriding the OG image would need separate plumbing through the
+  // satori route.
+  return { ...base, accentHex: accentOverride }
 }
 
 export const THEME_KEYS = Object.keys(THEMES) as ThemeKey[]

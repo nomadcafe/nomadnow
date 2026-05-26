@@ -110,6 +110,10 @@ CREATE TABLE IF NOT EXISTS profile_settings (
   background_value JSONB,
   -- Font override (null = use theme.font). Keys match lib/fonts.ts FONT_KEYS.
   font_family TEXT,
+  -- Hex accent override (e.g. '#FF6B35'). NULL = use the theme preset's
+  -- baked-in accentHex. Repaints links, CTAs, brand-icon chip tints, map
+  -- city dots — the loudest visual on the card. Added in migration 0020.
+  accent_color TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
