@@ -363,6 +363,13 @@
     "errorTooManyFeaturedWorks": "1 枚のカードにつき最大 {cap} 件の代表作まで",
     "errorGeneric": "カードを作成できませんでした"
   },
+  "edit": {
+    "tabs": {
+      "content": "内容",
+      "look": "見た目",
+      "account": "アカウント"
+    }
+  },
   "settings": {
     "navView": "プロフィールを見る",
     "title": "設定。",

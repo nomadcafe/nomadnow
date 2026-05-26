@@ -29,7 +29,16 @@ import { useSubmitCard } from './useSubmitCard'
 // fields pre-populate, handle becomes read-only, submit hits PUT.
 export type InitialCardData = FormInitial
 
-export default function CreateCardForm({ initial }: { initial?: InitialCardData | null }) {
+export default function CreateCardForm({
+  initial,
+  embedded = false,
+}: {
+  initial?: InitialCardData | null
+  // When true, the form skips its own top nav + min-h-screen wrapper because
+  // the host (e.g. /edit layout) already provides them. Keeps the form's
+  // controls and live preview the same in both contexts.
+  embedded?: boolean
+}) {
   const isEdit = Boolean(initial)
   const t = useTranslations('createCard')
   const tStays = useTranslations('stays')
@@ -101,7 +110,8 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
   return (
     <>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      <div className="min-h-screen bg-white text-gray-900">
+      <div className={embedded ? 'bg-white text-gray-900' : 'min-h-screen bg-white text-gray-900'}>
+        {!embedded && (
         <nav className="border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur z-50">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
             <Logo />
@@ -116,8 +126,9 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
             </div>
           </div>
         </nav>
+        )}
 
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        <main className={`max-w-6xl mx-auto px-4 sm:px-6 ${embedded ? 'py-6 sm:py-8' : 'py-10 sm:py-14'}`}>
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-12 xl:gap-16">
             <div className="min-w-0">
               <header className="mb-8 sm:mb-10">
