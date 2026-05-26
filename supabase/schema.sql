@@ -101,9 +101,6 @@ CREATE TABLE IF NOT EXISTS profile_settings (
   background_value JSONB,
   -- Font override (null = use theme.font). Keys match lib/fonts.ts FONT_KEYS.
   font_family TEXT,
-  -- When true, suppresses the "Make yours" / "Made on nomad.now" branding on the public profile.
-  -- Available to all paid plans (Basic and Pro) — pricing is set in /pricing.
-  hide_branding BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
