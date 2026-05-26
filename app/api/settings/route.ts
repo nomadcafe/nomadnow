@@ -42,7 +42,6 @@ const updateSettingsSchema = z.object({
   // anything bigger is junk or abuse. Defensive caps so a malformed POST
   // can't blow up a row size or shove a giant JSONB blob into the DB.
   section_order: z.array(z.string().max(50)).max(20).optional(),
-  hide_branding: z.boolean().optional(),
 })
 
 export async function PUT(request: NextRequest) {
@@ -140,7 +139,6 @@ export async function GET() {
           background_value: null,
           font_family: 'theme',
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
-          hide_branding: false,
         },
       })
     }

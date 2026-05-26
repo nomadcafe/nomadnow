@@ -378,12 +378,6 @@
       "moveDown": "Move down",
       "show": "Show"
     },
-    "branding": {
-      "title": "Branding",
-      "description": "Whether to show the \"Make yours\" CTA to visitors on your card.",
-      "hideLabel": "Hide \"Make yours\" CTA on my card",
-      "hideHint": "Removes the floating button that invites visitors to create their own card. Your profile stays the same."
-    },
     "privacy": {
       "title": "Privacy",
       "description": "Who can see what, and with how much delay.",
