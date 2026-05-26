@@ -191,6 +191,22 @@ CREATE TABLE IF NOT EXISTS nomad_blurbs (
 
 CREATE INDEX idx_nomad_blurbs_user_id ON nomad_blurbs(user_id);
 
+-- Featured Work (added in migration 0018). Click-through project tiles —
+-- case studies, portfolio pieces — with title + url + optional description.
+-- Cap at 6 enforced at the API layer (matches GitHub Pinned).
+CREATE TABLE IF NOT EXISTS nomad_featured_works (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL CHECK (length(title) > 0 AND length(title) <= 80),
+  url TEXT NOT NULL CHECK (length(url) > 0 AND length(url) <= 2048),
+  description TEXT CHECK (description IS NULL OR length(description) <= 140),
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_nomad_featured_works_user_id ON nomad_featured_works(user_id);
+
 -- Enable Row Level Security (RLS) - public read, owner-only write via auth.uid()
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
@@ -202,6 +218,7 @@ ALTER TABLE social_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_stays ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_blurbs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nomad_featured_works ENABLE ROW LEVEL SECURITY;
 
 -- Ownership model:
 --   users.id MUST equal auth.uid() at insert time. Enforced by RLS, not FK,
@@ -288,4 +305,10 @@ CREATE POLICY "nomad_blurbs_select_public" ON nomad_blurbs FOR SELECT USING (tru
 CREATE POLICY "nomad_blurbs_insert_self" ON nomad_blurbs FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "nomad_blurbs_update_self" ON nomad_blurbs FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "nomad_blurbs_delete_self" ON nomad_blurbs FOR DELETE USING (auth.uid() = user_id);
+
+-- nomad_featured_works
+CREATE POLICY "nomad_featured_works_select_public" ON nomad_featured_works FOR SELECT USING (true);
+CREATE POLICY "nomad_featured_works_insert_self" ON nomad_featured_works FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_featured_works_update_self" ON nomad_featured_works FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_featured_works_delete_self" ON nomad_featured_works FOR DELETE USING (auth.uid() = user_id);
 

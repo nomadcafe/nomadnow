@@ -332,6 +332,15 @@
       "add": "+ 追加",
       "remove": "削除"
     },
+    "featuredWork": {
+      "title": "代表作",
+      "description": "クリックできるプロジェクトタイル(最大 6 件) — ケーススタディ、ポートフォリオ作品、最近のクライアントワークなど。タイトルと任意の一行説明、リンクで構成されます。",
+      "titlePlaceholder": "Stripe チェックアウト リデザイン",
+      "urlPlaceholder": "https://your-case-study.com",
+      "descPlaceholder": "一行の説明(任意) — 何をしたか、どんな成果か。",
+      "add": "+ 代表作を追加",
+      "remove": "削除"
+    },
     "visitedCountries": "訪れた国",
     "visitedCountriesHint": "カードの地図に表示されます。すべて思い出せない場合は、後から追加できます。",
     "submit": "カードを確保",
@@ -342,6 +351,7 @@
     "errorName": "名前は必須です",
     "errorTooManyLinks": "1 枚のカードにつき最大 {cap} リンクまで",
     "errorTooManyBlurbs": "1 枚のカードにつき最大 {cap} ブラーブまで",
+    "errorTooManyFeaturedWorks": "1 枚のカードにつき最大 {cap} 件の代表作まで",
     "errorGeneric": "カードを作成できませんでした"
   },
   "settings": {
@@ -495,6 +505,9 @@
       "freelancing": "フリーランス",
       "busy": "多忙",
       "fulltime": "フルタイム"
+    },
+    "featuredWork": {
+      "sectionTitle": "代表作"
     },
     "linkTypes": {
       "website": "ウェブサイト",

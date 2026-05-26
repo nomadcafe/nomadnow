@@ -48,6 +48,18 @@ export interface BlurbDraft {
 
 export const BLURB_CAP = 8
 
+// Click-through project tile edited in the form. Mirrors /api/featured-works
+// (title <=80, url http/https <=2048, description <=140) and DB CHECKs in
+// migration 0018. Cap of 6 matches GitHub Pinned — enough to make a case
+// without drowning the card.
+export interface FeaturedWorkDraft {
+  title: string
+  url: string
+  description: string
+}
+
+export const FEATURED_WORK_CAP = 6
+
 // Roles persist as their English label (canonical DB value). Translation
 // happens at display time via the `roles.*` namespace.
 export const ROLES = [

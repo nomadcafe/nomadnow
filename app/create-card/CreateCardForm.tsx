@@ -16,6 +16,7 @@ import { ROLES, TIMEZONE_LIST } from './form-constants'
 import {
   BlurbsField,
   CompletionMeter,
+  FeaturedWorksField,
   HandleField,
   LinksField,
   WorkStatusField,
@@ -46,6 +47,8 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     setStays,
     blurbs,
     setBlurbs,
+    featuredWorks,
+    setFeaturedWorks,
     draftHasOptionalData,
     clearDraft,
   } = useFormDraft(initial ?? null)
@@ -67,6 +70,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     links,
     stays,
     blurbs,
+    featuredWorks,
     isHandleAvailable: handleStatus === 'available',
     clearDraft,
     showError,
@@ -80,6 +84,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
   const deferredLinks = useDeferredValue(links)
   const deferredStays = useDeferredValue(stays)
   const deferredBlurbs = useDeferredValue(blurbs)
+  const deferredFeaturedWorks = useDeferredValue(featuredWorks)
   const deferredVisitedCountries = useDeferredValue(visitedCountries)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -321,6 +326,8 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
 
                       <BlurbsField blurbs={blurbs} onChange={setBlurbs} />
 
+                      <FeaturedWorksField works={featuredWorks} onChange={setFeaturedWorks} />
+
                       <LinksField links={links} onChange={setLinks} />
 
                       {/* Stays — city-level travel with day counts. Lives
@@ -401,6 +408,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                     links={deferredLinks}
                     stays={deferredStays}
                     blurbs={deferredBlurbs}
+                    featuredWorks={deferredFeaturedWorks}
                     visitedCountries={deferredVisitedCountries}
                     themeKey="classic"
                   />

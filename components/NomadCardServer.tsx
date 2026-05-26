@@ -1,6 +1,6 @@
 import React from 'react'
 import { getTranslations, getLocale } from 'next-intl/server'
-import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb, NomadFeaturedWork } from '@/types/database'
 import { getCountryFlag } from '@/lib/countries'
 import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
@@ -24,6 +24,7 @@ interface NomadCardServerProps {
   links: NomadLink[]
   stays?: NomadStay[]
   blurbs?: NomadBlurb[]
+  featuredWorks?: NomadFeaturedWork[]
   themeKey?: ThemeKey | string | null
   buttonShape?: string | null
   backgroundMode?: string | null
@@ -54,6 +55,7 @@ export async function NomadCardServer({
   links,
   stays = [],
   blurbs = [],
+  featuredWorks = [],
   themeKey,
   buttonShape,
   backgroundMode,
@@ -65,10 +67,11 @@ export async function NomadCardServer({
   isOwner = false,
   embedded = false,
 }: NomadCardServerProps) {
-  const [t, tStays, tStatus, tRole, tLinkTypes, locale] = await Promise.all([
+  const [t, tStays, tStatus, tFeaturedWork, tRole, tLinkTypes, locale] = await Promise.all([
     getTranslations('card'),
     getTranslations('stays'),
     getTranslations('card.workStatus'),
+    getTranslations('card.featuredWork'),
     getTranslations('roles'),
     getTranslations('card.linkTypes'),
     getLocale(),
@@ -92,11 +95,13 @@ export async function NomadCardServer({
     links,
     stays,
     blurbs,
+    featuredWorks,
     theme,
     shape,
     t,
     tStays,
     tStatus,
+    tFeaturedWork,
     getLinkLabel: makeGetLinkLabel(tLinkTypes),
     localisedRole: makeLocaliseRole(tRole),
     formatShortDate: makeFormatShortDate(locale),

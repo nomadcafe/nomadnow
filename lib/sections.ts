@@ -18,6 +18,9 @@ export const NOMAD_SECTIONS: SectionDef[] = [
   { id: 'location', label: 'Currently in', description: 'City + live local time' },
   { id: 'bio', label: 'Bio', description: 'One-line introduction' },
   { id: 'blurbs', label: 'Blurbs', description: 'Label/value pairs — Now reading, Booking, Rate, Tools…' },
+  // Clickable project tiles — case studies / portfolio pieces. Renders
+  // only when at least one entry exists; cap of 6 enforced at the API.
+  { id: 'work', label: 'Featured work', description: 'Project tiles — case studies, portfolio pieces (up to 6)' },
   { id: 'stays', label: 'Stays', description: 'City-level travel with day counts' },
   { id: 'stats', label: 'Stats', description: 'Countries visited + member since' },
   { id: 'map', label: 'World map', description: 'Visited countries plotted as constellation' },

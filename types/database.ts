@@ -98,6 +98,20 @@ export interface NomadBlurb {
   updated_at: string
 }
 
+// Click-through project tile (case study / portfolio piece) shown on the
+// public card. Cap of 6 enforced at the API layer (matches GitHub Pinned);
+// lengths enforced at both DB CHECK constraints and Zod.
+export interface NomadFeaturedWork {
+  id: string
+  user_id: string
+  title: string // <= 80 chars
+  url: string // http/https; <= 2048 chars
+  description?: string | null // <= 140 chars
+  order_index: number
+  created_at: string
+  updated_at: string
+}
+
 export interface NomadLink {
   id: string
   user_id: string

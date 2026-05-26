@@ -1,5 +1,5 @@
 import React from 'react'
-import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb, NomadFeaturedWork } from '@/types/database'
 import type { Theme, ButtonShapeClasses } from '@/lib/themes'
 import { getCountryFlag, getCountryName } from '@/lib/countries'
 import { stayDayCount, computeTravelStats, formatTimeOnTheRoad } from '@/lib/stays'
@@ -211,11 +211,13 @@ export interface SectionContext {
   links: NomadLink[]
   stays: NomadStay[]
   blurbs: NomadBlurb[]
+  featuredWorks: NomadFeaturedWork[]
   theme: Theme
   shape: ButtonShapeClasses
   t: Translator
   tStays: Translator
   tStatus: Translator
+  tFeaturedWork: Translator
   getLinkLabel: (type: string, customLabel?: string | null) => string
   localisedRole: (raw?: string) => string | undefined
   formatShortDate: (iso: string) => string
@@ -240,11 +242,13 @@ export function createSectionRenderers(
     links,
     stays,
     blurbs,
+    featuredWorks,
     theme,
     shape,
     t,
     tStays,
     tStatus,
+    tFeaturedWork,
     getLinkLabel,
     localisedRole,
     formatShortDate,
@@ -358,6 +362,57 @@ export function createSectionRenderers(
             </div>
           ))}
         </dl>
+      )
+    },
+    work: () => {
+      if (!featuredWorks || featuredWorks.length === 0) return null
+      // Project tiles — bigger and more deliberate than a link row. Title
+      // gets weight, optional description provides context, the whole tile
+      // is clickable with an arrow indicator. Section title sits above so
+      // visitors immediately read it as portfolio rather than "more links".
+      return (
+        <div key="work" className="my-6">
+          <h3 className={`text-xs uppercase tracking-wider mb-3 ${theme.textMuted}`}>
+            {tFeaturedWork('sectionTitle')}
+          </h3>
+          <ul className="space-y-2">
+            {featuredWorks.map((work) => (
+              <li key={work.id}>
+                <a
+                  href={work.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group flex items-start gap-3 ${shape.row} border ${theme.divider} px-4 py-3 transition-all duration-200 ${theme.linkHover}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-base leading-snug break-words">
+                      {work.title}
+                    </div>
+                    {work.description && (
+                      <p className={`mt-0.5 text-xs leading-snug break-words ${theme.textMuted}`}>
+                        {work.description}
+                      </p>
+                    )}
+                  </div>
+                  <svg
+                    className={`w-4 h-4 mt-1 shrink-0 transition ${theme.linkArrow}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       )
     },
     stays: () => {
