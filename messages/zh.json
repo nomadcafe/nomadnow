@@ -534,6 +534,7 @@
   },
   "roles": {
     "Designer": "设计师",
+    "Product Designer": "产品设计师",
     "Developer": "开发者",
     "Writer": "写作者",
     "Product Manager": "产品经理",

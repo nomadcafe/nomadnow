@@ -64,6 +64,7 @@ export const FEATURED_WORK_CAP = 6
 // happens at display time via the `roles.*` namespace.
 export const ROLES = [
   'Designer',
+  'Product Designer',
   'Developer',
   'Writer',
   'Product Manager',

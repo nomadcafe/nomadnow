@@ -534,6 +534,7 @@
   },
   "roles": {
     "Designer": "デザイナー",
+    "Product Designer": "プロダクトデザイナー",
     "Developer": "開発者",
     "Writer": "ライター",
     "Product Manager": "プロダクトマネージャー",

@@ -534,6 +534,7 @@
   },
   "roles": {
     "Designer": "Designer",
+    "Product Designer": "Product Designer",
     "Developer": "Developer",
     "Writer": "Writer",
     "Product Manager": "Product Manager",
