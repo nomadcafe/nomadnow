@@ -61,6 +61,20 @@ export function reconcileSectionOrder(
 /**
  * Returns the enabled set, defaulting to "all enabled" when nothing is stored.
  * Always includes required sections regardless of the stored value.
+ *
+ * Sections added to the catalog AFTER this row was saved are auto-included —
+ * same intent as reconcileSectionOrder appending missing IDs. The /settings
+ * page does not (currently) expose any "enable/disable" UI and the
+ * /api/settings PUT schema does not accept enabled_sections, so a stored
+ * array that lacks a recent ID is "didn't exist at save time", not "user
+ * opted out". Without this, a stale enabled_sections column quietly hides
+ * every feature we shipped after the row was first written (blurbs, work,
+ * hire CTA, meetup CTA, stays for some legacy rows).
+ *
+ * When we eventually ship a disable-section UI, this behaviour will need to
+ * be revisited — we'll want to distinguish "explicitly disabled" from
+ * "didn't exist yet", probably via a separate disabled_sections column or a
+ * schema version stamp.
  */
 export function reconcileEnabledSections(
   _profileType: 'creator' | 'nomad' | 'both' | string | undefined,
@@ -68,10 +82,12 @@ export function reconcileEnabledSections(
 ): Set<string> {
   const allIds = NOMAD_SECTIONS.map((s) => s.id)
   const requiredIds = NOMAD_SECTIONS.filter((s) => s.required).map((s) => s.id)
-  if (!stored) return new Set(allIds)
+  if (!stored || stored.length === 0) return new Set(allIds)
   const allowedSet = new Set(allIds)
   const cleaned = stored.filter((id) => allowedSet.has(id))
-  const final = new Set(cleaned.length > 0 ? cleaned : allIds)
+  if (cleaned.length === 0) return new Set(allIds)
+  const missing = allIds.filter((id) => !cleaned.includes(id))
+  const final = new Set([...cleaned, ...missing])
   for (const id of requiredIds) final.add(id)
   return final
 }
