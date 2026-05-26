@@ -577,7 +577,7 @@ export function createSectionRenderers(
                 )
               }
               const brandColor = LINK_BRAND_COLORS[link.type]
-              const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} font-medium group touch-manipulation transition-all duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-md ${theme.linkRow}`
+              const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} font-medium group touch-manipulation transition-all duration-200 ${theme.linkHover} ${theme.linkRow}`
               return (
                 <a
                   key={index}
