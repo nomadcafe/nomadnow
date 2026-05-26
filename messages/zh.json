@@ -31,7 +31,16 @@
     "getCard": "创建卡片",
     "finishSetup": "完成设置",
     "myCard": "我的卡片",
-    "viewProfile": "查看主页"
+    "viewProfile": "查看主页",
+    "privacy": "隐私",
+    "terms": "条款",
+    "back": "返回"
+  },
+  "legal": {
+    "draftNotice": "本页面仍在拟定中,正式发布前会更新。",
+    "privacyBody": "我们只收集渲染你的公开卡片所必需的信息 —— 你的 handle、你填写的资料字段,以及付费用户的 Stripe 客户 ID。不投放广告,不出售数据,不加载跟踪像素。",
+    "termsBody": "不要冒充他人,不要发布违法内容,不要试图破坏服务。违反规则的 handle 我们会下架。订阅可随时在 /settings 中取消。",
+    "contactPrompt": "暂时有疑问?联系我们,我们会把不清楚的地方补到这页上。"
   },
   "footer": {
     "tagline": "为不在一处定居的人准备的 bio 链接。",
