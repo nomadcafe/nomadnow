@@ -51,7 +51,7 @@
     "heroLine2": "Where you've been.",
     "heroLine3": "What you're building.",
     "heroSub": "One link for your whole nomad life. Live local time, every country you've set foot in, what you're working on. At <handle>nomad.now/yourhandle</handle>.",
-    "heroPriceNote": "From $2.80 / month",
+    "heroPriceNote": "From $1.98 / month",
     "heroSetupNote": "1 minute to set up",
     "themeStrip": "7 themes — pick yours",
     "live": {
@@ -94,7 +94,7 @@
       "line2": "Wherever you are.",
       "body": "Set it up in a minute. Carry it forever.",
       "cta": "Get your card",
-      "note": "From $2.80 / month · Cancel any time"
+      "note": "From $1.98 / month · Cancel any time"
     },
     "previewCard": {
       "verified": "Verified"
@@ -196,7 +196,7 @@
     "faq": {
       "noFree": {
         "q": "Why is there no free plan?",
-        "a": "A free plan would force us to put ads or transaction fees somewhere — neither feels right for a profile you'd share to your network. $2.8 keeps the lights on without compromising the product."
+        "a": "A free plan would force us to put ads or transaction fees somewhere — neither feels right for a profile you'd share to your network. $1.98 keeps the lights on without compromising the product."
       },
       "cancel": {
         "q": "Can I cancel any time?",
@@ -310,7 +310,7 @@
     "visitedCountriesHint": "Plotted on the map on your card. Add the rest later if you don't remember them all now.",
     "submit": "Claim my card",
     "submitting": "Claiming…",
-    "submitNote": "From $2.80 / month. Cancel any time — your card stays live to the end of the period.",
+    "submitNote": "From $1.98 / month. Cancel any time — your card stays live to the end of the period.",
     "successToast": "Card created! Redirecting…",
     "errorHandle": "Please pick an available handle",
     "errorName": "Name is required",
@@ -571,7 +571,7 @@
     "reservedBadge": "Reserved",
     "availableBody": "Nobody's claimed this handle yet. Take it before someone else does.",
     "availableCta": "Claim @{handle}",
-    "availableNote": "From $2.80 / month · 1 minute to set up",
+    "availableNote": "From $1.98 / month · 1 minute to set up",
     "reservedBody": "This handle is reserved — usually because it collides with a system page or a brand-protected name.",
     "reservedCta": "Pick a different handle",
     "invalidTitle": "Not a valid handle",

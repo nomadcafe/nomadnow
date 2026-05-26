@@ -51,7 +51,7 @@
     "heroLine2": "你去过哪。",
     "heroLine3": "你在做什么。",
     "heroSub": "一个链接装下整个数字游民人生。当地实时时间、你踏足过的每个国家、你正在做的事。全都在 <handle>nomad.now/yourhandle</handle>。",
-    "heroPriceNote": "每月 $2.80 起",
+    "heroPriceNote": "每月 $1.98 起",
     "heroSetupNote": "1 分钟即可上线",
     "themeStrip": "7 套主题，挑你喜欢的",
     "live": {
@@ -94,7 +94,7 @@
       "line2": "无论你在哪。",
       "body": "1 分钟搭好,一辈子带着走。",
       "cta": "创建卡片",
-      "note": "每月 $2.80 起 · 随时可取消"
+      "note": "每月 $1.98 起 · 随时可取消"
     },
     "previewCard": {
       "verified": "已认证"
@@ -196,7 +196,7 @@
     "faq": {
       "noFree": {
         "q": "为什么没有免费套餐?",
-        "a": "免费套餐会逼我们在某处塞广告或抽手续费 —— 这两样都不适合一张你会分享给人脉的卡片。$2.8 让我们能维持运营而不牺牲产品。"
+        "a": "免费套餐会逼我们在某处塞广告或抽手续费 —— 这两样都不适合一张你会分享给人脉的卡片。$1.98 让我们能维持运营而不牺牲产品。"
       },
       "cancel": {
         "q": "随时可以取消吗?",
@@ -310,7 +310,7 @@
     "visitedCountriesHint": "会画在卡片地图上。一次想不起来全部没关系,以后随时可加。",
     "submit": "占下我的卡片",
     "submitting": "占用中…",
-    "submitNote": "每月 $2.80 起。随时可取消 —— 卡片在当期结束前保持在线。",
+    "submitNote": "每月 $1.98 起。随时可取消 —— 卡片在当期结束前保持在线。",
     "successToast": "卡片已创建! 正在跳转…",
     "errorHandle": "请选一个可用的 handle",
     "errorName": "姓名必填",
@@ -571,7 +571,7 @@
     "reservedBadge": "已保留",
     "availableBody": "这个 handle 还没人占。在别人之前占下它。",
     "availableCta": "占下 @{handle}",
-    "availableNote": "每月 $2.80 起 · 1 分钟即可上线",
+    "availableNote": "每月 $1.98 起 · 1 分钟即可上线",
     "reservedBody": "这个 handle 已被保留 —— 通常因为它与系统页面或品牌保护名称冲突。",
     "reservedCta": "选个别的 handle",
     "invalidTitle": "无效的 handle",
