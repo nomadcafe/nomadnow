@@ -16,7 +16,7 @@ import type { User, ProfileSettings, NomadLink, NomadStay } from '@/types/databa
 // to any visitor. `plan` is intentionally included so the public card can
 // render Pro-only features.
 const PUBLIC_USER_COLUMNS =
-  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,profile_type,verified,plan,created_at,updated_at' as const
+  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,profile_type,verified,hire_cta_label,hire_cta_url,plan,created_at,updated_at' as const
 
 export interface PublicProfile {
   user: User

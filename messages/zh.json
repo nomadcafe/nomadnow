@@ -315,6 +315,15 @@
     "linkUrlPlaceholder": "https://…",
     "linkLabelPlaceholder": "标签",
     "removeLink": "删除链接",
+    "hireCta": {
+      "title": "Hire CTA 按钮",
+      "description": "卡片上一个显眼的按钮 —— 用于约谈、预约或接业务咨询。",
+      "labelInput": "按钮文案",
+      "labelPlaceholder": "Hire me / 找我合作",
+      "urlInput": "跳转去哪",
+      "urlPlaceholder": "mailto:you@example.com 或 https://cal.com/you",
+      "urlHint": "可填邮箱(mailto:…)、电话(tel:…)或任意 https:// 链接。"
+    },
     "visitedCountries": "你去过的国家",
     "visitedCountriesHint": "会画在卡片地图上。一次想不起来全部没关系,以后随时可加。",
     "submit": "占下我的卡片",

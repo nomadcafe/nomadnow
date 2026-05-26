@@ -84,6 +84,11 @@ export function useSubmitCard({
         timezone: formData.timezone || undefined,
         visited_countries: visitedCountries,
         profile_type: 'nomad',
+        // Use null (not undefined) so cleanData on the server keeps the
+        // value and clears the column — undefined would be filtered out
+        // and the old DB value would persist.
+        hire_cta_label: formData.hire_cta_label.trim() || null,
+        hire_cta_url: formData.hire_cta_url.trim() || null,
       }
 
       const response = await fetch('/api/users', {

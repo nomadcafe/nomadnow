@@ -43,6 +43,8 @@ export default async function CreateCardPage() {
         work_status: (profile.work_status as string | null) ?? '',
         timezone: (profile.timezone as string | null) ?? '',
         visited_countries: (profile.visited_countries as string[] | null) ?? [],
+        hire_cta_label: (profile.hire_cta_label as string | null) ?? '',
+        hire_cta_url: (profile.hire_cta_url as string | null) ?? '',
         links: (links ?? []).map((l) => ({
           type: l.type as InitialCardData['links'][number]['type'],
           label: (l.label as string | null) ?? '',

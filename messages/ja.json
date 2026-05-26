@@ -315,6 +315,15 @@
     "linkUrlPlaceholder": "https://…",
     "linkLabelPlaceholder": "ラベル",
     "removeLink": "リンクを削除",
+    "hireCta": {
+      "title": "Hire CTA ボタン",
+      "description": "問い合わせ・打ち合わせ予約・案件相談などに使える、カード上の目立つボタン。",
+      "labelInput": "ボタンの文言",
+      "labelPlaceholder": "Hire me / 仕事を依頼する",
+      "urlInput": "リンク先",
+      "urlPlaceholder": "mailto:you@example.com または https://cal.com/you",
+      "urlHint": "メール(mailto:…)、電話(tel:…)、または https:// で始まるリンクを指定できます。"
+    },
     "visitedCountries": "訪れた国",
     "visitedCountriesHint": "カードの地図に表示されます。すべて思い出せない場合は、後から追加できます。",
     "submit": "カードを確保",

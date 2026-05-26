@@ -21,6 +21,10 @@ export interface PreviewFormState {
   // render verbatim. Empty hides the status pill entirely.
   work_status: string
   timezone: string
+  // Hire CTA — both blank hides the section. The synthesised User below
+  // carries them through to the section renderer.
+  hire_cta_label?: string
+  hire_cta_url?: string
 }
 
 export interface PreviewStay {
@@ -125,6 +129,8 @@ export function LiveCardPreview({
     timezone: effectiveForm.timezone || undefined,
     visited_countries: effectiveCountries,
     profile_type: 'nomad',
+    hire_cta_label: effectiveForm.hire_cta_label || null,
+    hire_cta_url: effectiveForm.hire_cta_url || null,
     created_at: NOW_ISO,
     updated_at: NOW_ISO,
   }

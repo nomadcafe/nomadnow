@@ -23,6 +23,11 @@ export interface User {
   // Manual verification flag (admin-toggled). Drives the "Verified" pill on
   // the public card — never set by users themselves.
   verified?: boolean
+  // Hire CTA — when both label and url are set, the public card renders a
+  // prominent solid-accent button (distinct from the bordered link rows)
+  // pointing to mailto: / https: / tel: / Calendly etc.
+  hire_cta_label?: string | null
+  hire_cta_url?: string | null
   // Stripe billing — see supabase/migrations/0003_subscriptions.sql
   stripe_customer_id?: string | null
   plan?: 'basic' | 'pro' | null
