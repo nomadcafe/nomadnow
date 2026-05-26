@@ -31,7 +31,16 @@
     "getCard": "Get your card",
     "finishSetup": "Finish setup",
     "myCard": "My card",
-    "viewProfile": "View profile"
+    "viewProfile": "View profile",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "back": "Back"
+  },
+  "legal": {
+    "draftNotice": "This page is still being drafted before launch.",
+    "privacyBody": "We collect only what's needed to render your public card — your handle, the profile fields you enter, and (for paid plans) the customer ID Stripe returns to us. We don't run ads, sell data, or load tracking pixels.",
+    "termsBody": "Don't impersonate other people, don't post anything illegal, and don't try to break the service. We can take down handles that violate this. Subscriptions can be canceled any time from /settings.",
+    "contactPrompt": "Questions in the meantime? Reach out and we'll update this page with whatever's still unclear."
   },
   "footer": {
     "tagline": "The bio link for people who don't live in one place.",

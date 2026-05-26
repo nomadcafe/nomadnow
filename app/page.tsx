@@ -372,10 +372,15 @@ export default async function Home() {
               {tFooter('tagline')}
             </p>
           </div>
+          {/* Pricing + Sign in used to live here too — both already appear
+              in the top nav (Pricing on every breakpoint, Sign in via
+              AccountMenu on desktop and the GetYourCard flow on mobile),
+              so they were noise. LanguageSwitcher is kept but mobile-only
+              since the top nav hides it on small screens. */}
           <div className="flex sm:justify-end items-center gap-6 text-sm text-gray-500 flex-wrap">
-            <Link href="/pricing" className="hover:text-gray-900 transition">{tNav('pricing')}</Link>
-            <Link href="/login" className="hover:text-gray-900 transition">{tNav('signin')}</Link>
-            <LanguageSwitcher />
+            <Link href="/privacy" className="hover:text-gray-900 transition">{tNav('privacy')}</Link>
+            <Link href="/terms" className="hover:text-gray-900 transition">{tNav('terms')}</Link>
+            <LanguageSwitcher className="sm:hidden" />
           </div>
         </div>
         <div className="border-t border-gray-100">
