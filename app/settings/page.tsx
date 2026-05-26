@@ -369,10 +369,12 @@ export default function SettingsPage() {
           </div>
         </nav>
 
-        {/* Bottom padding has to clear the fixed save bar at the bottom; the
-            previous pb-32 (8rem) left almost no breathing room and the last
-            section's content was getting visually clipped. */}
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 pb-48">
+        {/* Bottom padding clears the fixed save bar (~85px tall). Use
+            explicit pt-/pb- rather than py-N + pb-N — Tailwind's utility
+            output order between the two is not guaranteed, and py-N can
+            silently override the pb-N we need, leaving the last section's
+            content (Section order list) visually clipped by the save bar. */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-48">
           <header className="mb-10">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
               {t('title')}
