@@ -45,7 +45,6 @@ interface ProfileSettings {
     | null
   font_family?: FontKey
   section_order?: string[]
-  hide_branding?: boolean
 }
 
 function normalizeTheme(value: unknown): ThemeKey {
@@ -87,7 +86,6 @@ export default function SettingsPage() {
     background_value: null,
     font_family: 'theme',
     section_order: NOMAD_DEFAULT_ORDER,
-    hide_branding: false,
   }
   const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_SETTINGS)
   // Snapshot of the last saved state, used to compute the dirty flag and
@@ -173,7 +171,6 @@ export default function SettingsPage() {
             background_value: data.settings.background_value ?? null,
             font_family,
             section_order: order,
-            hide_branding: Boolean(data.settings.hide_branding),
           }
           setSettings(loaded)
           setSavedSerialized(JSON.stringify(loaded))
@@ -859,28 +856,6 @@ export default function SettingsPage() {
               </div>
             </details>
 
-            {/* Branding */}
-            <Section
-              title={t('branding.title')}
-              description={t('branding.description')}
-            >
-              <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-gray-300 transition">
-                <input
-                  type="checkbox"
-                  checked={Boolean(settings.hide_branding)}
-                  onChange={(e) => setSettings((prev) => ({ ...prev, hide_branding: e.target.checked }))}
-                  className="w-4 h-4 mt-0.5 text-gray-900 border-gray-300 rounded focus:ring-gray-900/30"
-                />
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">
-                    {t('branding.hideLabel')}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-0.5">
-                    {t('branding.hideHint')}
-                  </div>
-                </div>
-              </label>
-            </Section>
             </div>
 
             {/* Live preview column — sticky on lg+ so it stays in view while
@@ -919,7 +894,6 @@ export default function SettingsPage() {
                     backgroundValue={deferredSettings.background_value}
                     fontFamily={deferredSettings.font_family}
                     sectionOrder={deferredSettings.section_order}
-                    hideMakeYoursCTA={Boolean(deferredSettings.hide_branding)}
                     embedded
                   />
                 ) : previewLoading ? (

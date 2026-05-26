@@ -56,9 +56,6 @@ export interface ProfileSettings {
   // Font override key (null / 'theme' = inherit theme.font).
   // See lib/fonts.ts for the curated list.
   font_family?: string | null
-  // When true, the floating "Make yours" CTA / nomad.now branding is hidden on the
-  // public profile. Available to all paid plans (see /pricing).
-  hide_branding?: boolean
   created_at: string
   updated_at: string
 }

@@ -378,12 +378,6 @@
       "moveDown": "下移",
       "show": "显示"
     },
-    "branding": {
-      "title": "品牌水印",
-      "description": "是否向访客显示「Make yours」浮动按钮。",
-      "hideLabel": "在我的卡片上隐藏「Make yours」浮动按钮",
-      "hideHint": "移除引导访客创建自己卡片的浮动按钮。你的主页本身不变。"
-    },
     "privacy": {
       "title": "隐私",
       "description": "谁能看到什么,以及延迟多久。",

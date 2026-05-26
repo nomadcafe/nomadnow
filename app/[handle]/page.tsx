@@ -152,7 +152,6 @@ export default async function ProfilePage({
         fontFamily={settings?.font_family}
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
-        hideMakeYoursCTA={Boolean(settings?.hide_branding)}
         isOwner={isOwner}
       />
     </>
