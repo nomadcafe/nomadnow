@@ -71,6 +71,16 @@ export type ThemeDecoration =
   | 'forest-leaves'
   | 'cream-paper'
 
+// Avatar frame variant. Rendered by components/nomad-card/ThemedAvatar.tsx.
+// soft-ring = default gradient halo around a round image. Other variants
+// reshape the frame to match the theme identity (square brutalist, polaroid
+// rotate, extra layered glow).
+export type ThemeAvatarStyle = 'soft-ring' | 'square-mono' | 'polaroid' | 'big-halo'
+
+// Bio quote-mark variant. 'classic' = stylised " " typography quotes;
+// 'brackets' = monospace `[ ]` for the brutalist theme.
+export type ThemeBioQuoteStyle = 'classic' | 'brackets'
+
 export interface Theme {
   key: ThemeKey
   label: string
@@ -100,6 +110,14 @@ export interface Theme {
   roleClass: string
   // Background decoration rendered inside the card. See ThemeDecoration.
   decoration: ThemeDecoration
+  // Avatar frame style. See ThemedAvatar.
+  avatarStyle: ThemeAvatarStyle
+  // Bio quote-mark variant.
+  bioQuoteStyle: ThemeBioQuoteStyle
+  // Override for the stats strip's number size — empty string = default.
+  // Used by themes that want a louder ("text-3xl ...") or more compact
+  // stat presentation than the baseline.
+  statValueClass: string
 
   blurb: string
 
@@ -126,6 +144,9 @@ export const THEMES: Record<ThemeKey, Theme> = {
     nameClass: '',
     roleClass: '',
     decoration: 'none',
+    avatarStyle: 'soft-ring',
+    bioQuoteStyle: 'classic',
+    statValueClass: '',
     blurb: 'Clean, neutral, the default.',
     og: {
       bg: 'white',
@@ -156,6 +177,9 @@ export const THEMES: Record<ThemeKey, Theme> = {
     nameClass: '',
     roleClass: '',
     decoration: 'midnight-glow',
+    avatarStyle: 'soft-ring',
+    bioQuoteStyle: 'classic',
+    statValueClass: '',
     blurb: 'Deep dark with neon accent.',
     og: {
       bg: 'linear-gradient(135deg, #030712 0%, #111827 100%)',
@@ -187,6 +211,9 @@ export const THEMES: Record<ThemeKey, Theme> = {
     nameClass: 'text-3xl sm:text-4xl md:text-5xl font-serif font-light tracking-tight mb-1 sm:mb-2',
     roleClass: 'italic font-serif',
     decoration: 'sunset-band',
+    avatarStyle: 'polaroid',
+    bioQuoteStyle: 'classic',
+    statValueClass: '',
     blurb: 'Warm gradient, serif type, travel-mag feel.',
     og: {
       bg: 'linear-gradient(135deg, #fff7ed 0%, #fce7f3 50%, #fef3c7 100%)',
@@ -219,6 +246,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     nameClass: 'text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight uppercase mb-1 sm:mb-2',
     roleClass: 'font-mono uppercase tracking-widest text-xs sm:text-sm',
     decoration: 'mono-grid',
+    avatarStyle: 'square-mono',
+    bioQuoteStyle: 'brackets',
+    // Bigger tabular numerals — terminal-readout vibe.
+    statValueClass: 'text-3xl sm:text-4xl font-mono font-bold tabular-nums',
     blurb: 'Brutalist mono with hard edges.',
     og: {
       bg: 'white',
@@ -251,6 +282,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     nameClass: 'text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter leading-none mb-1 sm:mb-2',
     roleClass: 'uppercase tracking-wide text-sm sm:text-base',
     decoration: 'vivid-halo',
+    avatarStyle: 'big-halo',
+    bioQuoteStyle: 'classic',
+    // Bigger numbers to match the oversized headline language.
+    statValueClass: 'text-3xl sm:text-5xl font-bold tabular-nums',
     blurb: 'Bold gradient with glass card.',
     og: {
       bg: 'linear-gradient(135deg, #d946ef 0%, #a855f7 50%, #7c3aed 100%)',
@@ -282,6 +317,9 @@ export const THEMES: Record<ThemeKey, Theme> = {
     nameClass: 'text-2xl sm:text-3xl md:text-4xl font-serif font-medium tracking-tight mb-1 sm:mb-2',
     roleClass: 'italic font-serif',
     decoration: 'forest-leaves',
+    avatarStyle: 'soft-ring',
+    bioQuoteStyle: 'classic',
+    statValueClass: '',
     blurb: 'Deep green, slow & grounded.',
     og: {
       bg: 'linear-gradient(135deg, #022c22 0%, #064e3b 100%)',
@@ -313,6 +351,9 @@ export const THEMES: Record<ThemeKey, Theme> = {
     nameClass: 'text-2xl sm:text-3xl md:text-4xl font-serif font-normal tracking-normal mb-1 sm:mb-2',
     roleClass: 'italic font-serif text-sm sm:text-base',
     decoration: 'cream-paper',
+    avatarStyle: 'soft-ring',
+    bioQuoteStyle: 'classic',
+    statValueClass: '',
     blurb: 'Soft paper-and-coffee feel.',
     og: {
       bg: '#fffbeb',

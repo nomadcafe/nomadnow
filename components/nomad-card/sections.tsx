@@ -4,11 +4,11 @@ import type { Theme, ButtonShapeClasses } from '@/lib/themes'
 import { getCountryFlag, getCountryName } from '@/lib/countries'
 import { stayDayCount, computeTravelStats, formatTimeOnTheRoad } from '@/lib/stays'
 import { detectEmbed } from '@/lib/embeds'
-import { OptimizedImage } from '../OptimizedImage'
 import { WorldMap } from '../WorldMap'
 import { LiveLocalTime } from './LiveLocalTime'
 import { CurrentStayPhotos } from './CurrentStayPhotos'
 import { PastStayThumbnail } from './PastStayThumbnail'
+import { ThemedAvatar } from './ThemedAvatar'
 
 // Loose translator signature compatible with what next-intl returns from
 // both useTranslations (client) and getTranslations (server). The value type
@@ -147,14 +147,21 @@ function Stat({
   value,
   label,
   mutedClass,
+  valueClass,
 }: {
   value: React.ReactNode
   label: string
   mutedClass: string
+  // Override for the number's class — themes that want bigger or
+  // differently-styled numerals (Mono mono-bold, Vivid display-size) pass
+  // this in via theme.statValueClass. Empty string = use the default.
+  valueClass?: string
 }) {
   return (
     <div className="text-center min-w-0">
-      <div className="text-2xl sm:text-3xl font-semibold tabular-nums">{value}</div>
+      <div className={valueClass || 'text-2xl sm:text-3xl font-semibold tabular-nums'}>
+        {value}
+      </div>
       <div className={`text-[10px] sm:text-xs uppercase tracking-wide mt-0.5 ${mutedClass}`}>
         {label}
       </div>
@@ -251,35 +258,8 @@ export function createSectionRenderers(
 
   return {
     avatar: () => (
-      <div key="avatar" className="flex justify-center mb-4 sm:mb-6">
-        <div
-          className="relative rounded-full p-[3px] shadow-lg shadow-black/10"
-          style={{
-            // Theme-tinted soft ring around the avatar — uses accent at low alpha
-            // so it works on light AND dark themes without overpowering.
-            background: `linear-gradient(135deg, ${theme.accentHex}33, ${theme.accentHex}11)`,
-          }}
-        >
-          {user.avatar_url ? (
-            <OptimizedImage
-              src={user.avatar_url}
-              alt={user.display_name || user.handle}
-              width={128}
-              height={128}
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover ring-2 ring-white/80 block"
-              priority
-            />
-          ) : (
-            <div
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center text-3xl sm:text-4xl font-semibold text-white ring-2 ring-white/80"
-              style={{
-                background: `linear-gradient(135deg, ${theme.accentHex}, ${theme.accentHex}99)`,
-              }}
-            >
-              {(user.display_name || user.handle).charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
+      <div key="avatar">
+        <ThemedAvatar user={user} theme={theme} />
       </div>
     ),
     name: () => (
@@ -326,24 +306,31 @@ export function createSectionRenderers(
     },
     bio: () => {
       if (!user.bio) return null
+      // Brutalist themes get monospace square brackets in place of the
+      // editorial " " typography quotes — same hierarchy, different language.
+      const isBrackets = theme.bioQuoteStyle === 'brackets'
+      const openMark = isBrackets ? '[' : '“'
+      const closeMark = isBrackets ? ']' : '”'
+      const markFontClass = isBrackets ? 'font-mono font-bold' : 'font-serif'
+      const markOpacity = isBrackets ? 0.55 : 0.35
       return (
         <div key="bio" className="relative text-center mt-5 mb-6 max-w-lg mx-auto px-6">
           <span
             aria-hidden
-            className={`absolute -top-3 left-0 text-5xl leading-none font-serif select-none ${theme.textMuted}`}
-            style={{ opacity: 0.35 }}
+            className={`absolute -top-3 left-0 text-5xl leading-none select-none ${markFontClass} ${theme.textMuted}`}
+            style={{ opacity: markOpacity }}
           >
-            &ldquo;
+            {openMark}
           </span>
           <p className={`text-base leading-relaxed whitespace-pre-line ${theme.bioQuote} relative`}>
             {user.bio}
           </p>
           <span
             aria-hidden
-            className={`absolute -bottom-6 right-0 text-5xl leading-none font-serif select-none ${theme.textMuted}`}
-            style={{ opacity: 0.35 }}
+            className={`absolute -bottom-6 right-0 text-5xl leading-none select-none ${markFontClass} ${theme.textMuted}`}
+            style={{ opacity: markOpacity }}
           >
-            &rdquo;
+            {closeMark}
           </span>
         </div>
       )
@@ -487,13 +474,20 @@ export function createSectionRenderers(
               value={visitedCount}
               label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
               mutedClass={theme.textMuted}
+              valueClass={theme.statValueClass}
             />
             <Stat
               value={cityCount}
               label={cityCount === 1 ? t('cityOne') : t('cityMany')}
               mutedClass={theme.textMuted}
+              valueClass={theme.statValueClass}
             />
-            <Stat value={road.value} label={roadUnitLabel} mutedClass={theme.textMuted} />
+            <Stat
+              value={road.value}
+              label={roadUnitLabel}
+              mutedClass={theme.textMuted}
+              valueClass={theme.statValueClass}
+            />
           </div>
         </div>
       )
