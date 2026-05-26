@@ -15,12 +15,12 @@ function LoginForm() {
   const [status, setStatus] = useState<FormStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
-  // Default landing after login is /settings — it's the most useful
-  // logged-in page (shows account state, billing, profile knobs) and makes
-  // it visually obvious the session worked. Callers that want a different
+  // Default landing after login is /edit/look — it's the most useful
+  // logged-in page (the Look tab of the unified editor) and makes it
+  // visually obvious the session worked. Callers that want a different
   // destination (e.g. middleware bouncing protected routes to /login)
   // override via ?next=…
-  const redirectTo = searchParams.get('next') || '/settings'
+  const redirectTo = searchParams.get('next') || '/edit/look'
 
   async function handleGoogle() {
     setStatus('oauth')

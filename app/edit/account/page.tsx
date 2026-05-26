@@ -1,8 +1,8 @@
-import { SettingsContent } from '@/components/edit/SettingsContent'
+import { AccountSection } from '@/components/edit/AccountSection'
 
 // /edit/account — profile-link + billing only. No save flow (billing has
-// its own Stripe portal handler inside SettingsContent), no preview, no
-// dirty tracking. The look-only sections are hidden via `mode="account"`.
+// its own Stripe portal handler), no preview, no dirty tracking. Doesn't
+// fetch /api/settings — only /api/billing/state.
 export default function EditAccountPage() {
-  return <SettingsContent mode="account" showHeader={false} />
+  return <AccountSection />
 }
