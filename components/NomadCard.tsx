@@ -8,6 +8,7 @@ import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { CardCopyLink } from './nomad-card/CardCopyLink'
+import { ThemeDecoration } from './nomad-card/ThemeDecoration'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
 import { getFontClassName } from '@/lib/fonts'
@@ -148,10 +149,13 @@ export function NomadCard({
         className={`${customFontClass || theme.font} ${customBg ? '' : theme.page} rounded-2xl p-4 sm:p-6`}
         style={customBg ? { background: customBg } : undefined}
       >
-        <div className={`${theme.card} ${theme.text} p-5 sm:p-6`}>
-          {renderedSections}
-          <div className={`mt-6 pt-6 border-t ${theme.divider} text-center`}>
-            <p className={`text-xs ${theme.textMuted}`}>nomad.now/{user.handle || 'yourhandle'}</p>
+        <div className={`relative overflow-hidden ${theme.card} ${theme.text} p-5 sm:p-6`}>
+          <ThemeDecoration variant={theme.decoration} />
+          <div className="relative">
+            {renderedSections}
+            <div className={`mt-6 pt-6 border-t ${theme.divider} text-center`}>
+              <p className={`text-xs ${theme.textMuted}`}>nomad.now/{user.handle || 'yourhandle'}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -166,13 +170,16 @@ export function NomadCard({
       {isOwner ? <EditCardCTA /> : !hideMakeYoursCTA && <MakeYoursCTA />}
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
-        <div className={`${theme.card} ${theme.text} p-6 sm:p-8 md:p-12`}>
-          {renderedSections}
+        <div className={`relative overflow-hidden ${theme.card} ${theme.text} p-6 sm:p-8 md:p-12`}>
+          <ThemeDecoration variant={theme.decoration} />
+          <div className="relative">
+            {renderedSections}
 
-          {/* Share — always last, not reorderable. */}
-          <div className={`mt-8 pt-8 border-t ${theme.divider} text-center`}>
-            <p className={`text-sm mb-2 ${theme.textMuted}`}>{t('shareTitle')}</p>
-            <CardCopyLink handle={user.handle} mutedClass={theme.textMuted} />
+            {/* Share — always last, not reorderable. */}
+            <div className={`mt-8 pt-8 border-t ${theme.divider} text-center`}>
+              <p className={`text-sm mb-2 ${theme.textMuted}`}>{t('shareTitle')}</p>
+              <CardCopyLink handle={user.handle} mutedClass={theme.textMuted} />
+            </div>
           </div>
         </div>
       </div>
