@@ -95,6 +95,11 @@ export interface Theme {
   pillVerified: string
   pillNeutral: string
   linkRow: string
+  // Hover effect for the link row — translate / shadow / glow classes
+  // applied on hover. Each theme picks a language consistent with its own
+  // identity (brutalist hard shadow, Y2K glow, magazine warm shadow, etc.)
+  // rather than sharing a generic "hover:shadow-md + lift".
+  linkHover: string
   linkArrow: string
   divider: string
   font: string
@@ -138,6 +143,7 @@ export const THEMES: Record<ThemeKey, Theme> = {
     pillVerified: 'bg-green-50 text-green-700 border border-green-100',
     pillNeutral: 'bg-gray-100 text-gray-700',
     linkRow: 'bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-900',
+    linkHover: 'motion-safe:hover:-translate-y-0.5 hover:shadow-md',
     linkArrow: 'text-gray-400 group-hover:text-gray-600',
     divider: 'border-gray-100',
     font: '',
@@ -171,6 +177,8 @@ export const THEMES: Record<ThemeKey, Theme> = {
     pillVerified: 'bg-cyan-950/60 text-cyan-300 border border-cyan-900',
     pillNeutral: 'bg-gray-800 text-gray-300 border border-gray-700',
     linkRow: 'bg-gray-800/60 hover:bg-gray-800 border border-gray-700 text-white',
+    // Tech product hover: subtle lift + cyan-tinted glow picks up the accent.
+    linkHover: 'motion-safe:hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/20',
     linkArrow: 'text-gray-500 group-hover:text-gray-300',
     divider: 'border-gray-800',
     font: '',
@@ -204,6 +212,8 @@ export const THEMES: Record<ThemeKey, Theme> = {
     pillVerified: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     pillNeutral: 'bg-orange-100/70 text-orange-900 border border-orange-200/60',
     linkRow: 'bg-white/60 hover:bg-white/90 backdrop-blur border border-orange-100 text-stone-900',
+    // Magazine warm-lit hover: lift + soft orange shadow.
+    linkHover: 'motion-safe:hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-400/30',
     linkArrow: 'text-stone-400 group-hover:text-stone-600',
     divider: 'border-orange-100',
     font: 'font-serif',
@@ -239,6 +249,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     pillVerified: 'bg-white text-black border-2 border-black',
     pillNeutral: 'bg-white text-black border-2 border-black',
     linkRow: 'bg-white hover:bg-gray-50 border-2 border-black text-black',
+    // Brutalist hard-stamp hover: button moves up-and-left a hair while a
+    // crisp 4px offset black shadow appears down-and-right. Matches the
+    // card's own hard offset shadow language.
+    linkHover: 'motion-safe:hover:-translate-x-0.5 motion-safe:hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]',
     linkArrow: 'text-black',
     divider: 'border-black',
     font: 'font-mono',
@@ -275,6 +289,8 @@ export const THEMES: Record<ThemeKey, Theme> = {
     pillVerified: 'bg-yellow-300/20 text-yellow-100 border border-yellow-300/40',
     pillNeutral: 'bg-white/20 text-white border border-white/30',
     linkRow: 'bg-white/15 hover:bg-white/25 backdrop-blur border border-white/30 text-white',
+    // Y2K bright-glow hover: micro scale + a wide yellow halo around the row.
+    linkHover: 'motion-safe:hover:scale-[1.02] hover:shadow-[0_0_28px_4px_rgba(253,224,71,0.35)]',
     linkArrow: 'text-white/60 group-hover:text-white/90',
     divider: 'border-white/20',
     font: '',
@@ -310,6 +326,8 @@ export const THEMES: Record<ThemeKey, Theme> = {
     pillVerified: 'bg-emerald-800/60 text-emerald-200 border border-emerald-700',
     pillNeutral: 'bg-emerald-900 text-emerald-200 border border-emerald-800',
     linkRow: 'bg-emerald-900/50 hover:bg-emerald-900 border border-emerald-800 text-emerald-50',
+    // Grounded slow hover: gentle lift + deep emerald shadow.
+    linkHover: 'motion-safe:hover:-translate-y-0.5 hover:shadow-md hover:shadow-emerald-900/40',
     linkArrow: 'text-emerald-500 group-hover:text-emerald-300',
     divider: 'border-emerald-800/60',
     font: '',
@@ -344,6 +362,8 @@ export const THEMES: Record<ThemeKey, Theme> = {
     pillVerified: 'bg-amber-100 text-amber-900 border border-amber-300',
     pillNeutral: 'bg-amber-50 text-amber-900 border border-amber-200',
     linkRow: 'bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950',
+    // Notebook quiet hover: no translate, only a soft warm shadow whisper.
+    linkHover: 'hover:shadow-sm hover:shadow-amber-300/40',
     linkArrow: 'text-amber-700 group-hover:text-amber-900',
     divider: 'border-amber-200',
     font: 'font-serif',

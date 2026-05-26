@@ -4,6 +4,12 @@ module.exports = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    // Themes and other config-shaped modules under lib/ hold Tailwind class
+    // strings (theme.card, theme.linkRow, arbitrary-value shadows / glows
+    // for the per-theme hover variants). Without this entry JIT silently
+    // drops those classes — mono's brutalist offset shadow had been a
+    // no-op until this got added.
+    './lib/**/*.{js,ts}',
   ],
   theme: {
     extend: {
