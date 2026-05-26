@@ -324,6 +324,15 @@
       "urlPlaceholder": "mailto:you@example.com 或 https://cal.com/you",
       "urlHint": "可填邮箱(mailto:…)、电话(tel:…)或任意 https:// 链接。"
     },
+    "meetupCta": {
+      "title": "Meetup CTA 按钮",
+      "description": "次级按钮 —— 邀请本地朋友约一杯咖啡、打个招呼、面基聊聊。和 Hire CTA 互补,卡片的社交那一面。",
+      "labelInput": "按钮文案",
+      "labelPlaceholder": "在曼谷约一杯咖啡",
+      "urlInput": "跳转去哪",
+      "urlPlaceholder": "https://cal.com/you/coffee 或 mailto:…",
+      "urlHint": "日历链接最合适。邮箱(mailto:…)、Telegram(tg://…)也可以。"
+    },
     "blurbs": {
       "title": "随身小卡片",
       "description": "在简介旁边放几对 标签/内容,用来传达你的工作状态 —— 现在在读、接单时段、报价、用啥工具,什么都行。",

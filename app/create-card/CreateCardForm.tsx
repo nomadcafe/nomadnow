@@ -324,6 +324,41 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                         <p className="mt-1.5 text-xs text-gray-500">{t('hireCta.urlHint')}</p>
                       </div>
 
+                      {/* Meetup CTA — twin of Hire CTA but for peer meetups
+                          (Grab a coffee in {city}, Say hi on Telegram).
+                          Renders as a secondary outlined button on the card,
+                          paired with but visually subordinate to the solid
+                          Hire button. Both fields blank = section hidden. */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                          {t('meetupCta.title')}
+                        </label>
+                        <p className="mb-3 text-xs text-gray-500">{t('meetupCta.description')}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            name="meetup_cta_label"
+                            value={formData.meetup_cta_label}
+                            onChange={handleChange}
+                            maxLength={30}
+                            placeholder={t('meetupCta.labelPlaceholder')}
+                            aria-label={t('meetupCta.labelInput')}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+                          />
+                          <input
+                            type="text"
+                            name="meetup_cta_url"
+                            value={formData.meetup_cta_url}
+                            onChange={handleChange}
+                            maxLength={2048}
+                            placeholder={t('meetupCta.urlPlaceholder')}
+                            aria-label={t('meetupCta.urlInput')}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base font-mono"
+                          />
+                        </div>
+                        <p className="mt-1.5 text-xs text-gray-500">{t('meetupCta.urlHint')}</p>
+                      </div>
+
                       <BlurbsField blurbs={blurbs} onChange={setBlurbs} />
 
                       <FeaturedWorksField works={featuredWorks} onChange={setFeaturedWorks} />

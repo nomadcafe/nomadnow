@@ -15,6 +15,9 @@ import { safeLinkUrlSchema } from '@/lib/validation'
 // http/https/mailto/tel via the same allow-list as nomad_links.
 const hireCtaLabelSchema = z.string().max(30).nullable().optional().or(z.literal(''))
 const hireCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(''))
+// Meetup CTA — same shape and validation as hire_cta. Twin field on users.
+const meetupCtaLabelSchema = z.string().max(30).nullable().optional().or(z.literal(''))
+const meetupCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(''))
 
 const createUserSchema = z.object({
   handle: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Handle can only contain letters, numbers, underscores, and hyphens'),
@@ -35,6 +38,8 @@ const createUserSchema = z.object({
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
+  meetup_cta_label: meetupCtaLabelSchema,
+  meetup_cta_url: meetupCtaUrlSchema,
 })
 
 const updateUserSchema = z.object({
@@ -55,6 +60,8 @@ const updateUserSchema = z.object({
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
+  meetup_cta_label: meetupCtaLabelSchema,
+  meetup_cta_url: meetupCtaUrlSchema,
 })
 
 export async function POST(request: NextRequest) {
@@ -88,6 +95,13 @@ export async function POST(request: NextRequest) {
         timezone: validation.data.timezone || null,
         visited_countries: validation.data.visited_countries || null,
         profile_type: validation.data.profile_type || 'creator',
+        // CTAs the form may have submitted on first-time create. Previously
+        // dropped here (only PUT applied them), forcing users to save the
+        // card once and then edit to get their Hire / Meetup buttons live.
+        hire_cta_label: validation.data.hire_cta_label || null,
+        hire_cta_url: validation.data.hire_cta_url || null,
+        meetup_cta_label: validation.data.meetup_cta_label || null,
+        meetup_cta_url: validation.data.meetup_cta_url || null,
       })
       // Explicit column list — '.select()' (no args) returns every column
       // and would fail RETURNING because session role lacks SELECT on the

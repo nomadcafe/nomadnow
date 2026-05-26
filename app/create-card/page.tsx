@@ -61,6 +61,8 @@ export default async function CreateCardPage() {
         visited_countries: (profile.visited_countries as string[] | null) ?? [],
         hire_cta_label: (profile.hire_cta_label as string | null) ?? '',
         hire_cta_url: (profile.hire_cta_url as string | null) ?? '',
+        meetup_cta_label: (profile.meetup_cta_label as string | null) ?? '',
+        meetup_cta_url: (profile.meetup_cta_url as string | null) ?? '',
         links: (links ?? []).map((l) => ({
           type: l.type as InitialCardData['links'][number]['type'],
           label: (l.label as string | null) ?? '',

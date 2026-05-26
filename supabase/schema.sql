@@ -18,6 +18,15 @@ CREATE TABLE IF NOT EXISTS users (
   timezone TEXT, -- Current timezone
   visited_countries TEXT[], -- Array of country codes (e.g., ['TH', 'JP', 'PT'])
   profile_type TEXT DEFAULT 'creator', -- 'creator' | 'nomad' | 'both'
+  -- Hire-CTA fields drive the prominent "Hire me" / "Book a call" button
+  -- on the public card. NULL = section hidden. Added in migration 0016.
+  hire_cta_label TEXT,
+  hire_cta_url TEXT,
+  -- Meetup-CTA fields drive the secondary "Grab a coffee" / "Say hi" button.
+  -- Twin to hire_cta — nomad-side conversion (peer meetups in the current
+  -- city) vs hire_cta's freelance-side (client conversions). Added in 0019.
+  meetup_cta_label TEXT,
+  meetup_cta_url TEXT,
   -- Stripe billing state (kept on users for 1:1 simplicity — see migration 0003)
   stripe_customer_id TEXT UNIQUE,
   plan TEXT,                     -- 'basic' | 'pro' | NULL (no active subscription)
@@ -58,10 +67,6 @@ CREATE TABLE IF NOT EXISTS revenues (
   oneoff_cents INTEGER DEFAULT 0,
   currency CHAR(3) DEFAULT 'USD',
   verified BOOLEAN DEFAULT FALSE,
-  -- Hire-CTA fields drive the prominent "Hire me" / "Book a call" button
-  -- on the public card. NULL = section hidden.
-  hire_cta_label TEXT,
-  hire_cta_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(project_id, month)

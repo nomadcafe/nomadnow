@@ -24,6 +24,9 @@ export interface FormData {
   // Hire CTA fields. Empty strings = section hidden on the public card.
   hire_cta_label: string
   hire_cta_url: string
+  // Meetup CTA fields. Empty strings = section hidden.
+  meetup_cta_label: string
+  meetup_cta_url: string
 }
 
 // Initial-state snapshot the server hands down in edit mode. In create mode
@@ -45,6 +48,8 @@ export interface FormInitial {
   featured_works: FeaturedWorkDraft[]
   hire_cta_label: string
   hire_cta_url: string
+  meetup_cta_label: string
+  meetup_cta_url: string
 }
 
 interface UseFormDraftResult {
@@ -112,6 +117,8 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
     timezone: initial?.timezone ?? draft?.timezone ?? '',
     hire_cta_label: initial?.hire_cta_label ?? draft?.hire_cta_label ?? '',
     hire_cta_url: initial?.hire_cta_url ?? draft?.hire_cta_url ?? '',
+    meetup_cta_label: initial?.meetup_cta_label ?? draft?.meetup_cta_label ?? '',
+    meetup_cta_url: initial?.meetup_cta_url ?? draft?.meetup_cta_url ?? '',
   })
   const [visitedCountries, setVisitedCountries] = useState<string[]>(
     initial?.visited_countries ?? draft?.visitedCountries ?? [],

@@ -100,6 +100,8 @@ export function useSubmitCard({
         // and the old DB value would persist.
         hire_cta_label: formData.hire_cta_label.trim() || null,
         hire_cta_url: formData.hire_cta_url.trim() || null,
+        meetup_cta_label: formData.meetup_cta_label.trim() || null,
+        meetup_cta_url: formData.meetup_cta_url.trim() || null,
       }
 
       const response = await fetch('/api/users', {

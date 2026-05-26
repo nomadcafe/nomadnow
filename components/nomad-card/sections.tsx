@@ -626,6 +626,42 @@ export function createSectionRenderers(
         </div>
       )
     },
+    meetup: () => {
+      const label = user.meetup_cta_label?.trim()
+      const url = user.meetup_cta_url?.trim()
+      if (!label || !url) return null
+      // Secondary outlined button. Paired with the solid Hire CTA below
+      // — same accent color, but border-only fill so visitors read it as
+      // "lighter ask" (coffee, peer meetup) vs the primary hire conversion.
+      return (
+        <div key="meetup" className="my-3">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex items-center justify-center gap-2 w-full px-4 sm:px-6 py-3 sm:py-3.5 ${shape.row} font-semibold border-2 touch-manipulation transition-all duration-200 ${theme.linkHover}`}
+            style={{ borderColor: theme.accentHex, color: theme.accentHex }}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              {/* Coffee cup — universal "let's grab a coffee" cue. */}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"
+              />
+            </svg>
+            <span>{label}</span>
+          </a>
+        </div>
+      )
+    },
     hire: () => {
       const label = user.hire_cta_label?.trim()
       const url = user.hire_cta_url?.trim()
