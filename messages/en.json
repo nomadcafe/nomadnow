@@ -401,6 +401,34 @@
       "useThemeDefault": "Use theme default",
       "themeDefaultLabel": "Theme default:"
     },
+    "overrides": {
+      "title": "Theme details",
+      "description": "Mix-and-match the small touches independently from the theme — pick a decoration from one preset, an avatar style from another.",
+      "decorationLabel": "Decoration",
+      "avatarLabel": "Avatar style",
+      "bioQuoteLabel": "Bio quote marks",
+      "useThemeDefault": "Use theme default",
+      "themeDefaultBadge": "Default",
+      "decoration": {
+        "none": "None",
+        "midnight-glow": "Midnight glow",
+        "sunset-band": "Sunset band",
+        "mono-grid": "Mono grid",
+        "vivid-halo": "Vivid halo",
+        "forest-leaves": "Forest leaves",
+        "cream-paper": "Cream paper"
+      },
+      "avatar": {
+        "soft-ring": "Soft ring",
+        "square-mono": "Square mono",
+        "polaroid": "Polaroid",
+        "big-halo": "Big halo"
+      },
+      "bioQuote": {
+        "classic": "Curly “ ”",
+        "brackets": "Brackets [ ]"
+      }
+    },
     "buttonShape": {
       "title": "Button shape",
       "description": "Corner style for link rows. Works with any theme.",

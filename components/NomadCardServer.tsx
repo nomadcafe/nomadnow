@@ -32,6 +32,11 @@ interface NomadCardServerProps {
   fontFamily?: string | null
   // Hex accent override applied via getTheme. Null = use theme preset accent.
   accentColor?: string | null
+  // Per-axis preset unbundling. Each null = inherit the chosen theme's value.
+  // Validated against the catalog in getTheme; bad values fall through.
+  decorationOverride?: string | null
+  avatarStyleOverride?: string | null
+  bioQuoteStyleOverride?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
   // When true, the floating "Make yours →" CTA is suppressed. Used on the
@@ -64,6 +69,9 @@ export async function NomadCardServer({
   backgroundValue,
   fontFamily,
   accentColor,
+  decorationOverride,
+  avatarStyleOverride,
+  bioQuoteStyleOverride,
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
@@ -80,7 +88,12 @@ export async function NomadCardServer({
     getLocale(),
   ])
 
-  const theme = getTheme(themeKey, accentColor)
+  const theme = getTheme(themeKey, {
+    accent: accentColor,
+    decoration: decorationOverride,
+    avatarStyle: avatarStyleOverride,
+    bioQuoteStyle: bioQuoteStyleOverride,
+  })
   const shape = getButtonShape(buttonShape)
   const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
   const customFontClass = getFontClassName(fontFamily)

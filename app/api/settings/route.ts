@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
+import { DECORATION_KEYS, AVATAR_STYLE_KEYS, BIO_QUOTE_STYLE_KEYS } from '@/lib/themes'
 
 // Settings the user can actually change today. Dropped fields (visibility,
 // delay_days, layout_template, enabled_sections) had UI but were never read
@@ -41,6 +42,13 @@ const updateSettingsSchema = z.object({
   // Hex accent override (e.g. #FF6B35). Null clears the override and falls
   // back to the theme preset's accentHex. Same HEX shape as background_value.
   accent_color: z.string().regex(HEX, 'Invalid hex color').nullable().optional(),
+  // Per-axis preset unbundling. Each null clears the override; non-null must
+  // match the catalog in lib/themes.ts (DECORATION_KEYS etc.). The renderer
+  // also drops unknown values defensively, but rejecting them at the API
+  // layer keeps junk out of the DB in the first place.
+  decoration_override: z.enum(DECORATION_KEYS).nullable().optional(),
+  avatar_style_override: z.enum(AVATAR_STYLE_KEYS).nullable().optional(),
+  bio_quote_style_override: z.enum(BIO_QUOTE_STYLE_KEYS).nullable().optional(),
   // The Nomad Card catalog has ~8 section IDs and each is a short string —
   // anything bigger is junk or abuse. Defensive caps so a malformed POST
   // can't blow up a row size or shove a giant JSONB blob into the DB.
@@ -141,6 +149,10 @@ export async function GET() {
           background_mode: 'theme',
           background_value: null,
           font_family: 'theme',
+          accent_color: null,
+          decoration_override: null,
+          avatar_style_override: null,
+          bio_quote_style_override: null,
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
         },
       })

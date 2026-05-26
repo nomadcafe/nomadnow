@@ -401,6 +401,34 @@
       "useThemeDefault": "テーマのデフォルトに戻す",
       "themeDefaultLabel": "テーマのデフォルト:"
     },
+    "overrides": {
+      "title": "テーマの細部",
+      "description": "テーマと独立して細部を組み合わせ可能 — 装飾は別プリセットから、アバターはまた別のプリセットから、といった具合に。",
+      "decorationLabel": "装飾",
+      "avatarLabel": "アバターのスタイル",
+      "bioQuoteLabel": "Bio の引用符",
+      "useThemeDefault": "テーマのデフォルトに戻す",
+      "themeDefaultBadge": "デフォルト",
+      "decoration": {
+        "none": "なし",
+        "midnight-glow": "Midnight グロー",
+        "sunset-band": "Sunset バンド",
+        "mono-grid": "Mono グリッド",
+        "vivid-halo": "Vivid ヘイロー",
+        "forest-leaves": "Forest 葉",
+        "cream-paper": "Cream ペーパー"
+      },
+      "avatar": {
+        "soft-ring": "ソフトリング",
+        "square-mono": "スクエア モノ",
+        "polaroid": "ポラロイド",
+        "big-halo": "ビッグヘイロー"
+      },
+      "bioQuote": {
+        "classic": "カーリー “ ”",
+        "brackets": "ブラケット [ ]"
+      }
+    },
     "buttonShape": {
       "title": "ボタンの形",
       "description": "リンク行の角の形。どのテーマとも組み合わせ可能。",

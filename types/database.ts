@@ -69,6 +69,13 @@ export interface ProfileSettings {
   // Hex accent override (#RRGGBB / #RGB / #RRGGBBAA). NULL = inherit the
   // theme preset's accentHex. Applied at render time via getTheme override.
   accent_color?: string | null
+  // Per-axis theme overrides. Each NULL = inherit the chosen theme preset's
+  // baked-in value. Catalogs live in lib/themes.ts as ThemeDecoration /
+  // ThemeAvatarStyle / ThemeBioQuoteStyle. Bad values drop silently at
+  // read time so old/junk overrides can't break the card.
+  decoration_override?: string | null
+  avatar_style_override?: string | null
+  bio_quote_style_override?: string | null
   created_at: string
   updated_at: string
 }

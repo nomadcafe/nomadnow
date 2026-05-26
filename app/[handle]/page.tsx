@@ -153,6 +153,9 @@ export default async function ProfilePage({
         backgroundValue={settings?.background_value}
         fontFamily={settings?.font_family}
         accentColor={settings?.accent_color}
+        decorationOverride={settings?.decoration_override}
+        avatarStyleOverride={settings?.avatar_style_override}
+        bioQuoteStyleOverride={settings?.bio_quote_style_override}
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
         isOwner={isOwner}

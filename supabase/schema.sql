@@ -114,6 +114,14 @@ CREATE TABLE IF NOT EXISTS profile_settings (
   -- baked-in accentHex. Repaints links, CTAs, brand-icon chip tints, map
   -- city dots — the loudest visual on the card. Added in migration 0020.
   accent_color TEXT,
+  -- Per-axis theme overrides — let users mix-and-match across presets.
+  -- NULL on each = inherit the chosen theme's baked-in value. Catalogs
+  -- (ThemeDecoration / ThemeAvatarStyle / ThemeBioQuoteStyle) live in
+  -- lib/themes.ts; bad values drop to the preset default at read time.
+  -- Added in migration 0021.
+  decoration_override TEXT,
+  avatar_style_override TEXT,
+  bio_quote_style_override TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
