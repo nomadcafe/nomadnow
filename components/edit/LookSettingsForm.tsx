@@ -71,28 +71,12 @@ function normalizeTheme(value: unknown): ThemeKey {
   return 'classic'
 }
 
-interface BillingDisplayState {
-  plan: 'basic' | 'pro' | null
-  status: string | null
-  currentPeriodEnd: string | null
-}
-
-// What this instance renders. 'full' = the original /settings page (every
-// section + the save bar + preview). 'look' = theme/accent/overrides/bg/
-// button-shape/font/section-order only (used by the /edit/look tab; preview
-// + save bar included since these need a save flow). 'account' = profile +
-// billing only (no save flow — billing has its own Stripe portal; no preview).
-export type SettingsMode = 'full' | 'look' | 'account'
-
-export function SettingsContent({
-  mode = 'full',
-  showHeader = true,
-}: {
-  mode?: SettingsMode
-  showHeader?: boolean
-}) {
-  const showLookSections = mode === 'full' || mode === 'look'
-  const showAccountSections = mode === 'full' || mode === 'account'
+// Theme / appearance editor — the "Look" tab of /edit. Owns the settings
+// state, dirty flag, save handler, and the embedded live preview. Hosted by
+// /edit/look (a thin wrapper). Account-only concerns (billing, sign-out,
+// profile link) live in a sibling AccountSection; this form never touches
+// billing endpoints.
+export function LookSettingsForm() {
   const t = useTranslations('settings')
   const tCommon = useTranslations('common')
   const tNav = useTranslations('nav')
@@ -104,12 +88,6 @@ export function SettingsContent({
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [handle, setHandle] = useState<string>('')
-  const [billing, setBilling] = useState<BillingDisplayState>({
-    plan: null,
-    status: null,
-    currentPeriodEnd: null,
-  })
-  const [portalLoading, setPortalLoading] = useState(false)
   const DEFAULT_SETTINGS: ProfileSettings = {
     theme_color: 'classic',
     button_shape: 'rounded',
@@ -149,34 +127,19 @@ export function SettingsContent({
       const supabase = createBrowserSupabase()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/login?next=/settings')
+        router.push('/login?next=/edit/look')
         return
       }
 
-      // Handle is in the publicly-readable column set; billing fields are
-      // not (migration 0007 locked them down), so /api/billing/state uses
-      // the admin client server-side. All three of these reads are
-      // independent of each other, so fire them in parallel.
-      const [handleResult, billingRes, settingsRes] = await Promise.all([
+      // Handle drives the preview fetch; settings drives the form. Both
+      // reads are independent so fire them in parallel. Billing lives on
+      // a sibling component (AccountSection) and is not needed here.
+      const [handleResult, settingsRes] = await Promise.all([
         supabase.from('users').select('handle').eq('id', user.id).maybeSingle(),
-        fetch('/api/billing/state').catch(() => null),
         fetch('/api/settings').catch(() => null),
       ])
 
       if (handleResult.data?.handle) setHandle(handleResult.data.handle as string)
-
-      if (billingRes && billingRes.ok) {
-        try {
-          const billingData = await billingRes.json()
-          setBilling({
-            plan: billingData.plan ?? null,
-            status: billingData.status ?? null,
-            currentPeriodEnd: billingData.currentPeriodEnd ?? null,
-          })
-        } catch {
-          // Non-fatal — UI treats billing=null as "no active subscription".
-        }
-      }
 
       try {
         const data = settingsRes ? await settingsRes.json() : null
@@ -320,39 +283,6 @@ export function SettingsContent({
     }
   }
 
-  const openBillingPortal = async () => {
-    setPortalLoading(true)
-    try {
-      const res = await fetch('/api/billing/portal', { method: 'POST' })
-      const data = await res.json()
-      if (res.ok && data.url) {
-        window.location.href = data.url
-        return
-      }
-      showError(data.error || tBilling('portalError'))
-    } catch {
-      showError(tBilling('portalError'))
-    } finally {
-      setPortalLoading(false)
-    }
-  }
-
-  // Renders the renewal/end-of-period line under the plan label. Active subs
-  // see "renews on X"; canceled subs (still inside their paid period) see
-  // "access ends on X" so they know exactly when the page goes dark.
-  const formatPeriodEnd = (iso: string | null): string | null => {
-    if (!iso) return null
-    try {
-      return new Date(iso).toLocaleDateString(locale, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    } catch {
-      return null
-    }
-  }
-
   const moveSection = (sectionId: string, direction: 'up' | 'down') => {
     setSettings((prev) => {
       const order = prev.section_order || []
@@ -397,145 +327,17 @@ export function SettingsContent({
   return (
     <>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      <div className={showHeader ? 'min-h-screen bg-white text-gray-900' : 'bg-white text-gray-900'}>
-        {showHeader && (
-        <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-            <Logo />
-            <div className="flex items-center gap-4">
-              <LanguageSwitcher />
-              {handle ? (
-                <Link href={`/${handle}`} className="text-sm text-gray-500 hover:text-gray-900 transition">
-                  {t('navView')}
-                </Link>
-              ) : (
-                // No handle yet means the user hasn't claimed a card — go
-                // straight to /create-card. The previous order (subscribe →
-                // claim) trapped users at the pricing gate because the
-                // public.users row didn't exist for the webhook to update.
-                <Link
-                  href="/create-card"
-                  className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition"
-                >
-                  {tNav('getCard')}
-                </Link>
-              )}
-            </div>
-          </div>
-        </nav>
-        )}
-
-        {/* Bottom padding clears the fixed save bar (~85px tall). Use
-            explicit pt-/pb- rather than py-N + pb-N — Tailwind's utility
-            output order between the two is not guaranteed, and py-N can
-            silently override the pb-N we need, leaving the last section's
-            content (Section order list) visually clipped by the save bar. */}
-        <main className={`max-w-6xl mx-auto px-4 sm:px-6 ${showHeader ? 'pt-10 sm:pt-14' : 'pt-4 sm:pt-6'} ${showLookSections ? 'pb-48' : 'pb-12'}`}>
-          {showHeader && (
-          <header className="mb-10">
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-              {t('title')}
-            </h1>
-            <p className="text-gray-600">
-              {t('subtitle')}
-            </p>
-          </header>
-          )}
+      <div className="bg-white text-gray-900">
+        {/* Bottom padding clears the fixed save bar (~85px tall). Explicit
+            pt-/pb- rather than py-N + pb-N — Tailwind's utility output order
+            isn't guaranteed and py-N can silently override pb-N, leaving the
+            last section visually clipped by the save bar. */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-48">
 
           {/* Two columns on lg+ when there's a preview (look or full mode).
               Account-only mode collapses to single column. */}
-          <div className={showLookSections ? 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 lg:gap-12' : ''}>
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 lg:gap-12">
             <div className="space-y-10">
-            {showAccountSections && (
-            <>
-            {/* Profile info — the most-edited surface area. Routes to
-                /edit/content since that's the unified content editor.
-                Keeping the link here for users who land on Account first. */}
-            <Section
-              title={t('profile.title')}
-              description={t('profile.description')}
-            >
-              <Link
-                href="/edit/content"
-                className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border border-gray-300 hover:border-gray-900 transition"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                {t('profile.edit')}
-              </Link>
-            </Section>
-
-            {/* Billing */}
-            <Section
-              title={tBilling('title')}
-              description={tBilling('description')}
-            >
-              <div className="rounded-xl border border-gray-200 bg-white p-5">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div>
-                    <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                      {tBilling('currentPlan')}
-                    </div>
-                    <div className="text-lg font-semibold text-gray-900">
-                      {billing.plan === 'pro'
-                        ? tBilling('planPro')
-                        : billing.plan === 'basic'
-                        ? tBilling('planBasic')
-                        : tBilling('planNone')}
-                      {billing.status && (
-                        <span
-                          className={`ml-2 inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full align-middle ${
-                            billing.status === 'active' || billing.status === 'trialing'
-                              ? 'bg-green-50 text-green-700 border border-green-100'
-                              : billing.status === 'canceled'
-                              ? 'bg-gray-100 text-gray-700'
-                              : 'bg-amber-50 text-amber-700 border border-amber-100'
-                          }`}
-                        >
-                          {(() => {
-                            try {
-                              return tBillingStatus(billing.status)
-                            } catch {
-                              return billing.status
-                            }
-                          })()}
-                        </span>
-                      )}
-                    </div>
-                    {billing.currentPeriodEnd && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        {billing.status === 'canceled'
-                          ? tBilling('endsOn', { date: formatPeriodEnd(billing.currentPeriodEnd) ?? '' })
-                          : tBilling('renewsOn', { date: formatPeriodEnd(billing.currentPeriodEnd) ?? '' })}
-                      </div>
-                    )}
-                  </div>
-                  {billing.plan ? (
-                    <button
-                      type="button"
-                      onClick={openBillingPortal}
-                      disabled={portalLoading}
-                      className="text-sm font-medium px-4 py-2 rounded-full border border-gray-300 hover:border-gray-900 transition disabled:opacity-60 disabled:cursor-wait"
-                    >
-                      {portalLoading ? tCommon('loading') : tBilling('manage')}
-                    </button>
-                  ) : (
-                    <Link
-                      href="/pricing"
-                      className="text-sm font-medium px-4 py-2 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition"
-                    >
-                      {tBilling('subscribe')}
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </Section>
-            </>
-            )}
-
-            {showLookSections && (
-            <>
             {/* Theme */}
             <Section
               title={t('theme.title')}
@@ -1032,13 +834,9 @@ export function SettingsContent({
                 })()}
               </div>
             </details>
-            </>
-            )}
 
             </div>
 
-            {showLookSections && (
-            <>
             {/* Live preview column — sticky on lg+ so it stays in view while
                 the user scrolls through the long control list. Renders the
                 user's actual card with the current draft settings, so every
@@ -1108,16 +906,13 @@ export function SettingsContent({
                 </p>
               )}
             </aside>
-            </>
-            )}
           </div>
         </main>
 
-        {showLookSections && (
-        /* Sticky save bar — shows a dirty pill on the left so the user
+        {/* Sticky save bar — shows a dirty pill on the left so the user
             knows their changes haven't gone out yet. Save is disabled
             when clean (no-op POSTs are wasted round-trips); Reset shows
-            up only when dirty (no point in resetting a clean state). */
+            up only when dirty (no point in resetting a clean state). */}
         <div className="fixed bottom-0 inset-x-0 z-40 border-t border-gray-100 bg-white/95 backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
             {isDirty && (
@@ -1152,7 +947,6 @@ export function SettingsContent({
             </button>
           </div>
         </div>
-        )}
       </div>
     </>
   )

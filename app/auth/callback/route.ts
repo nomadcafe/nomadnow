@@ -23,10 +23,10 @@ import { getEnvSafe } from '@/lib/env'
 //   - protocol-relative URLs (//evil.com — which would resolve as
 //     `${base}//evil.com` and silently redirect off-domain)
 //   - paths that fail to start with a forward slash
-// Anything else falls back to /settings so a tampered magic link still
+// Anything else falls back to /edit/look so a tampered magic link still
 // lands on a sensible page.
 function safeNextPath(raw: string | null): string {
-  const fallback = '/settings'
+  const fallback = '/edit/look'
   if (!raw) return fallback
   if (!raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\')) return fallback
   return raw

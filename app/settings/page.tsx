@@ -1,9 +1,8 @@
-import { SettingsContent } from '@/components/edit/SettingsContent'
+import { redirect } from 'next/navigation'
 
-// /settings — legacy single-page entrypoint. Renders the combined Look +
-// Account view that the page hosted before /edit/* shipped. New code paths
-// drive users into /edit/look or /edit/account instead, but the URL stays
-// alive so existing bookmarks and AccountMenu memorisation don't 404.
+// /settings — legacy URL. Now redirects to /edit/look so old bookmarks,
+// magic-link callbacks, and Stripe portal returns keep working without
+// rendering the old combined view.
 export default function SettingsPage() {
-  return <SettingsContent mode="full" showHeader />
+  redirect('/edit/look')
 }

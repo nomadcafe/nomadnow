@@ -46,7 +46,7 @@ export async function POST() {
     const baseUrl = getBaseUrl()
     const session = await getStripe().billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${baseUrl}/settings`,
+      return_url: `${baseUrl}/edit/account`,
     })
     return NextResponse.json({ url: session.url })
   } catch (error) {
