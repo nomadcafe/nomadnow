@@ -324,6 +324,14 @@
       "urlPlaceholder": "mailto:you@example.com or https://cal.com/you",
       "urlHint": "Email (mailto:…), phone (tel:…), or any https:// link."
     },
+    "blurbs": {
+      "title": "Blurbs",
+      "description": "Short label/value pairs shown next to your bio — Now reading, Booking, Rate, Tools, anything that gives a flavour of how you work.",
+      "labelPlaceholder": "Now reading",
+      "valuePlaceholder": "The Creative Act",
+      "add": "+ Add blurb",
+      "remove": "Remove blurb"
+    },
     "visitedCountries": "Countries you've been to",
     "visitedCountriesHint": "Plotted on the map on your card. Add the rest later if you don't remember them all now.",
     "submit": "Claim my card",
@@ -333,6 +341,7 @@
     "errorHandle": "Please pick an available handle",
     "errorName": "Name is required",
     "errorTooManyLinks": "Maximum {cap} links per card",
+    "errorTooManyBlurbs": "Maximum {cap} blurbs per card",
     "errorGeneric": "Failed to create nomad card"
   },
   "settings": {

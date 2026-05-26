@@ -324,6 +324,14 @@
       "urlPlaceholder": "mailto:you@example.com または https://cal.com/you",
       "urlHint": "メール(mailto:…)、電話(tel:…)、または https:// で始まるリンクを指定できます。"
     },
+    "blurbs": {
+      "title": "ブラーブ",
+      "description": "ラベル/内容のペアを並べる小さなセクション — Now reading・Booking・Rate・Tools など、仕事の雰囲気が伝わる任意の項目を。",
+      "labelPlaceholder": "今読んでいる",
+      "valuePlaceholder": "The Creative Act",
+      "add": "+ 追加",
+      "remove": "削除"
+    },
     "visitedCountries": "訪れた国",
     "visitedCountriesHint": "カードの地図に表示されます。すべて思い出せない場合は、後から追加できます。",
     "submit": "カードを確保",
@@ -333,6 +341,7 @@
     "errorHandle": "利用可能なハンドルを選んでください",
     "errorName": "名前は必須です",
     "errorTooManyLinks": "1 枚のカードにつき最大 {cap} リンクまで",
+    "errorTooManyBlurbs": "1 枚のカードにつき最大 {cap} ブラーブまで",
     "errorGeneric": "カードを作成できませんでした"
   },
   "settings": {

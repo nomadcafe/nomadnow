@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { StayDraft } from '@/components/StaysEditor'
-import { LINK_CAP, type NomadLinkDraft } from './form-constants'
+import { BLURB_CAP, LINK_CAP, type BlurbDraft, type NomadLinkDraft } from './form-constants'
 import type { FormData, FormInitial } from './useFormDraft'
 
 interface UseSubmitCardArgs {
@@ -13,6 +13,7 @@ interface UseSubmitCardArgs {
   visitedCountries: string[]
   links: NomadLinkDraft[]
   stays: StayDraft[]
+  blurbs: BlurbDraft[]
   // Returns true iff the handle is in a submit-eligible state. Computed
   // outside the hook because useHandleCheck owns that status.
   isHandleAvailable: boolean
@@ -40,6 +41,7 @@ export function useSubmitCard({
   visitedCountries,
   links,
   stays,
+  blurbs,
   isHandleAvailable,
   clearDraft,
   showError,
@@ -122,6 +124,31 @@ export function useSubmitCard({
         if (!linksResponse.ok) {
           const linksData = await linksResponse.json().catch(() => ({}))
           throw new Error(linksData.error || t('errorGeneric'))
+        }
+      }
+
+      // Blurbs sync: replace-all in both modes. Skip in create mode when
+      // there's nothing to insert (matches the stays branch below).
+      const validBlurbs = blurbs.filter((b) => b.label.trim() && b.value.trim())
+      if (validBlurbs.length > BLURB_CAP) {
+        showError(t('errorTooManyBlurbs', { cap: BLURB_CAP }))
+        setLoading(false)
+        return
+      }
+      if (isEdit || validBlurbs.length > 0) {
+        const blurbsResponse = await fetch('/api/blurbs', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            blurbs: validBlurbs.map((b) => ({
+              label: b.label.trim(),
+              value: b.value.trim(),
+            })),
+          }),
+        })
+        if (!blurbsResponse.ok) {
+          const blurbsData = await blurbsResponse.json().catch(() => ({}))
+          throw new Error(blurbsData.error || t('errorGeneric'))
         }
       }
 

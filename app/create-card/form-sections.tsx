@@ -4,9 +4,11 @@ import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import {
+  BLURB_CAP,
   LINK_CAP,
   LINK_TYPE_SLUGS,
   WORK_STATUS_PRESETS,
+  type BlurbDraft,
   type HandleStatus,
   type NomadLinkDraft,
 } from './form-constants'
@@ -244,6 +246,84 @@ export function LinksField({
             className="text-sm text-gray-600 hover:text-gray-900 font-medium transition"
           >
             {t('addLink')}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Repeating list of label/value pairs that render as the "blurbs" section
+// on the public card (Now reading / Booking / Rate / Tools / etc).
+// Same add/remove/update shape as LinksField; capped at BLURB_CAP so the
+// editorial-side section can't drown the card.
+export function BlurbsField({
+  blurbs,
+  onChange,
+}: {
+  blurbs: BlurbDraft[]
+  onChange: (next: BlurbDraft[]) => void
+}) {
+  const t = useTranslations('createCard.blurbs')
+
+  const updateRow = (index: number, field: keyof BlurbDraft, value: string) => {
+    const next = [...blurbs]
+    next[index] = { ...next[index], [field]: value }
+    onChange(next)
+  }
+  const addRow = () => {
+    if (blurbs.length < BLURB_CAP) {
+      onChange([...blurbs, { label: '', value: '' }])
+    }
+  }
+  const removeRow = (index: number) => {
+    onChange(blurbs.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-900 mb-1.5">
+        {t('title')}
+      </label>
+      <p className="mb-3 text-xs text-gray-500">{t('description')}</p>
+      <div className="space-y-2">
+        {blurbs.map((blurb, index) => (
+          <div key={index} className="flex gap-2">
+            <input
+              type="text"
+              maxLength={30}
+              placeholder={t('labelPlaceholder')}
+              value={blurb.label}
+              onChange={(e) => updateRow(index, 'label', e.target.value)}
+              className="w-1/3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900"
+            />
+            <input
+              type="text"
+              maxLength={120}
+              placeholder={t('valuePlaceholder')}
+              value={blurb.value}
+              onChange={(e) => updateRow(index, 'value', e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900"
+            />
+            <button
+              type="button"
+              onClick={() => removeRow(index)}
+              className="px-2 py-2 text-gray-400 hover:text-red-600 transition"
+              aria-label={t('remove')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        ))}
+        {blurbs.length < BLURB_CAP && (
+          <button
+            type="button"
+            onClick={addRow}
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium transition"
+          >
+            {t('add')}
           </button>
         )}
       </div>

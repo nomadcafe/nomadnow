@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
-import type { User, NomadLink, NomadStay } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
 import { getCountryFlag } from '@/lib/countries'
 import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
@@ -25,6 +25,7 @@ interface NomadCardProps {
   user: User
   links: NomadLink[]
   stays?: NomadStay[]
+  blurbs?: NomadBlurb[]
   themeKey?: ThemeKey | string | null
   // Corner-radius preset for link buttons — see lib/themes.ts. Orthogonal
   // to theme color so any theme works with any shape.
@@ -73,6 +74,7 @@ export function NomadCard({
   isOwner = false,
   embedded = false,
   stays = [],
+  blurbs = [],
 }: NomadCardProps) {
   const t = useTranslations('card')
   const tStays = useTranslations('stays')
@@ -110,6 +112,7 @@ export function NomadCard({
     user,
     links,
     stays,
+    blurbs,
     theme,
     shape,
     t,

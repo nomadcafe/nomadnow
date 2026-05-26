@@ -17,6 +17,7 @@ export const NOMAD_SECTIONS: SectionDef[] = [
   { id: 'name', label: 'Name & role', description: 'Display name and what you do', required: true },
   { id: 'location', label: 'Currently in', description: 'City + live local time' },
   { id: 'bio', label: 'Bio', description: 'One-line introduction' },
+  { id: 'blurbs', label: 'Blurbs', description: 'Label/value pairs — Now reading, Booking, Rate, Tools…' },
   { id: 'stays', label: 'Stays', description: 'City-level travel with day counts' },
   { id: 'stats', label: 'Stats', description: 'Countries visited + member since' },
   { id: 'map', label: 'World map', description: 'Visited countries plotted as constellation' },

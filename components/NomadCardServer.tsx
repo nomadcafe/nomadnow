@@ -1,6 +1,6 @@
 import React from 'react'
 import { getTranslations, getLocale } from 'next-intl/server'
-import type { User, NomadLink, NomadStay } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
 import { getCountryFlag } from '@/lib/countries'
 import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
@@ -23,6 +23,7 @@ interface NomadCardServerProps {
   user: User
   links: NomadLink[]
   stays?: NomadStay[]
+  blurbs?: NomadBlurb[]
   themeKey?: ThemeKey | string | null
   buttonShape?: string | null
   backgroundMode?: string | null
@@ -52,6 +53,7 @@ export async function NomadCardServer({
   user,
   links,
   stays = [],
+  blurbs = [],
   themeKey,
   buttonShape,
   backgroundMode,
@@ -89,6 +91,7 @@ export async function NomadCardServer({
     user,
     links,
     stays,
+    blurbs,
     theme,
     shape,
     t,

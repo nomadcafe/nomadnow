@@ -1,7 +1,7 @@
 'use client'
 
 import { NomadCard } from './NomadCard'
-import type { User, NomadLink, NomadStay } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
 
 // Live preview wrapper for /create-card. Takes the in-progress form values,
 // synthesises a User + NomadLink set, and feeds them to NomadCard in embedded
@@ -39,6 +39,11 @@ export interface PreviewStay {
   lat?: number | null
   lon?: number | null
   photo_urls?: string[]
+}
+
+export interface PreviewBlurb {
+  label: string
+  value: string
 }
 
 export interface PreviewLink {
@@ -82,6 +87,12 @@ const SAMPLE_LINKS: PreviewLink[] = [
   { type: 'website', url: 'https://kenji.example' },
 ]
 const SAMPLE_VISITED = ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'MX', 'ES', 'GE', 'RS']
+const SAMPLE_BLURBS: PreviewBlurb[] = [
+  { label: 'Now reading', value: 'The Creative Act — Rick Rubin' },
+  { label: 'Booking', value: 'Q2 2026 onwards' },
+  { label: 'Tools', value: 'Figma · Linear · Notion' },
+  { label: 'Coffee', value: '☕️☕️☕️' },
+]
 const SAMPLE_STAYS: PreviewStay[] = [
   { city: 'Bangkok', country: 'TH', start_date: dateNDaysAgo(14), end_date: '', notes: '' },
   { city: 'Lisbon', country: 'PT', start_date: dateNDaysAgo(60), end_date: dateNDaysAgo(28), notes: '' },
@@ -102,12 +113,14 @@ export function LiveCardPreview({
   form,
   links,
   stays,
+  blurbs,
   visitedCountries,
   themeKey,
 }: {
   form: PreviewFormState
   links: PreviewLink[]
   stays: PreviewStay[]
+  blurbs?: PreviewBlurb[]
   visitedCountries: string[]
   themeKey?: string | null
 }) {
@@ -115,6 +128,7 @@ export function LiveCardPreview({
   const effectiveForm = empty ? SAMPLE_FORM : form
   const effectiveLinks = empty ? SAMPLE_LINKS : links
   const effectiveStays = empty ? SAMPLE_STAYS : stays
+  const effectiveBlurbs = empty ? SAMPLE_BLURBS : (blurbs ?? [])
   const effectiveCountries = empty ? SAMPLE_VISITED : visitedCountries
 
   const user: User = {
@@ -148,6 +162,18 @@ export function LiveCardPreview({
       updated_at: NOW_ISO,
     }))
 
+  const cardBlurbs: NomadBlurb[] = effectiveBlurbs
+    .filter((b) => b.label.trim() && b.value.trim())
+    .map((b, i) => ({
+      id: `preview-blurb-${i}`,
+      user_id: 'preview',
+      label: b.label,
+      value: b.value,
+      order_index: i,
+      created_at: NOW_ISO,
+      updated_at: NOW_ISO,
+    }))
+
   const cardStays: NomadStay[] = effectiveStays
     .filter((s) => s.city.trim() && s.country && s.start_date)
     .map((s, i) => ({
@@ -170,6 +196,7 @@ export function LiveCardPreview({
       user={user}
       links={cardLinks}
       stays={cardStays}
+      blurbs={cardBlurbs}
       themeKey={themeKey}
       embedded
     />

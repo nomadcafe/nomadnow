@@ -5,6 +5,7 @@ import type { StayDraft } from '@/components/StaysEditor'
 import {
   DRAFT_STORAGE_KEY,
   detectBrowserTimezone,
+  type BlurbDraft,
   type NomadLinkDraft,
 } from './form-constants'
 
@@ -39,6 +40,7 @@ export interface FormInitial {
   visited_countries: string[]
   links: NomadLinkDraft[]
   stays: StayDraft[]
+  blurbs: BlurbDraft[]
   hire_cta_label: string
   hire_cta_url: string
 }
@@ -52,6 +54,8 @@ interface UseFormDraftResult {
   setLinks: React.Dispatch<React.SetStateAction<NomadLinkDraft[]>>
   stays: StayDraft[]
   setStays: React.Dispatch<React.SetStateAction<StayDraft[]>>
+  blurbs: BlurbDraft[]
+  setBlurbs: React.Dispatch<React.SetStateAction<BlurbDraft[]>>
   // True if the saved localStorage draft contained any optional-section
   // data — the caller uses this to auto-expand the "Customize more" panel
   // so users don't lose visibility into in-progress work.
@@ -110,6 +114,7 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
   )
   const [links, setLinks] = useState<NomadLinkDraft[]>(initial?.links ?? draft?.links ?? [])
   const [stays, setStays] = useState<StayDraft[]>(initial?.stays ?? draft?.stays ?? [])
+  const [blurbs, setBlurbs] = useState<BlurbDraft[]>(initial?.blurbs ?? draft?.blurbs ?? [])
 
   // One-shot post-mount work: handle URL prefill and timezone seeding. Runs
   // once because the array is empty — the ref-style guard against re-runs
@@ -141,12 +146,12 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
   useEffect(() => {
     if (isEdit || typeof window === 'undefined') return
     try {
-      const payload = { ...formData, visitedCountries, links, stays }
+      const payload = { ...formData, visitedCountries, links, stays, blurbs }
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload))
     } catch {
       // Ignore storage errors (quota, private mode, etc.)
     }
-  }, [formData, visitedCountries, links, stays, isEdit])
+  }, [formData, visitedCountries, links, stays, blurbs, isEdit])
 
   const clearDraft = () => {
     if (typeof window === 'undefined') return
@@ -175,6 +180,8 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
     setLinks,
     stays,
     setStays,
+    blurbs,
+    setBlurbs,
     draftHasOptionalData,
     clearDraft,
   }

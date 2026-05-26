@@ -85,6 +85,19 @@ export interface NomadStay {
   updated_at: string
 }
 
+// Label/value pair shown as editorial side-data on the public card.
+// Cap on count (~8) enforced at the API layer; lengths enforced at both
+// DB CHECK constraints and Zod.
+export interface NomadBlurb {
+  id: string
+  user_id: string
+  label: string // <= 30 chars
+  value: string // <= 120 chars
+  order_index: number
+  created_at: string
+  updated_at: string
+}
+
 export interface NomadLink {
   id: string
   user_id: string

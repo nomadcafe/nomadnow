@@ -176,6 +176,21 @@ CREATE TABLE IF NOT EXISTS nomad_stays (
 CREATE INDEX idx_nomad_stays_user_id ON nomad_stays(user_id);
 CREATE INDEX idx_nomad_stays_user_start ON nomad_stays(user_id, start_date DESC);
 
+-- Label/value pairs (added in migration 0017). Editorial side-data next
+-- to the bio: "Now reading", "Booking", "Rate", "Tools", etc. Cap at ~8
+-- enforced at the API layer.
+CREATE TABLE IF NOT EXISTS nomad_blurbs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label TEXT NOT NULL CHECK (length(label) > 0 AND length(label) <= 30),
+  value TEXT NOT NULL CHECK (length(value) > 0 AND length(value) <= 120),
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_nomad_blurbs_user_id ON nomad_blurbs(user_id);
+
 -- Enable Row Level Security (RLS) - public read, owner-only write via auth.uid()
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
@@ -186,6 +201,7 @@ ALTER TABLE social_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE social_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_stays ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nomad_blurbs ENABLE ROW LEVEL SECURITY;
 
 -- Ownership model:
 --   users.id MUST equal auth.uid() at insert time. Enforced by RLS, not FK,
@@ -266,4 +282,10 @@ CREATE POLICY "nomad_stays_select_public" ON nomad_stays FOR SELECT USING (true)
 CREATE POLICY "nomad_stays_insert_self" ON nomad_stays FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "nomad_stays_update_self" ON nomad_stays FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "nomad_stays_delete_self" ON nomad_stays FOR DELETE USING (auth.uid() = user_id);
+
+-- nomad_blurbs
+CREATE POLICY "nomad_blurbs_select_public" ON nomad_blurbs FOR SELECT USING (true);
+CREATE POLICY "nomad_blurbs_insert_self" ON nomad_blurbs FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_blurbs_update_self" ON nomad_blurbs FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "nomad_blurbs_delete_self" ON nomad_blurbs FOR DELETE USING (auth.uid() = user_id);
 

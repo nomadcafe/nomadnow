@@ -14,6 +14,7 @@ import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ROLES, TIMEZONE_LIST } from './form-constants'
 import {
+  BlurbsField,
   CompletionMeter,
   HandleField,
   LinksField,
@@ -43,6 +44,8 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     setLinks,
     stays,
     setStays,
+    blurbs,
+    setBlurbs,
     draftHasOptionalData,
     clearDraft,
   } = useFormDraft(initial ?? null)
@@ -63,6 +66,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
     visitedCountries,
     links,
     stays,
+    blurbs,
     isHandleAvailable: handleStatus === 'available',
     clearDraft,
     showError,
@@ -75,6 +79,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
   const deferredFormData = useDeferredValue(formData)
   const deferredLinks = useDeferredValue(links)
   const deferredStays = useDeferredValue(stays)
+  const deferredBlurbs = useDeferredValue(blurbs)
   const deferredVisitedCountries = useDeferredValue(visitedCountries)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -314,6 +319,8 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                         <p className="mt-1.5 text-xs text-gray-500">{t('hireCta.urlHint')}</p>
                       </div>
 
+                      <BlurbsField blurbs={blurbs} onChange={setBlurbs} />
+
                       <LinksField links={links} onChange={setLinks} />
 
                       {/* Stays — city-level travel with day counts. Lives
@@ -393,6 +400,7 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                     form={deferredFormData}
                     links={deferredLinks}
                     stays={deferredStays}
+                    blurbs={deferredBlurbs}
                     visitedCountries={deferredVisitedCountries}
                     themeKey="classic"
                   />

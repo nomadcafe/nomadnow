@@ -26,12 +26,13 @@ import {
   reconcileSectionOrder,
   type SectionDef,
 } from '@/lib/sections'
-import type { User, NomadLink, NomadStay } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
 
 interface ProfileData {
   user: User
   links: NomadLink[]
   stays: NomadStay[]
+  blurbs: NomadBlurb[]
 }
 
 interface ProfileSettings {
@@ -203,6 +204,7 @@ export default function SettingsPage() {
           user: data.user as User,
           links: (data.nomadLinks ?? []) as NomadLink[],
           stays: (data.nomadStays ?? []) as NomadStay[],
+          blurbs: (data.nomadBlurbs ?? []) as NomadBlurb[],
         })
       })
       .catch(() => {
@@ -890,6 +892,7 @@ export default function SettingsPage() {
                     user={previewData.user}
                     links={previewData.links}
                     stays={previewData.stays}
+                    blurbs={previewData.blurbs}
                     themeKey={deferredSettings.theme_color}
                     buttonShape={deferredSettings.button_shape}
                     backgroundMode={deferredSettings.background_mode}
