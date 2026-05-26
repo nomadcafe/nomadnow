@@ -59,6 +59,18 @@ export interface ThemeOg {
   fontFamily?: string
 }
 
+// Background decoration variant rendered inside the card via
+// components/nomad-card/ThemeDecoration.tsx. Drives the per-theme "feel"
+// (gradient band / grid / halo / leaf / paper grain). 'none' = no overlay.
+export type ThemeDecoration =
+  | 'none'
+  | 'midnight-glow'
+  | 'sunset-band'
+  | 'mono-grid'
+  | 'vivid-halo'
+  | 'forest-leaves'
+  | 'cream-paper'
+
 export interface Theme {
   key: ThemeKey
   label: string
@@ -76,6 +88,18 @@ export interface Theme {
   linkArrow: string
   divider: string
   font: string
+
+  // ─── Typography per theme. Empty string falls through to the section
+  // renderer's default, so themes that want neutral baseline (Classic /
+  // Midnight) don't have to fill these in. ────────────────────────────
+  // Override for the user's display_name <h1>. Set the full class string;
+  // section renderer uses theme.nameClass || <default> so empty means default.
+  nameClass: string
+  // Appended (not replaced) to the role text class. Used to add things like
+  // italic / uppercase / tracking that should sit on top of the muted color.
+  roleClass: string
+  // Background decoration rendered inside the card. See ThemeDecoration.
+  decoration: ThemeDecoration
 
   blurb: string
 
@@ -99,6 +123,9 @@ export const THEMES: Record<ThemeKey, Theme> = {
     linkArrow: 'text-gray-400 group-hover:text-gray-600',
     divider: 'border-gray-100',
     font: '',
+    nameClass: '',
+    roleClass: '',
+    decoration: 'none',
     blurb: 'Clean, neutral, the default.',
     og: {
       bg: 'white',
@@ -126,6 +153,9 @@ export const THEMES: Record<ThemeKey, Theme> = {
     linkArrow: 'text-gray-500 group-hover:text-gray-300',
     divider: 'border-gray-800',
     font: '',
+    nameClass: '',
+    roleClass: '',
+    decoration: 'midnight-glow',
     blurb: 'Deep dark with neon accent.',
     og: {
       bg: 'linear-gradient(135deg, #030712 0%, #111827 100%)',
@@ -153,6 +183,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     linkArrow: 'text-stone-400 group-hover:text-stone-600',
     divider: 'border-orange-100',
     font: 'font-serif',
+    // Magazine vibe: bigger serif headline, lighter weight, italic role.
+    nameClass: 'text-3xl sm:text-4xl md:text-5xl font-serif font-light tracking-tight mb-1 sm:mb-2',
+    roleClass: 'italic font-serif',
+    decoration: 'sunset-band',
     blurb: 'Warm gradient, serif type, travel-mag feel.',
     og: {
       bg: 'linear-gradient(135deg, #fff7ed 0%, #fce7f3 50%, #fef3c7 100%)',
@@ -181,6 +215,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     linkArrow: 'text-black',
     divider: 'border-black',
     font: 'font-mono',
+    // Brutalist: all-caps mono name, mono uppercase role with wide tracking.
+    nameClass: 'text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight uppercase mb-1 sm:mb-2',
+    roleClass: 'font-mono uppercase tracking-widest text-xs sm:text-sm',
+    decoration: 'mono-grid',
     blurb: 'Brutalist mono with hard edges.',
     og: {
       bg: 'white',
@@ -209,6 +247,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     linkArrow: 'text-white/60 group-hover:text-white/90',
     divider: 'border-white/20',
     font: '',
+    // Y2K display: oversized tight-tracked name, small uppercase role.
+    nameClass: 'text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter leading-none mb-1 sm:mb-2',
+    roleClass: 'uppercase tracking-wide text-sm sm:text-base',
+    decoration: 'vivid-halo',
     blurb: 'Bold gradient with glass card.',
     og: {
       bg: 'linear-gradient(135deg, #d946ef 0%, #a855f7 50%, #7c3aed 100%)',
@@ -236,6 +278,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     linkArrow: 'text-emerald-500 group-hover:text-emerald-300',
     divider: 'border-emerald-800/60',
     font: '',
+    // Slow / grounded: serif headline at default size, italic serif role.
+    nameClass: 'text-2xl sm:text-3xl md:text-4xl font-serif font-medium tracking-tight mb-1 sm:mb-2',
+    roleClass: 'italic font-serif',
+    decoration: 'forest-leaves',
     blurb: 'Deep green, slow & grounded.',
     og: {
       bg: 'linear-gradient(135deg, #022c22 0%, #064e3b 100%)',
@@ -263,6 +309,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     linkArrow: 'text-amber-700 group-hover:text-amber-900',
     divider: 'border-amber-200',
     font: 'font-serif',
+    // Notebook: smaller serif name (less assertive than Sunset), italic role.
+    nameClass: 'text-2xl sm:text-3xl md:text-4xl font-serif font-normal tracking-normal mb-1 sm:mb-2',
+    roleClass: 'italic font-serif text-sm sm:text-base',
+    decoration: 'cream-paper',
     blurb: 'Soft paper-and-coffee feel.',
     og: {
       bg: '#fffbeb',

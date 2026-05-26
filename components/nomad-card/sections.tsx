@@ -284,11 +284,20 @@ export function createSectionRenderers(
     ),
     name: () => (
       <div key="name" className="text-center mb-3 sm:mb-4">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-1 sm:mb-2">
+        <h1
+          className={
+            theme.nameClass ||
+            'text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-1 sm:mb-2'
+          }
+        >
           {user.display_name || user.handle}
         </h1>
         {user.role && (
-          <p className={`text-base sm:text-lg font-medium ${theme.textMuted}`}>{localisedRole(user.role)}</p>
+          <p
+            className={`text-base sm:text-lg font-medium ${theme.textMuted} ${theme.roleClass}`}
+          >
+            {localisedRole(user.role)}
+          </p>
         )}
       </div>
     ),
