@@ -1,5 +1,5 @@
 import React from 'react'
-import type { User, NomadLink, NomadStay } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
 import type { Theme, ButtonShapeClasses } from '@/lib/themes'
 import { getCountryFlag, getCountryName } from '@/lib/countries'
 import { stayDayCount, computeTravelStats, formatTimeOnTheRoad } from '@/lib/stays'
@@ -210,6 +210,7 @@ export interface SectionContext {
   user: User
   links: NomadLink[]
   stays: NomadStay[]
+  blurbs: NomadBlurb[]
   theme: Theme
   shape: ButtonShapeClasses
   t: Translator
@@ -238,6 +239,7 @@ export function createSectionRenderers(
     user,
     links,
     stays,
+    blurbs,
     theme,
     shape,
     t,
@@ -333,6 +335,29 @@ export function createSectionRenderers(
             {closeMark}
           </span>
         </div>
+      )
+    },
+    blurbs: () => {
+      if (!blurbs || blurbs.length === 0) return null
+      // Two-column grid on wider cards, single on narrow. Label is small
+      // uppercase muted, value is regular text — pairs read like editorial
+      // metadata next to the bio (Now reading / Booking / Rate / Tools).
+      return (
+        <dl
+          key="blurbs"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 my-6"
+        >
+          {blurbs.map((blurb) => (
+            <div key={blurb.id} className="min-w-0">
+              <dt
+                className={`text-[10px] uppercase tracking-wider mb-0.5 ${theme.textMuted}`}
+              >
+                {blurb.label}
+              </dt>
+              <dd className="text-sm leading-snug break-words">{blurb.value}</dd>
+            </div>
+          ))}
+        </dl>
       )
     },
     stays: () => {

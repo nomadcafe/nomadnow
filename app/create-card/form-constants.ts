@@ -37,6 +37,17 @@ export interface NomadLinkDraft {
   url: string
 }
 
+// Label/value pair edited in the form. Mirrors the server-side schema in
+// /api/blurbs (label <=30, value <=120) and the DB CHECK constraints in
+// migration 0017. Up to BLURB_CAP rows kept the card from drowning in
+// trivia — same shape as LINK_CAP for the links list.
+export interface BlurbDraft {
+  label: string
+  value: string
+}
+
+export const BLURB_CAP = 8
+
 // Roles persist as their English label (canonical DB value). Translation
 // happens at display time via the `roles.*` namespace.
 export const ROLES = [

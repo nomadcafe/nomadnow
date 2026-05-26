@@ -2,7 +2,7 @@ import { cache } from 'react'
 import { createServerSupabase } from './supabase/server'
 import { handleSchema } from './validation'
 import { logError } from './errors'
-import type { User, ProfileSettings, NomadLink, NomadStay } from '@/types/database'
+import type { User, ProfileSettings, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
 
 // Single source of truth for the public-profile read. Used by:
 //   - app/[handle]/page.tsx (server component + generateMetadata)
@@ -23,6 +23,7 @@ export interface PublicProfile {
   settings: ProfileSettings | undefined
   nomadLinks: NomadLink[]
   nomadStays: NomadStay[]
+  nomadBlurbs: NomadBlurb[]
 }
 
 export const getProfileByHandle = cache(
@@ -52,7 +53,7 @@ export const getProfileByHandle = cache(
     }
     if (!user) return null
 
-    const [settingsResult, linksResult, staysResult] = await Promise.all([
+    const [settingsResult, linksResult, staysResult, blurbsResult] = await Promise.all([
       supabase.from('profile_settings').select('*').eq('user_id', user.id).maybeSingle(),
       supabase
         .from('nomad_links')
@@ -64,6 +65,11 @@ export const getProfileByHandle = cache(
         .select('*')
         .eq('user_id', user.id)
         .order('start_date', { ascending: false }),
+      supabase
+        .from('nomad_blurbs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('order_index', { ascending: true }),
     ])
 
     return {
@@ -71,6 +77,7 @@ export const getProfileByHandle = cache(
       settings: (settingsResult.data ?? undefined) as ProfileSettings | undefined,
       nomadLinks: (linksResult.data ?? []) as NomadLink[],
       nomadStays: (staysResult.data ?? []) as NomadStay[],
+      nomadBlurbs: (blurbsResult.data ?? []) as NomadBlurb[],
     }
   },
 )

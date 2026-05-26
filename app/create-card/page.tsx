@@ -22,7 +22,7 @@ export default async function CreateCardPage() {
 
   // Pull existing profile + links + stays in parallel. All queries hit
   // RLS-public tables so no admin client needed.
-  const [{ data: profile }, { data: links }, { data: stays }] = await Promise.all([
+  const [{ data: profile }, { data: links }, { data: stays }, { data: blurbs }] = await Promise.all([
     supabase.from('users').select(SAFE_USER_COLUMNS).eq('id', user.id).maybeSingle(),
     supabase.from('nomad_links').select('*').eq('user_id', user.id).order('order_index'),
     supabase
@@ -30,6 +30,11 @@ export default async function CreateCardPage() {
       .select('*')
       .eq('user_id', user.id)
       .order('start_date', { ascending: false }),
+    supabase
+      .from('nomad_blurbs')
+      .select('label, value')
+      .eq('user_id', user.id)
+      .order('order_index', { ascending: true }),
   ])
 
   const initial: InitialCardData | null = profile
@@ -49,6 +54,10 @@ export default async function CreateCardPage() {
           type: l.type as InitialCardData['links'][number]['type'],
           label: (l.label as string | null) ?? '',
           url: l.url as string,
+        })),
+        blurbs: (blurbs ?? []).map((b) => ({
+          label: (b.label as string) ?? '',
+          value: (b.value as string) ?? '',
         })),
         stays: (stays ?? []).map((s) => ({
           city: (s.city as string) ?? '',

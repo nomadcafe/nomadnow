@@ -324,6 +324,14 @@
       "urlPlaceholder": "mailto:you@example.com 或 https://cal.com/you",
       "urlHint": "可填邮箱(mailto:…)、电话(tel:…)或任意 https:// 链接。"
     },
+    "blurbs": {
+      "title": "随身小卡片",
+      "description": "在简介旁边放几对 标签/内容,用来传达你的工作状态 —— 现在在读、接单时段、报价、用啥工具,什么都行。",
+      "labelPlaceholder": "现在在读",
+      "valuePlaceholder": "The Creative Act",
+      "add": "+ 添加一条",
+      "remove": "删除"
+    },
     "visitedCountries": "你去过的国家",
     "visitedCountriesHint": "会画在卡片地图上。一次想不起来全部没关系,以后随时可加。",
     "submit": "占下我的卡片",
@@ -333,6 +341,7 @@
     "errorHandle": "请选一个可用的 handle",
     "errorName": "姓名必填",
     "errorTooManyLinks": "每张卡片最多 {cap} 条链接",
+    "errorTooManyBlurbs": "每张卡片最多 {cap} 条小卡片",
     "errorGeneric": "创建卡片失败"
   },
   "settings": {
