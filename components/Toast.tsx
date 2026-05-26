@@ -76,7 +76,12 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   if (toasts.length === 0) return null
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    // z-[60] (not z-50) so toasts always sit above sticky nav bars — those
+    // are also z-50, and DOM order decides the tie. The ToastContainer is
+    // typically rendered before the nav (at the top of a page's JSX), so on
+    // equal z-index the nav wins and a toast popping in around `top-4`
+    // disappears behind the nav's ~64px tall header.
+    <div className="fixed top-4 right-4 z-[60] flex flex-col gap-2">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
