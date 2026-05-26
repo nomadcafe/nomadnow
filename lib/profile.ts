@@ -2,7 +2,14 @@ import { cache } from 'react'
 import { createServerSupabase } from './supabase/server'
 import { handleSchema } from './validation'
 import { logError } from './errors'
-import type { User, ProfileSettings, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
+import type {
+  User,
+  ProfileSettings,
+  NomadLink,
+  NomadStay,
+  NomadBlurb,
+  NomadFeaturedWork,
+} from '@/types/database'
 
 // Single source of truth for the public-profile read. Used by:
 //   - app/[handle]/page.tsx (server component + generateMetadata)
@@ -24,6 +31,7 @@ export interface PublicProfile {
   nomadLinks: NomadLink[]
   nomadStays: NomadStay[]
   nomadBlurbs: NomadBlurb[]
+  nomadFeaturedWorks: NomadFeaturedWork[]
 }
 
 export const getProfileByHandle = cache(
@@ -53,24 +61,30 @@ export const getProfileByHandle = cache(
     }
     if (!user) return null
 
-    const [settingsResult, linksResult, staysResult, blurbsResult] = await Promise.all([
-      supabase.from('profile_settings').select('*').eq('user_id', user.id).maybeSingle(),
-      supabase
-        .from('nomad_links')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('order_index', { ascending: true }),
-      supabase
-        .from('nomad_stays')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('start_date', { ascending: false }),
-      supabase
-        .from('nomad_blurbs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('order_index', { ascending: true }),
-    ])
+    const [settingsResult, linksResult, staysResult, blurbsResult, featuredWorksResult] =
+      await Promise.all([
+        supabase.from('profile_settings').select('*').eq('user_id', user.id).maybeSingle(),
+        supabase
+          .from('nomad_links')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('order_index', { ascending: true }),
+        supabase
+          .from('nomad_stays')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('start_date', { ascending: false }),
+        supabase
+          .from('nomad_blurbs')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('order_index', { ascending: true }),
+        supabase
+          .from('nomad_featured_works')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('order_index', { ascending: true }),
+      ])
 
     return {
       user: user as unknown as User,
@@ -78,6 +92,7 @@ export const getProfileByHandle = cache(
       nomadLinks: (linksResult.data ?? []) as NomadLink[],
       nomadStays: (staysResult.data ?? []) as NomadStay[],
       nomadBlurbs: (blurbsResult.data ?? []) as NomadBlurb[],
+      nomadFeaturedWorks: (featuredWorksResult.data ?? []) as NomadFeaturedWork[],
     }
   },
 )

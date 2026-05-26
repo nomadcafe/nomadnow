@@ -332,6 +332,15 @@
       "add": "+ Add blurb",
       "remove": "Remove blurb"
     },
+    "featuredWork": {
+      "title": "Featured work",
+      "description": "Up to 6 clickable project tiles — case studies, portfolio pieces, recent client work. Each tile shows a title, optional one-line description, and links out.",
+      "titlePlaceholder": "Stripe checkout redesign",
+      "urlPlaceholder": "https://your-case-study.com",
+      "descPlaceholder": "One-line description (optional) — what you did and the outcome.",
+      "add": "+ Add work",
+      "remove": "Remove work"
+    },
     "visitedCountries": "Countries you've been to",
     "visitedCountriesHint": "Plotted on the map on your card. Add the rest later if you don't remember them all now.",
     "submit": "Claim my card",
@@ -342,6 +351,7 @@
     "errorName": "Name is required",
     "errorTooManyLinks": "Maximum {cap} links per card",
     "errorTooManyBlurbs": "Maximum {cap} blurbs per card",
+    "errorTooManyFeaturedWorks": "Maximum {cap} featured works per card",
     "errorGeneric": "Failed to create nomad card"
   },
   "settings": {
@@ -495,6 +505,9 @@
       "freelancing": "Freelancing",
       "busy": "Busy",
       "fulltime": "Full-time"
+    },
+    "featuredWork": {
+      "sectionTitle": "Featured work"
     },
     "linkTypes": {
       "website": "Website",

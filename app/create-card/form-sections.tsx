@@ -5,10 +5,12 @@ import { useTranslations } from 'next-intl'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import {
   BLURB_CAP,
+  FEATURED_WORK_CAP,
   LINK_CAP,
   LINK_TYPE_SLUGS,
   WORK_STATUS_PRESETS,
   type BlurbDraft,
+  type FeaturedWorkDraft,
   type HandleStatus,
   type NomadLinkDraft,
 } from './form-constants'
@@ -318,6 +320,98 @@ export function BlurbsField({
           </div>
         ))}
         {blurbs.length < BLURB_CAP && (
+          <button
+            type="button"
+            onClick={addRow}
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium transition"
+          >
+            {t('add')}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Repeating list of project tiles (title + url + optional description) that
+// render as the "Featured Work" section on the public card — case studies
+// and portfolio pieces for the freelancer wedge. Same add/remove/update
+// shape as BlurbsField; capped at FEATURED_WORK_CAP (6, matches GitHub
+// Pinned).
+export function FeaturedWorksField({
+  works,
+  onChange,
+}: {
+  works: FeaturedWorkDraft[]
+  onChange: (next: FeaturedWorkDraft[]) => void
+}) {
+  const t = useTranslations('createCard.featuredWork')
+
+  const updateRow = (index: number, field: keyof FeaturedWorkDraft, value: string) => {
+    const next = [...works]
+    next[index] = { ...next[index], [field]: value }
+    onChange(next)
+  }
+  const addRow = () => {
+    if (works.length < FEATURED_WORK_CAP) {
+      onChange([...works, { title: '', url: '', description: '' }])
+    }
+  }
+  const removeRow = (index: number) => {
+    onChange(works.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-900 mb-1.5">
+        {t('title')}
+      </label>
+      <p className="mb-3 text-xs text-gray-500">{t('description')}</p>
+      <div className="space-y-3">
+        {works.map((work, index) => (
+          <div
+            key={index}
+            className="border border-gray-200 rounded-xl p-3 space-y-2 bg-gray-50/40"
+          >
+            <div className="flex gap-2">
+              <input
+                type="text"
+                maxLength={80}
+                placeholder={t('titlePlaceholder')}
+                value={work.title}
+                onChange={(e) => updateRow(index, 'title', e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 bg-white"
+              />
+              <button
+                type="button"
+                onClick={() => removeRow(index)}
+                className="px-2 py-2 text-gray-400 hover:text-red-600 transition"
+                aria-label={t('remove')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <input
+              type="url"
+              maxLength={2048}
+              placeholder={t('urlPlaceholder')}
+              value={work.url}
+              onChange={(e) => updateRow(index, 'url', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 bg-white font-mono text-sm"
+            />
+            <input
+              type="text"
+              maxLength={140}
+              placeholder={t('descPlaceholder')}
+              value={work.description}
+              onChange={(e) => updateRow(index, 'description', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 bg-white"
+            />
+          </div>
+        ))}
+        {works.length < FEATURED_WORK_CAP && (
           <button
             type="button"
             onClick={addRow}

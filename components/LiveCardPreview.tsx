@@ -1,7 +1,7 @@
 'use client'
 
 import { NomadCard } from './NomadCard'
-import type { User, NomadLink, NomadStay, NomadBlurb } from '@/types/database'
+import type { User, NomadLink, NomadStay, NomadBlurb, NomadFeaturedWork } from '@/types/database'
 
 // Live preview wrapper for /create-card. Takes the in-progress form values,
 // synthesises a User + NomadLink set, and feeds them to NomadCard in embedded
@@ -44,6 +44,12 @@ export interface PreviewStay {
 export interface PreviewBlurb {
   label: string
   value: string
+}
+
+export interface PreviewFeaturedWork {
+  title: string
+  url: string
+  description: string
 }
 
 export interface PreviewLink {
@@ -93,6 +99,18 @@ const SAMPLE_BLURBS: PreviewBlurb[] = [
   { label: 'Tools', value: 'Figma · Linear · Notion' },
   { label: 'Coffee', value: '☕️☕️☕️' },
 ]
+const SAMPLE_FEATURED_WORKS: PreviewFeaturedWork[] = [
+  {
+    title: 'Stripe checkout redesign',
+    url: 'https://kenji.example/work/stripe-checkout',
+    description: 'Led the visual + interaction overhaul shipped to 1.2M merchants.',
+  },
+  {
+    title: 'Linear → Notion data sync',
+    url: 'https://kenji.example/work/linear-notion-sync',
+    description: 'Open-source TS library bridging Linear cycles and Notion databases.',
+  },
+]
 const SAMPLE_STAYS: PreviewStay[] = [
   { city: 'Bangkok', country: 'TH', start_date: dateNDaysAgo(14), end_date: '', notes: '' },
   { city: 'Lisbon', country: 'PT', start_date: dateNDaysAgo(60), end_date: dateNDaysAgo(28), notes: '' },
@@ -114,6 +132,7 @@ export function LiveCardPreview({
   links,
   stays,
   blurbs,
+  featuredWorks,
   visitedCountries,
   themeKey,
 }: {
@@ -121,6 +140,7 @@ export function LiveCardPreview({
   links: PreviewLink[]
   stays: PreviewStay[]
   blurbs?: PreviewBlurb[]
+  featuredWorks?: PreviewFeaturedWork[]
   visitedCountries: string[]
   themeKey?: string | null
 }) {
@@ -129,6 +149,7 @@ export function LiveCardPreview({
   const effectiveLinks = empty ? SAMPLE_LINKS : links
   const effectiveStays = empty ? SAMPLE_STAYS : stays
   const effectiveBlurbs = empty ? SAMPLE_BLURBS : (blurbs ?? [])
+  const effectiveFeaturedWorks = empty ? SAMPLE_FEATURED_WORKS : (featuredWorks ?? [])
   const effectiveCountries = empty ? SAMPLE_VISITED : visitedCountries
 
   const user: User = {
@@ -174,6 +195,19 @@ export function LiveCardPreview({
       updated_at: NOW_ISO,
     }))
 
+  const cardFeaturedWorks: NomadFeaturedWork[] = effectiveFeaturedWorks
+    .filter((w) => w.title.trim() && w.url.trim())
+    .map((w, i) => ({
+      id: `preview-work-${i}`,
+      user_id: 'preview',
+      title: w.title,
+      url: w.url,
+      description: w.description.trim() || null,
+      order_index: i,
+      created_at: NOW_ISO,
+      updated_at: NOW_ISO,
+    }))
+
   const cardStays: NomadStay[] = effectiveStays
     .filter((s) => s.city.trim() && s.country && s.start_date)
     .map((s, i) => ({
@@ -197,6 +231,7 @@ export function LiveCardPreview({
       links={cardLinks}
       stays={cardStays}
       blurbs={cardBlurbs}
+      featuredWorks={cardFeaturedWorks}
       themeKey={themeKey}
       embedded
     />

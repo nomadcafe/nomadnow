@@ -4,7 +4,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { StayDraft } from '@/components/StaysEditor'
-import { BLURB_CAP, LINK_CAP, type BlurbDraft, type NomadLinkDraft } from './form-constants'
+import {
+  BLURB_CAP,
+  FEATURED_WORK_CAP,
+  LINK_CAP,
+  type BlurbDraft,
+  type FeaturedWorkDraft,
+  type NomadLinkDraft,
+} from './form-constants'
 import type { FormData, FormInitial } from './useFormDraft'
 
 interface UseSubmitCardArgs {
@@ -14,6 +21,7 @@ interface UseSubmitCardArgs {
   links: NomadLinkDraft[]
   stays: StayDraft[]
   blurbs: BlurbDraft[]
+  featuredWorks: FeaturedWorkDraft[]
   // Returns true iff the handle is in a submit-eligible state. Computed
   // outside the hook because useHandleCheck owns that status.
   isHandleAvailable: boolean
@@ -42,6 +50,7 @@ export function useSubmitCard({
   links,
   stays,
   blurbs,
+  featuredWorks,
   isHandleAvailable,
   clearDraft,
   showError,
@@ -149,6 +158,35 @@ export function useSubmitCard({
         if (!blurbsResponse.ok) {
           const blurbsData = await blurbsResponse.json().catch(() => ({}))
           throw new Error(blurbsData.error || t('errorGeneric'))
+        }
+      }
+
+      // Featured works sync: replace-all. Filter to rows with both title
+      // and url; description is optional and stays empty-string -> null on
+      // the server. Same skip-when-empty optimisation as blurbs/stays.
+      const validFeaturedWorks = featuredWorks.filter(
+        (w) => w.title.trim() && w.url.trim(),
+      )
+      if (validFeaturedWorks.length > FEATURED_WORK_CAP) {
+        showError(t('errorTooManyFeaturedWorks', { cap: FEATURED_WORK_CAP }))
+        setLoading(false)
+        return
+      }
+      if (isEdit || validFeaturedWorks.length > 0) {
+        const worksResponse = await fetch('/api/featured-works', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            featured_works: validFeaturedWorks.map((w) => ({
+              title: w.title.trim(),
+              url: w.url.trim(),
+              description: w.description.trim() || null,
+            })),
+          }),
+        })
+        if (!worksResponse.ok) {
+          const worksData = await worksResponse.json().catch(() => ({}))
+          throw new Error(worksData.error || t('errorGeneric'))
         }
       }
 

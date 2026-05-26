@@ -6,6 +6,7 @@ import {
   DRAFT_STORAGE_KEY,
   detectBrowserTimezone,
   type BlurbDraft,
+  type FeaturedWorkDraft,
   type NomadLinkDraft,
 } from './form-constants'
 
@@ -41,6 +42,7 @@ export interface FormInitial {
   links: NomadLinkDraft[]
   stays: StayDraft[]
   blurbs: BlurbDraft[]
+  featured_works: FeaturedWorkDraft[]
   hire_cta_label: string
   hire_cta_url: string
 }
@@ -56,6 +58,8 @@ interface UseFormDraftResult {
   setStays: React.Dispatch<React.SetStateAction<StayDraft[]>>
   blurbs: BlurbDraft[]
   setBlurbs: React.Dispatch<React.SetStateAction<BlurbDraft[]>>
+  featuredWorks: FeaturedWorkDraft[]
+  setFeaturedWorks: React.Dispatch<React.SetStateAction<FeaturedWorkDraft[]>>
   // True if the saved localStorage draft contained any optional-section
   // data — the caller uses this to auto-expand the "Customize more" panel
   // so users don't lose visibility into in-progress work.
@@ -115,6 +119,9 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
   const [links, setLinks] = useState<NomadLinkDraft[]>(initial?.links ?? draft?.links ?? [])
   const [stays, setStays] = useState<StayDraft[]>(initial?.stays ?? draft?.stays ?? [])
   const [blurbs, setBlurbs] = useState<BlurbDraft[]>(initial?.blurbs ?? draft?.blurbs ?? [])
+  const [featuredWorks, setFeaturedWorks] = useState<FeaturedWorkDraft[]>(
+    initial?.featured_works ?? draft?.featuredWorks ?? [],
+  )
 
   // One-shot post-mount work: handle URL prefill and timezone seeding. Runs
   // once because the array is empty — the ref-style guard against re-runs
@@ -146,12 +153,12 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
   useEffect(() => {
     if (isEdit || typeof window === 'undefined') return
     try {
-      const payload = { ...formData, visitedCountries, links, stays, blurbs }
+      const payload = { ...formData, visitedCountries, links, stays, blurbs, featuredWorks }
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload))
     } catch {
       // Ignore storage errors (quota, private mode, etc.)
     }
-  }, [formData, visitedCountries, links, stays, blurbs, isEdit])
+  }, [formData, visitedCountries, links, stays, blurbs, featuredWorks, isEdit])
 
   const clearDraft = () => {
     if (typeof window === 'undefined') return
@@ -168,6 +175,7 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
         draft.bio ||
         (draft.visitedCountries?.length ?? 0) > 0 ||
         (draft.links?.length ?? 0) > 0 ||
+        (draft.featuredWorks?.length ?? 0) > 0 ||
         draft.avatar_url),
   )
 
@@ -182,6 +190,8 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
     setStays,
     blurbs,
     setBlurbs,
+    featuredWorks,
+    setFeaturedWorks,
     draftHasOptionalData,
     clearDraft,
   }

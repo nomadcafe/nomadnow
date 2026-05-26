@@ -332,6 +332,15 @@
       "add": "+ 添加一条",
       "remove": "删除"
     },
+    "featuredWork": {
+      "title": "代表作",
+      "description": "最多 6 个可点击的项目卡片 —— 案例、作品集、近期合作。每条包含标题、可选的一行描述,以及外链。",
+      "titlePlaceholder": "Stripe 结账流程改版",
+      "urlPlaceholder": "https://your-case-study.com",
+      "descPlaceholder": "一行说明(可留空) —— 你做了什么、有什么成果。",
+      "add": "+ 添加代表作",
+      "remove": "删除"
+    },
     "visitedCountries": "你去过的国家",
     "visitedCountriesHint": "会画在卡片地图上。一次想不起来全部没关系,以后随时可加。",
     "submit": "占下我的卡片",
@@ -342,6 +351,7 @@
     "errorName": "姓名必填",
     "errorTooManyLinks": "每张卡片最多 {cap} 条链接",
     "errorTooManyBlurbs": "每张卡片最多 {cap} 条小卡片",
+    "errorTooManyFeaturedWorks": "每张卡片最多 {cap} 条代表作",
     "errorGeneric": "创建卡片失败"
   },
   "settings": {
@@ -495,6 +505,9 @@
       "freelancing": "自由职业",
       "busy": "忙碌中",
       "fulltime": "全职"
+    },
+    "featuredWork": {
+      "sectionTitle": "代表作"
     },
     "linkTypes": {
       "website": "网站",

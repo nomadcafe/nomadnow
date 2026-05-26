@@ -108,7 +108,7 @@ export default async function ProfilePage({
     return <ProfileNotFound handle={handle} />
   }
 
-  const { user, settings, nomadLinks, nomadStays, nomadBlurbs } = profileData
+  const { user, settings, nomadLinks, nomadStays, nomadBlurbs, nomadFeaturedWorks } = profileData
 
   // Subscription gate. If the owner canceled and the paid period has elapsed,
   // we hide the card entirely — keeps the paid-only model honest. Active and
@@ -146,6 +146,7 @@ export default async function ProfilePage({
         links={nomadLinks || []}
         stays={nomadStays || []}
         blurbs={nomadBlurbs || []}
+        featuredWorks={nomadFeaturedWorks || []}
         themeKey={settings?.theme_color}
         buttonShape={settings?.button_shape}
         backgroundMode={settings?.background_mode}
