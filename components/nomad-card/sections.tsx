@@ -546,6 +546,41 @@ export function createSectionRenderers(
         </div>
       )
     },
+    hire: () => {
+      const label = user.hire_cta_label?.trim()
+      const url = user.hire_cta_url?.trim()
+      if (!label || !url) return null
+      // Solid accent button. Visually distinct from the bordered link rows
+      // below so visitors read it as the primary conversion path (not just
+      // another social link). Reuses theme.linkHover for consistent feel.
+      return (
+        <div key="hire" className="my-4">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex items-center justify-center gap-2 w-full px-4 sm:px-6 py-3.5 sm:py-4 ${shape.row} font-semibold text-white touch-manipulation transition-all duration-200 ${theme.linkHover}`}
+            style={{ backgroundColor: theme.accentHex }}
+          >
+            <span>{label}</span>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </a>
+        </div>
+      )
+    },
     links: () => {
       if (!links.length) return null
       return (

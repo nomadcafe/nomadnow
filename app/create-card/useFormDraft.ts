@@ -19,6 +19,9 @@ export interface FormData {
   work_status: string
   avatar_url: string
   timezone: string
+  // Hire CTA fields. Empty strings = section hidden on the public card.
+  hire_cta_label: string
+  hire_cta_url: string
 }
 
 // Initial-state snapshot the server hands down in edit mode. In create mode
@@ -36,6 +39,8 @@ export interface FormInitial {
   visited_countries: string[]
   links: NomadLinkDraft[]
   stays: StayDraft[]
+  hire_cta_label: string
+  hire_cta_url: string
 }
 
 interface UseFormDraftResult {
@@ -97,6 +102,8 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
     // mount detection can run; useState initialisers are render-time and
     // calling Intl during SSR would mismatch hydration.
     timezone: initial?.timezone ?? draft?.timezone ?? '',
+    hire_cta_label: initial?.hire_cta_label ?? draft?.hire_cta_label ?? '',
+    hire_cta_url: initial?.hire_cta_url ?? draft?.hire_cta_url ?? '',
   })
   const [visitedCountries, setVisitedCountries] = useState<string[]>(
     initial?.visited_countries ?? draft?.visitedCountries ?? [],

@@ -7,6 +7,14 @@ import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { bumpProfileCache } from '@/lib/revalidate'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
+import { safeLinkUrlSchema } from '@/lib/validation'
+
+// Reused on both create and update — keep them in lockstep so the form can
+// submit the same shape regardless of mode.
+// Label is the button text (e.g. "Hire me", "Book intro call"); url accepts
+// http/https/mailto/tel via the same allow-list as nomad_links.
+const hireCtaLabelSchema = z.string().max(30).nullable().optional().or(z.literal(''))
+const hireCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(''))
 
 const createUserSchema = z.object({
   handle: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Handle can only contain letters, numbers, underscores, and hyphens'),
@@ -25,6 +33,8 @@ const createUserSchema = z.object({
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
+  hire_cta_label: hireCtaLabelSchema,
+  hire_cta_url: hireCtaUrlSchema,
 })
 
 const updateUserSchema = z.object({
@@ -43,6 +53,8 @@ const updateUserSchema = z.object({
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
+  hire_cta_label: hireCtaLabelSchema,
+  hire_cta_url: hireCtaUrlSchema,
 })
 
 export async function POST(request: NextRequest) {

@@ -315,6 +315,15 @@
     "linkUrlPlaceholder": "https://…",
     "linkLabelPlaceholder": "Label",
     "removeLink": "Remove link",
+    "hireCta": {
+      "title": "Hire CTA",
+      "description": "A prominent button visitors can tap to reach you — for booking, intro calls, or hire-me inquiries.",
+      "labelInput": "Button text",
+      "labelPlaceholder": "Hire me",
+      "urlInput": "Where it links",
+      "urlPlaceholder": "mailto:you@example.com or https://cal.com/you",
+      "urlHint": "Email (mailto:…), phone (tel:…), or any https:// link."
+    },
     "visitedCountries": "Countries you've been to",
     "visitedCountriesHint": "Plotted on the map on your card. Add the rest later if you don't remember them all now.",
     "submit": "Claim my card",

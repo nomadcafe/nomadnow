@@ -21,6 +21,8 @@ export const NOMAD_SECTIONS: SectionDef[] = [
   { id: 'stats', label: 'Stats', description: 'Countries visited + member since' },
   { id: 'map', label: 'World map', description: 'Visited countries plotted as constellation' },
   { id: 'status', label: 'Status pills', description: 'Verified badge + work status' },
+  // Solid-accent CTA button. Renders only when both label and URL are set.
+  { id: 'hire', label: 'Hire CTA', description: 'Prominent "Hire me / Book a call" button' },
   { id: 'links', label: 'Links', description: 'External links' },
 ]
 

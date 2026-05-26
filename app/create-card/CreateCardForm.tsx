@@ -281,6 +281,39 @@ export default function CreateCardForm({ initial }: { initial?: InitialCardData 
                         />
                       </div>
 
+                      {/* Hire CTA — solid-accent button on the public card
+                          (distinct from the bordered link rows below).
+                          Both fields blank = section hidden. */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                          {t('hireCta.title')}
+                        </label>
+                        <p className="mb-3 text-xs text-gray-500">{t('hireCta.description')}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            name="hire_cta_label"
+                            value={formData.hire_cta_label}
+                            onChange={handleChange}
+                            maxLength={30}
+                            placeholder={t('hireCta.labelPlaceholder')}
+                            aria-label={t('hireCta.labelInput')}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+                          />
+                          <input
+                            type="text"
+                            name="hire_cta_url"
+                            value={formData.hire_cta_url}
+                            onChange={handleChange}
+                            maxLength={2048}
+                            placeholder={t('hireCta.urlPlaceholder')}
+                            aria-label={t('hireCta.urlInput')}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base font-mono"
+                          />
+                        </div>
+                        <p className="mt-1.5 text-xs text-gray-500">{t('hireCta.urlHint')}</p>
+                      </div>
+
                       <LinksField links={links} onChange={setLinks} />
 
                       {/* Stays — city-level travel with day counts. Lives

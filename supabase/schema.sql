@@ -58,6 +58,10 @@ CREATE TABLE IF NOT EXISTS revenues (
   oneoff_cents INTEGER DEFAULT 0,
   currency CHAR(3) DEFAULT 'USD',
   verified BOOLEAN DEFAULT FALSE,
+  -- Hire-CTA fields drive the prominent "Hire me" / "Book a call" button
+  -- on the public card. NULL = section hidden.
+  hire_cta_label TEXT,
+  hire_cta_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(project_id, month)
