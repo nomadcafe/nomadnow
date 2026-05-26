@@ -113,7 +113,14 @@ export function useSubmitCard({
       })
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error || t('errorGeneric'))
+        // When the server returns Zod-style details, surface the first
+        // offender's path+message so the toast actually tells the user
+        // which field is wrong instead of "Invalid update data".
+        const details = Array.isArray(data?.details) ? data.details : null
+        const first = details?.[0]
+        const fieldPath = Array.isArray(first?.path) ? first.path.join('.') : null
+        const detailMsg = fieldPath && first?.message ? `${fieldPath}: ${first.message}` : null
+        throw new Error(detailMsg || data.error || t('errorGeneric'))
       }
 
       // Links sync: replace-all in both modes. The server PUT atomically
