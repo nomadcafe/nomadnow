@@ -25,6 +25,9 @@ export interface PreviewFormState {
   // carries them through to the section renderer.
   hire_cta_label?: string
   hire_cta_url?: string
+  // Meetup CTA — twin of hire_cta. Both blank hides the section.
+  meetup_cta_label?: string
+  meetup_cta_url?: string
 }
 
 export interface PreviewStay {
@@ -86,6 +89,12 @@ const SAMPLE_FORM: PreviewFormState = {
   avatar_url: '',
   work_status: 'freelancing',
   timezone: 'Asia/Bangkok',
+  // Sample card shows both CTAs paired so new users see how the dual
+  // primary/secondary conversion is meant to read.
+  hire_cta_label: 'Hire me',
+  hire_cta_url: 'mailto:kenji@example.com',
+  meetup_cta_label: 'Grab a coffee in Bangkok',
+  meetup_cta_url: 'https://cal.com/kenji/coffee',
 }
 const SAMPLE_LINKS: PreviewLink[] = [
   { type: 'instagram', url: 'https://instagram.com/kenji' },
@@ -166,6 +175,8 @@ export function LiveCardPreview({
     profile_type: 'nomad',
     hire_cta_label: effectiveForm.hire_cta_label || null,
     hire_cta_url: effectiveForm.hire_cta_url || null,
+    meetup_cta_label: effectiveForm.meetup_cta_label || null,
+    meetup_cta_url: effectiveForm.meetup_cta_url || null,
     created_at: NOW_ISO,
     updated_at: NOW_ISO,
   }

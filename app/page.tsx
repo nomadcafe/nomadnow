@@ -29,6 +29,12 @@ const HERO_USER: User = {
   work_status: 'freelancing',
   visited_countries: previewVisited,
   profile_type: 'nomad',
+  // Demo both CTAs on the home hero so visitors see the dual conversion
+  // shape (primary hire + secondary local meetup) at a glance.
+  hire_cta_label: 'Hire me',
+  hire_cta_url: 'mailto:kenji@example.com',
+  meetup_cta_label: 'Grab a coffee in Bangkok',
+  meetup_cta_url: 'https://cal.com/kenji/coffee',
   created_at: '2024-03-15T00:00:00.000Z',
   updated_at: new Date().toISOString(),
 }

@@ -25,6 +25,9 @@ export const NOMAD_SECTIONS: SectionDef[] = [
   { id: 'stats', label: 'Stats', description: 'Countries visited + member since' },
   { id: 'map', label: 'World map', description: 'Visited countries plotted as constellation' },
   { id: 'status', label: 'Status pills', description: 'Verified badge + work status' },
+  // Secondary outlined CTA — paired with hire below. Renders only when both
+  // label and URL are set. Nomad-side conversion ("Grab a coffee in {city}").
+  { id: 'meetup', label: 'Meetup CTA', description: 'Secondary "Grab a coffee / Say hi" button' },
   // Solid-accent CTA button. Renders only when both label and URL are set.
   { id: 'hire', label: 'Hire CTA', description: 'Prominent "Hire me / Book a call" button' },
   { id: 'links', label: 'Links', description: 'External links' },

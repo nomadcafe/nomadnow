@@ -28,6 +28,11 @@ export interface User {
   // pointing to mailto: / https: / tel: / Calendly etc.
   hire_cta_label?: string | null
   hire_cta_url?: string | null
+  // Meetup CTA — twin of hire_cta but for peer meetups ("Grab a coffee in
+  // {current_city}", "Say hi on Telegram"). Renders as a secondary outlined
+  // button on the card so it reads as paired-but-secondary to Hire CTA.
+  meetup_cta_label?: string | null
+  meetup_cta_url?: string | null
   // Stripe billing — see supabase/migrations/0003_subscriptions.sql
   stripe_customer_id?: string | null
   plan?: 'basic' | 'pro' | null

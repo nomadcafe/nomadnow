@@ -324,6 +324,15 @@
       "urlPlaceholder": "mailto:you@example.com or https://cal.com/you",
       "urlHint": "Email (mailto:…), phone (tel:…), or any https:// link."
     },
+    "meetupCta": {
+      "title": "Meetup CTA",
+      "description": "A secondary button for local meetups — coffee, casual hi, peer chats. Pairs with Hire CTA as the social side of your card.",
+      "labelInput": "Button text",
+      "labelPlaceholder": "Grab a coffee in Bangkok",
+      "urlInput": "Where it links",
+      "urlPlaceholder": "https://cal.com/you/coffee or mailto:…",
+      "urlHint": "Calendar link works best. Email (mailto:…) and Telegram (tg://…) also accepted."
+    },
     "blurbs": {
       "title": "Blurbs",
       "description": "Short label/value pairs shown next to your bio — Now reading, Booking, Rate, Tools, anything that gives a flavour of how you work.",

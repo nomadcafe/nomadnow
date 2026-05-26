@@ -324,6 +324,15 @@
       "urlPlaceholder": "mailto:you@example.com または https://cal.com/you",
       "urlHint": "メール(mailto:…)、電話(tel:…)、または https:// で始まるリンクを指定できます。"
     },
+    "meetupCta": {
+      "title": "Meetup CTA ボタン",
+      "description": "ローカルでの気軽な交流用のサブボタン — コーヒー一杯・雑談・現地ノマドとの顔合わせなど。Hire CTA と並んでカードのもう一つの導線になります。",
+      "labelInput": "ボタンの文言",
+      "labelPlaceholder": "バンコクでコーヒー一杯",
+      "urlInput": "リンク先",
+      "urlPlaceholder": "https://cal.com/you/coffee または mailto:…",
+      "urlHint": "カレンダーリンクが最適。メール(mailto:…)や Telegram(tg://…)も使えます。"
+    },
     "blurbs": {
       "title": "ブラーブ",
       "description": "ラベル/内容のペアを並べる小さなセクション — Now reading・Booking・Rate・Tools など、仕事の雰囲気が伝わる任意の項目を。",
