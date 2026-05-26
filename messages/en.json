@@ -363,6 +363,13 @@
     "errorTooManyFeaturedWorks": "Maximum {cap} featured works per card",
     "errorGeneric": "Failed to create nomad card"
   },
+  "edit": {
+    "tabs": {
+      "content": "Content",
+      "look": "Look",
+      "account": "Account"
+    }
+  },
   "settings": {
     "navView": "View profile",
     "title": "Settings.",

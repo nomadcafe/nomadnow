@@ -363,6 +363,13 @@
     "errorTooManyFeaturedWorks": "每张卡片最多 {cap} 条代表作",
     "errorGeneric": "创建卡片失败"
   },
+  "edit": {
+    "tabs": {
+      "content": "内容",
+      "look": "外观",
+      "account": "账号"
+    }
+  },
   "settings": {
     "navView": "查看主页",
     "title": "设置。",

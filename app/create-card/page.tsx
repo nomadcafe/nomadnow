@@ -20,6 +20,19 @@ export default async function CreateCardPage() {
     redirect('/login?next=/create-card')
   }
 
+  // /create-card is the first-time-creation flow (CompletionMeter,
+  // post-claim paywall redirect, etc.). Existing-card users get sent into
+  // the unified /edit shell — that's where ongoing edits now live. Cheap
+  // peek for a row before the heavy parallel fetch below.
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (existing) {
+    redirect('/edit/content')
+  }
+
   // Pull existing profile + links + stays in parallel. All queries hit
   // RLS-public tables so no admin client needed.
   const [
