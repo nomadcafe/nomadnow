@@ -12,7 +12,16 @@ import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { NomadCard } from '@/components/NomadCard'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
-import { THEMES, THEME_KEYS, BUTTON_SHAPE_KEYS, type ThemeKey, type ButtonShape } from '@/lib/themes'
+import {
+  THEMES,
+  THEME_KEYS,
+  BUTTON_SHAPE_KEYS,
+  DECORATION_KEYS,
+  AVATAR_STYLE_KEYS,
+  BIO_QUOTE_STYLE_KEYS,
+  type ThemeKey,
+  type ButtonShape,
+} from '@/lib/themes'
 import {
   BACKGROUND_MODE_KEYS,
   GRADIENT_PRESETS,
@@ -47,6 +56,10 @@ interface ProfileSettings {
   font_family?: FontKey
   // Hex accent override (#RRGGBB). null = inherit theme preset's accentHex.
   accent_color?: string | null
+  // Per-axis preset unbundling. null on each = inherit chosen theme's value.
+  decoration_override?: string | null
+  avatar_style_override?: string | null
+  bio_quote_style_override?: string | null
   section_order?: string[]
 }
 
@@ -89,6 +102,9 @@ export default function SettingsPage() {
     background_value: null,
     font_family: 'theme',
     accent_color: null,
+    decoration_override: null,
+    avatar_style_override: null,
+    bio_quote_style_override: null,
     section_order: NOMAD_DEFAULT_ORDER,
   }
   const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_SETTINGS)
@@ -176,6 +192,12 @@ export default function SettingsPage() {
             typeof rawAccent === 'string' && /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(rawAccent)
               ? rawAccent
               : null
+          // The three preset-unbundle overrides. Pass through verbatim — the
+          // server-side render's getTheme() validates against the catalog and
+          // drops anything unknown to the theme's baked-in value.
+          const decoration_override = (data.settings.decoration_override as string | null | undefined) ?? null
+          const avatar_style_override = (data.settings.avatar_style_override as string | null | undefined) ?? null
+          const bio_quote_style_override = (data.settings.bio_quote_style_override as string | null | undefined) ?? null
           const loaded: ProfileSettings = {
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
@@ -183,6 +205,9 @@ export default function SettingsPage() {
             background_value: data.settings.background_value ?? null,
             font_family,
             accent_color,
+            decoration_override,
+            avatar_style_override,
+            bio_quote_style_override,
             section_order: order,
           }
           setSettings(loaded)
@@ -563,6 +588,71 @@ export default function SettingsPage() {
                         <span className="font-mono">{themeDefaultAccent}</span>
                       </p>
                     )}
+                  </div>
+                )
+              })()}
+            </Section>
+
+            {/* Theme overrides — mix-and-match across presets. Each axis
+                (decoration / avatar / bio quote) defaults to the preset's
+                baked-in choice when its override is null; setting any axis
+                pins it to the user's pick regardless of which theme is
+                selected. */}
+            <Section
+              title={t('overrides.title')}
+              description={t('overrides.description')}
+            >
+              {(() => {
+                const themePreset = THEMES[settings.theme_color ?? 'classic']
+                const decorationDefault = themePreset.decoration
+                const avatarDefault = themePreset.avatarStyle
+                const bioDefault = themePreset.bioQuoteStyle
+                const decorationOverride = settings.decoration_override ?? null
+                const avatarOverride = settings.avatar_style_override ?? null
+                const bioOverride = settings.bio_quote_style_override ?? null
+                const tDecoration = (key: string) =>
+                  // Maps `mono-grid` → key in the i18n namespace.
+                  t(`overrides.decoration.${key}`)
+                const tAvatar = (key: string) => t(`overrides.avatar.${key}`)
+                const tBio = (key: string) => t(`overrides.bioQuote.${key}`)
+                return (
+                  <div className="space-y-6">
+                    <OverrideRow
+                      label={t('overrides.decorationLabel')}
+                      defaultKey={decorationDefault}
+                      override={decorationOverride}
+                      options={DECORATION_KEYS as readonly string[]}
+                      tLabel={tDecoration}
+                      onSelect={(key) =>
+                        setSettings((prev) => ({ ...prev, decoration_override: key }))
+                      }
+                      resetLabel={t('overrides.useThemeDefault')}
+                      defaultBadgeLabel={t('overrides.themeDefaultBadge')}
+                    />
+                    <OverrideRow
+                      label={t('overrides.avatarLabel')}
+                      defaultKey={avatarDefault}
+                      override={avatarOverride}
+                      options={AVATAR_STYLE_KEYS as readonly string[]}
+                      tLabel={tAvatar}
+                      onSelect={(key) =>
+                        setSettings((prev) => ({ ...prev, avatar_style_override: key }))
+                      }
+                      resetLabel={t('overrides.useThemeDefault')}
+                      defaultBadgeLabel={t('overrides.themeDefaultBadge')}
+                    />
+                    <OverrideRow
+                      label={t('overrides.bioQuoteLabel')}
+                      defaultKey={bioDefault}
+                      override={bioOverride}
+                      options={BIO_QUOTE_STYLE_KEYS as readonly string[]}
+                      tLabel={tBio}
+                      onSelect={(key) =>
+                        setSettings((prev) => ({ ...prev, bio_quote_style_override: key }))
+                      }
+                      resetLabel={t('overrides.useThemeDefault')}
+                      defaultBadgeLabel={t('overrides.themeDefaultBadge')}
+                    />
                   </div>
                 )
               })()}
@@ -960,6 +1050,9 @@ export default function SettingsPage() {
                     backgroundValue={deferredSettings.background_value}
                     fontFamily={deferredSettings.font_family}
                     accentColor={deferredSettings.accent_color}
+                    decorationOverride={deferredSettings.decoration_override}
+                    avatarStyleOverride={deferredSettings.avatar_style_override}
+                    bioQuoteStyleOverride={deferredSettings.bio_quote_style_override}
                     sectionOrder={deferredSettings.section_order}
                     embedded
                   />
@@ -1032,6 +1125,81 @@ export default function SettingsPage() {
         </div>
       </div>
     </>
+  )
+}
+
+// Row used by the theme-override section — a small label, then a segmented
+// strip of options. Active option = explicit override OR (no override AND
+// option equals the theme preset's value for this axis). A small badge marks
+// the preset's default so users see what they're starting from. Clicking
+// "Use theme default" clears the override.
+function OverrideRow({
+  label,
+  defaultKey,
+  override,
+  options,
+  tLabel,
+  onSelect,
+  resetLabel,
+  defaultBadgeLabel,
+}: {
+  label: string
+  defaultKey: string
+  override: string | null
+  options: readonly string[]
+  tLabel: (key: string) => string
+  onSelect: (key: string | null) => void
+  resetLabel: string
+  defaultBadgeLabel: string
+}) {
+  const effective = override ?? defaultKey
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <span className="text-sm font-medium text-gray-900">{label}</span>
+        {override !== null && (
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            className="text-xs text-gray-500 hover:text-gray-900 underline underline-offset-2 transition"
+          >
+            {resetLabel}
+          </button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((key) => {
+          const isActive = effective === key
+          const isDefault = key === defaultKey
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onSelect(key)}
+              className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition ${
+                isActive
+                  ? 'border-gray-900 bg-gray-900 text-white'
+                  : 'border-gray-200 text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <span>{tLabel(key)}</span>
+              {isDefault && (
+                <span
+                  className={`ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide ${
+                    isActive
+                      ? 'bg-white/15 text-white'
+                      : 'bg-gray-100 text-gray-500'
+                  }`}
+                  aria-label={defaultBadgeLabel}
+                >
+                  {defaultBadgeLabel}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

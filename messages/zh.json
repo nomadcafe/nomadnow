@@ -401,6 +401,34 @@
       "useThemeDefault": "用主题默认色",
       "themeDefaultLabel": "主题默认色:"
     },
+    "overrides": {
+      "title": "主题细节",
+      "description": "把小细节跟主题解绑混搭 —— 装饰从一个预设拿、头像风格从另一个预设拿。",
+      "decorationLabel": "装饰",
+      "avatarLabel": "头像风格",
+      "bioQuoteLabel": "简介引号",
+      "useThemeDefault": "用主题默认",
+      "themeDefaultBadge": "默认",
+      "decoration": {
+        "none": "无",
+        "midnight-glow": "Midnight 光晕",
+        "sunset-band": "Sunset 色带",
+        "mono-grid": "Mono 网格",
+        "vivid-halo": "Vivid 光环",
+        "forest-leaves": "Forest 叶片",
+        "cream-paper": "Cream 纸纹"
+      },
+      "avatar": {
+        "soft-ring": "柔光环",
+        "square-mono": "方形冷调",
+        "polaroid": "宝丽来",
+        "big-halo": "大光环"
+      },
+      "bioQuote": {
+        "classic": "曲引号 “ ”",
+        "brackets": "方括号 [ ]"
+      }
+    },
     "buttonShape": {
       "title": "按钮形状",
       "description": "链接按钮的圆角风格。与任意主题兼容。",

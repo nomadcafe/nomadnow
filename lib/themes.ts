@@ -395,19 +395,80 @@ export const THEMES: Record<ThemeKey, Theme> = {
 // survives unchanged.
 const ACCENT_HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
 
+// Catalogs of valid override values for the three discrete theme axes.
+// Re-exported so the /api/settings Zod schema and the /settings UI segmented
+// pickers can share the same source of truth. Keep these in lockstep with
+// the type unions above (ThemeDecoration / ThemeAvatarStyle / etc.) — adding
+// a value in one place but not the other will silently drop overrides.
+export const DECORATION_KEYS = [
+  'none',
+  'midnight-glow',
+  'sunset-band',
+  'mono-grid',
+  'vivid-halo',
+  'forest-leaves',
+  'cream-paper',
+] as const satisfies readonly ThemeDecoration[]
+
+export const AVATAR_STYLE_KEYS = [
+  'soft-ring',
+  'square-mono',
+  'polaroid',
+  'big-halo',
+] as const satisfies readonly ThemeAvatarStyle[]
+
+export const BIO_QUOTE_STYLE_KEYS = [
+  'classic',
+  'brackets',
+] as const satisfies readonly ThemeBioQuoteStyle[]
+
+const DECORATION_SET: ReadonlySet<string> = new Set<string>(DECORATION_KEYS)
+const AVATAR_STYLE_SET: ReadonlySet<string> = new Set<string>(AVATAR_STYLE_KEYS)
+const BIO_QUOTE_STYLE_SET: ReadonlySet<string> = new Set<string>(BIO_QUOTE_STYLE_KEYS)
+
+// Optional per-axis overrides applied on top of a chosen preset. Each null /
+// undefined / unknown value falls through to the preset's baked-in choice.
+// Lets users mix-and-match (e.g. Classic palette + mono-grid decoration +
+// polaroid avatar) without us having to ship every combination as a preset.
+export interface ThemeOverrides {
+  accent?: string | null
+  decoration?: string | null
+  avatarStyle?: string | null
+  bioQuoteStyle?: string | null
+}
+
 export function getTheme(
   key: string | undefined | null,
-  accentOverride?: string | null,
+  overrides?: ThemeOverrides | null,
 ): Theme {
   const base = key && key in THEMES ? THEMES[key as ThemeKey] : THEMES.classic
-  if (!accentOverride) return base
-  if (!ACCENT_HEX.test(accentOverride)) return base
-  // Shallow-clone so we don't mutate the singleton THEMES record (NomadCard
-  // server-renders use the same module instance across requests). Only
-  // accentHex changes; og.* stays the preset's baked colour for now —
-  // overriding the OG image would need separate plumbing through the
-  // satori route.
-  return { ...base, accentHex: accentOverride }
+  if (!overrides) return base
+
+  // Build a single shallow-clone with all valid overrides applied. We
+  // never mutate the singleton THEMES record — server renders reuse the
+  // same module instance across requests, so an in-place edit would leak
+  // one user's overrides to the next visitor.
+  const out: Theme = { ...base }
+  let touched = false
+
+  if (overrides.accent && ACCENT_HEX.test(overrides.accent)) {
+    out.accentHex = overrides.accent
+    touched = true
+  }
+  if (overrides.decoration && DECORATION_SET.has(overrides.decoration)) {
+    out.decoration = overrides.decoration as ThemeDecoration
+    touched = true
+  }
+  if (overrides.avatarStyle && AVATAR_STYLE_SET.has(overrides.avatarStyle)) {
+    out.avatarStyle = overrides.avatarStyle as ThemeAvatarStyle
+    touched = true
+  }
+  if (overrides.bioQuoteStyle && BIO_QUOTE_STYLE_SET.has(overrides.bioQuoteStyle)) {
+    out.bioQuoteStyle = overrides.bioQuoteStyle as ThemeBioQuoteStyle
+    touched = true
+  }
+
+  return touched ? out : base
 }
 
 export const THEME_KEYS = Object.keys(THEMES) as ThemeKey[]
