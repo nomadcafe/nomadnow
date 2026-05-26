@@ -18,12 +18,32 @@ type State =
   | { status: 'signedOut' }
   | { status: 'signedIn'; handle: string | null }
 
-export function AccountMenu({ className = '' }: { className?: string }) {
+// Resolved auth state a server component can pass down so the menu renders
+// the final label on first paint instead of a loading placeholder that pops
+// in after two sequential network calls. Shape matches the runtime State,
+// minus the 'loading' variant (server already knows the answer).
+export type AccountInitial =
+  | { status: 'signedOut' }
+  | { status: 'signedIn'; handle: string | null }
+
+export function AccountMenu({
+  className = '',
+  initial,
+}: {
+  className?: string
+  initial?: AccountInitial
+}) {
   const tNav = useTranslations('nav')
   const router = useRouter()
-  const [state, setState] = useState<State>({ status: 'loading' })
+  const [state, setState] = useState<State>(initial ?? { status: 'loading' })
 
   useEffect(() => {
+    // Server already resolved the auth state and passed it as `initial` —
+    // skip the client-side fetch entirely. Saves two sequential round-trips
+    // (auth.getUser + users.select handle) per page load and removes the
+    // "username appears last" flash.
+    if (initial) return
+
     let mounted = true
     async function load() {
       const supabase = createBrowserSupabase()
@@ -47,7 +67,7 @@ export function AccountMenu({ className = '' }: { className?: string }) {
     return () => {
       mounted = false
     }
-  }, [])
+  }, [initial])
 
   if (state.status === 'loading') {
     // Reserve roughly the same width as the signed-in label to avoid the

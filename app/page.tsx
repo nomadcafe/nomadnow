@@ -7,6 +7,7 @@ import { MarqueeBand } from '@/components/MarqueeBand'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { AccountMenu } from '@/components/AccountMenu'
+import { getAccountInitial } from '@/lib/account'
 import { GetYourCardButton } from '@/components/GetYourCardButton'
 import { NomadCardServer } from '@/components/NomadCardServer'
 import { THEMES, THEME_KEYS } from '@/lib/themes'
@@ -69,10 +70,16 @@ const HERO_LINKS: NomadLink[] = [
 const HERO_SECTIONS = ['avatar', 'name', 'location', 'map', 'links']
 
 export default async function Home() {
-  const t = await getTranslations('home')
-  const tNav = await getTranslations('nav')
-  const tFooter = await getTranslations('footer')
-  const tStatus = await getTranslations('card.workStatus')
+  // Account state resolved server-side so the nav's @handle paints in the
+  // initial HTML instead of popping in after the client AccountMenu finishes
+  // two sequential Supabase calls.
+  const [t, tNav, tFooter, tStatus, accountInitial] = await Promise.all([
+    getTranslations('home'),
+    getTranslations('nav'),
+    getTranslations('footer'),
+    getTranslations('card.workStatus'),
+    getAccountInitial(),
+  ])
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -94,7 +101,7 @@ export default async function Home() {
             >
               {tNav('pricing')}
             </Link>
-            <AccountMenu className="hidden sm:inline-flex" />
+            <AccountMenu className="hidden sm:inline-flex" initial={accountInitial} />
             <LanguageSwitcher className="hidden sm:inline-flex" />
             <GetYourCardButton className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition" />
           </div>

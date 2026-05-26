@@ -8,6 +8,7 @@ import { AccountMenu } from '@/components/AccountMenu'
 import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { getBillingState } from '@/lib/billing'
+import { getAccountInitial } from '@/lib/account'
 import { PricingPlans } from './PricingPlans'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -154,12 +155,17 @@ export default async function PricingPage() {
 
   // Detect whether the viewer is already paying so we can dim the button on
   // their current plan and route the other plan's CTA into the Customer
-  // Portal instead of creating a second Stripe subscription.
+  // Portal instead of creating a second Stripe subscription. Also resolves
+  // the account-menu initial state in the same pass so the nav renders the
+  // user's @handle on first paint.
   const supabase = await createServerSupabase()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const currentPlan = user ? (await getBillingState(user.id)).plan : null
+  const [currentPlan, accountInitial] = await Promise.all([
+    user ? getBillingState(user.id).then((b) => b.plan) : Promise.resolve(null),
+    getAccountInitial(),
+  ])
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -168,7 +174,7 @@ export default async function PricingPage() {
           <Logo />
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Map and Explore hidden until those pages feel populated. */}
-            <AccountMenu className="hidden sm:inline-flex" />
+            <AccountMenu className="hidden sm:inline-flex" initial={accountInitial} />
             <LanguageSwitcher className="hidden sm:inline-flex" />
             <Link
               href="/create-card"
