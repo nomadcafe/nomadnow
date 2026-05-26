@@ -45,6 +45,8 @@ interface ProfileSettings {
     | { from: string; to: string; angle: number }
     | null
   font_family?: FontKey
+  // Hex accent override (#RRGGBB). null = inherit theme preset's accentHex.
+  accent_color?: string | null
   section_order?: string[]
 }
 
@@ -86,6 +88,7 @@ export default function SettingsPage() {
     background_mode: 'theme',
     background_value: null,
     font_family: 'theme',
+    accent_color: null,
     section_order: NOMAD_DEFAULT_ORDER,
   }
   const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_SETTINGS)
@@ -165,12 +168,21 @@ export default function SettingsPage() {
             rawFont && (FONT_KEYS as readonly string[]).includes(rawFont)
               ? (rawFont as FontKey)
               : 'theme'
+          const rawAccent = data.settings.accent_color as string | null | undefined
+          // Same #RGB / #RRGGBB / #RRGGBBAA shape as background_value's hex.
+          // Anything else (legacy junk, partial typing) drops to null so the
+          // theme preset's accent renders unchanged.
+          const accent_color: string | null =
+            typeof rawAccent === 'string' && /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(rawAccent)
+              ? rawAccent
+              : null
           const loaded: ProfileSettings = {
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
             background_mode,
             background_value: data.settings.background_value ?? null,
             font_family,
+            accent_color,
             section_order: order,
           }
           setSettings(loaded)
@@ -505,6 +517,55 @@ export default function SettingsPage() {
                 </a>
                 .
               </p>
+            </Section>
+
+            {/* Accent color — overrides the theme preset's accentHex.
+                Repaints links, both CTAs, brand-chip tints on monochrome
+                platforms, and the map's city dots. NULL = use the preset's
+                default so the picker still shows where you're starting from. */}
+            <Section
+              title={t('accent.title')}
+              description={t('accent.description')}
+            >
+              {(() => {
+                const themePreset = THEMES[settings.theme_color ?? 'classic']
+                const themeDefaultAccent = themePreset.accentHex
+                const override = settings.accent_color ?? null
+                const effectiveAccent = override || themeDefaultAccent
+                return (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <input
+                        type="color"
+                        value={effectiveAccent}
+                        onChange={(e) =>
+                          setSettings((prev) => ({ ...prev, accent_color: e.target.value }))
+                        }
+                        className="w-12 h-12 rounded-lg border border-gray-200 cursor-pointer"
+                        aria-label={t('accent.pickerLabel')}
+                      />
+                      <span className="font-mono text-sm text-gray-700">{effectiveAccent}</span>
+                      {override && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSettings((prev) => ({ ...prev, accent_color: null }))
+                          }
+                          className="text-xs text-gray-500 hover:text-gray-900 underline underline-offset-2 transition"
+                        >
+                          {t('accent.useThemeDefault')}
+                        </button>
+                      )}
+                    </div>
+                    {override && (
+                      <p className="text-xs text-gray-500">
+                        {t('accent.themeDefaultLabel')}{' '}
+                        <span className="font-mono">{themeDefaultAccent}</span>
+                      </p>
+                    )}
+                  </div>
+                )
+              })()}
             </Section>
 
             {/* Background — solid or gradient overrides the theme's
@@ -898,6 +959,7 @@ export default function SettingsPage() {
                     backgroundMode={deferredSettings.background_mode}
                     backgroundValue={deferredSettings.background_value}
                     fontFamily={deferredSettings.font_family}
+                    accentColor={deferredSettings.accent_color}
                     sectionOrder={deferredSettings.section_order}
                     embedded
                   />

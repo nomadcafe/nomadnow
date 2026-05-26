@@ -394,6 +394,13 @@
       "description": "完整的视觉风格 —— 背景、字体、按钮、强调色。",
       "previewHint": "实时预览任意主题: "
     },
+    "accent": {
+      "title": "强调色",
+      "description": "重新着色链接按钮、Hire / Meetup CTA、品牌图标色调、地图上的城市点。可任选颜色,或退回主题默认色。",
+      "pickerLabel": "强调色选择器",
+      "useThemeDefault": "用主题默认色",
+      "themeDefaultLabel": "主题默认色:"
+    },
     "buttonShape": {
       "title": "按钮形状",
       "description": "链接按钮的圆角风格。与任意主题兼容。",

@@ -394,6 +394,13 @@
       "description": "完成された見た目 — 背景、フォント、ボタン、アクセント。",
       "previewHint": "テーマをライブプレビュー: "
     },
+    "accent": {
+      "title": "アクセントカラー",
+      "description": "リンクボタン・Hire / Meetup CTA・ブランドアイコンの色味・地図上の都市ドットを塗り替えます。好きな色を選ぶか、テーマのデフォルトに戻せます。",
+      "pickerLabel": "アクセントカラーピッカー",
+      "useThemeDefault": "テーマのデフォルトに戻す",
+      "themeDefaultLabel": "テーマのデフォルト:"
+    },
     "buttonShape": {
       "title": "ボタンの形",
       "description": "リンク行の角の形。どのテーマとも組み合わせ可能。",

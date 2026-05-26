@@ -152,6 +152,7 @@ export default async function ProfilePage({
         backgroundMode={settings?.background_mode}
         backgroundValue={settings?.background_value}
         fontFamily={settings?.font_family}
+        accentColor={settings?.accent_color}
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
         isOwner={isOwner}

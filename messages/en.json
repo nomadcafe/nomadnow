@@ -394,6 +394,13 @@
       "description": "A complete look — background, type, buttons, accent.",
       "previewHint": "Preview any theme live at "
     },
+    "accent": {
+      "title": "Accent color",
+      "description": "Repaints link buttons, the Hire / Meetup CTAs, brand-icon tints, and the map's city dots. Pick any color or fall back to the theme's default.",
+      "pickerLabel": "Accent color picker",
+      "useThemeDefault": "Use theme default",
+      "themeDefaultLabel": "Theme default:"
+    },
     "buttonShape": {
       "title": "Button shape",
       "description": "Corner style for link rows. Works with any theme.",

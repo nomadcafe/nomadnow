@@ -40,6 +40,8 @@ interface NomadCardProps {
   // Font override key from lib/fonts.ts. Null / 'theme' falls back to
   // the theme's own font class.
   fontFamily?: string | null
+  // Hex accent override applied via getTheme. Null = use theme preset accent.
+  accentColor?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
   // When true, the floating "Make yours →" CTA is suppressed. Use on the
@@ -69,6 +71,7 @@ export function NomadCard({
   backgroundMode,
   backgroundValue,
   fontFamily,
+  accentColor,
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
@@ -86,7 +89,7 @@ export function NomadCard({
   const tLinkTypes = useTranslations('card.linkTypes')
   const locale = useLocale()
 
-  const theme = getTheme(themeKey)
+  const theme = getTheme(themeKey, accentColor)
   const shape = getButtonShape(buttonShape)
   const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
   // Empty string for theme-default; otherwise the next/font className wins
