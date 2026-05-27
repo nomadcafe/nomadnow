@@ -27,6 +27,9 @@ interface Nomad {
   bio?: string | null
   role?: string | null
   current_city?: string | null
+  // ISO α-2 — drives the flag in each summary card's location row.
+  // Matches the public card + /explore summary behavior.
+  country?: string | null
   visited_countries?: string[] | null
 }
 
@@ -38,7 +41,7 @@ async function getNomadsInCountry(code: string): Promise<Nomad[]> {
     const supabase = await createServerSupabase()
     const { data, error } = await supabase
       .from('users')
-      .select('id, handle, display_name, avatar_url, bio, role, current_city, visited_countries')
+      .select('id, handle, display_name, avatar_url, bio, role, current_city, country, visited_countries')
       .contains('visited_countries', [code])
       .order('created_at', { ascending: false })
       .limit(60)
@@ -222,7 +225,12 @@ export default async function InCountryPage({
                   </div>
                 </div>
                 {nomad.current_city && (
-                  <div className="text-sm text-gray-700 mb-2">📍 {nomad.current_city}</div>
+                  <div className="text-sm text-gray-700 mb-2">
+                    <span aria-hidden>
+                      {nomad.country ? getCountryFlag(nomad.country) : '📍'}
+                    </span>{' '}
+                    {nomad.current_city}
+                  </div>
                 )}
                 {nomad.bio && (
                   <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{nomad.bio}</p>

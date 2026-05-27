@@ -17,6 +17,11 @@ interface Nomad {
   bio?: string
   role?: string
   current_city?: string
+  // ISO α-2 derived when the user picked an autocomplete suggestion for
+  // current_city. Drives the flag in the summary card's location row —
+  // matches the public card's behavior. Empty for users who typed their
+  // city manually before the autocomplete upgrade.
+  country?: string
   timezone?: string
   visited_countries?: string[]
   created_at?: string
@@ -196,7 +201,7 @@ function NomadCardSummary({ nomad }: { nomad: Nomad }) {
 
       {nomad.current_city && (
         <div className="text-sm text-gray-700 mb-3 flex items-center gap-1">
-          <span aria-hidden>📍</span>
+          <span aria-hidden>{nomad.country ? getCountryFlag(nomad.country) : '📍'}</span>
           <span className="font-medium">{nomad.current_city}</span>
           {localTime && (
             <span className="text-gray-400 font-mono tabular-nums text-xs">· {localTime}</span>

@@ -24,21 +24,42 @@ async function getNomads(
     const supabase = await createServerSupabase()
     let query = supabase
       .from('users')
-      .select('id, handle, display_name, avatar_url, bio, role, current_city, timezone, visited_countries, created_at', { count: 'exact' })
+      .select(
+        // country added so the summary card can show the actual flag for
+        // the user's current_city (matches the public card's new flag
+        // fallback). visited_countries_count is the generated column from
+        // migration 0025 — drives the "sort by countries" path below.
+        'id, handle, display_name, avatar_url, bio, role, current_city, country, timezone, visited_countries, visited_countries_count, created_at',
+        { count: 'exact' },
+      )
 
     if (filters?.search) {
-      query = query.or(
-        `handle.ilike.%${filters.search}%,display_name.ilike.%${filters.search}%,bio.ilike.%${filters.search}%,current_city.ilike.%${filters.search}%`
-      )
+      // Strip characters that have meaning in PostgREST's `or` filter
+      // grammar — comma separates filters, parens group them, quotes wrap
+      // values. Without this, a search term containing any of these breaks
+      // the filter syntax (the search just silently misbehaves, not a
+      // data-exposure issue since RLS still applies). Also cap length so a
+      // pathological term can't blow up the query.
+      const safe = filters.search.replace(/[,()"\\]/g, '').slice(0, 100)
+      if (safe) {
+        query = query.or(
+          `handle.ilike.%${safe}%,display_name.ilike.%${safe}%,bio.ilike.%${safe}%,current_city.ilike.%${safe}%`,
+        )
+      }
     }
     if (filters?.country) {
       // visited_countries is TEXT[] in Postgres; cs = contains
       query = query.contains('visited_countries', [filters.country])
     }
 
-    // Server-side ordering for keys Postgres can handle. "countries" sort is done
-    // client-side after fetch because the array-length sort needs a computed column.
-    if (filters?.sortBy === 'alpha') {
+    // All three sorts are now DB-level. The "countries" sort previously ran
+    // client-side post-fetch and only re-ordered the current page's 24
+    // rows — meaningless across pages. Migration 0025 added a
+    // generated/indexed visited_countries_count column so we can order the
+    // full result set properly.
+    if (filters?.sortBy === 'countries') {
+      query = query.order('visited_countries_count', { ascending: false, nullsFirst: false })
+    } else if (filters?.sortBy === 'alpha') {
       query = query.order('display_name', { ascending: true, nullsFirst: false })
     } else {
       query = query.order('created_at', { ascending: false })
@@ -51,15 +72,8 @@ async function getNomads(
     const { data, error, count } = await query
     if (error) throw error
 
-    let nomads = data ?? []
-    if (filters?.sortBy === 'countries') {
-      nomads = [...nomads].sort(
-        (a, b) => (b.visited_countries?.length ?? 0) - (a.visited_countries?.length ?? 0)
-      )
-    }
-
     return {
-      nomads,
+      nomads: data ?? [],
       totalPages: Math.ceil((count || 0) / pageSize),
       currentPage: page,
       total: count || 0,
