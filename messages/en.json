@@ -547,6 +547,7 @@
     "startDate": "Started",
     "endDate": "Ended",
     "endDateHint": "(empty = currently here)",
+    "stillHere": "Still here",
     "notesPlaceholder": "Notes (optional)",
     "currentDuration": "{days} days so far",
     "pastDuration": "{days} days",

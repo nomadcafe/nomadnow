@@ -547,6 +547,7 @@
     "startDate": "开始",
     "endDate": "结束",
     "endDateHint": "(空 = 当前还在)",
+    "stillHere": "还在这",
     "notesPlaceholder": "备注(可选)",
     "currentDuration": "已经 {days} 天",
     "pastDuration": "{days} 天",
