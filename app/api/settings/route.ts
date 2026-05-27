@@ -156,7 +156,7 @@ export async function GET() {
           decoration_override: null,
           avatar_style_override: null,
           bio_quote_style_override: null,
-          links_layout: 'rows',
+          links_layout: 'icons',
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
         },
       })

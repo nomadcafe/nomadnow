@@ -102,7 +102,7 @@ export function LookSettingsForm() {
     decoration_override: null,
     avatar_style_override: null,
     bio_quote_style_override: null,
-    links_layout: 'rows',
+    links_layout: 'icons',
     section_order: NOMAD_DEFAULT_ORDER,
   }
   const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_SETTINGS)
@@ -187,7 +187,7 @@ export function LookSettingsForm() {
           const avatar_style_override = (data.settings.avatar_style_override as string | null | undefined) ?? null
           const bio_quote_style_override = (data.settings.bio_quote_style_override as string | null | undefined) ?? null
           const rawLinksLayout = data.settings.links_layout as string | null | undefined
-          const links_layout: 'rows' | 'icons' = rawLinksLayout === 'icons' ? 'icons' : 'rows'
+          const links_layout: 'rows' | 'icons' = rawLinksLayout === 'rows' ? 'rows' : 'icons'
           const loaded: ProfileSettings = {
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
@@ -716,7 +716,7 @@ export function LookSettingsForm() {
             >
               <div className="grid grid-cols-2 gap-2 max-w-md">
                 {(['rows', 'icons'] as const).map((key) => {
-                  const active = (settings.links_layout ?? 'rows') === key
+                  const active = (settings.links_layout ?? 'icons') === key
                   return (
                     <button
                       key={key}

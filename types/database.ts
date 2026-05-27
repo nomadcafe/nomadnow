@@ -87,10 +87,10 @@ export interface ProfileSettings {
   decoration_override?: string | null
   avatar_style_override?: string | null
   bio_quote_style_override?: string | null
-  // 'rows' (default) renders each link as a full-width labelled button.
-  // 'icons' collapses preset-brand links into a centred icon strip; custom
-  // 'other' links and embeddable URLs (YouTube / Spotify iframes) always
-  // stay as full rows so their labels / embeds remain legible.
+  // 'icons' (default) collapses preset-brand links into a centred icon
+  // strip; 'rows' renders each link as a full-width labelled button.
+  // Custom 'other' links and embeddable URLs (YouTube / Spotify iframes)
+  // always stay as full rows so their labels / embeds remain legible.
   links_layout?: 'rows' | 'icons' | null
   created_at: string
   updated_at: string
