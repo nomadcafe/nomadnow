@@ -204,8 +204,13 @@ export const THEMES: Record<ThemeKey, Theme> = {
     key: 'sunset',
     label: 'Sunset',
     accentHex: '#f97316',
-    page: 'bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50',
-    card: 'bg-white/70 backdrop-blur-md border border-orange-100/80 rounded-3xl shadow-lg shadow-orange-200/40',
+    // Vertical sunset palette — amber high sky, pink mid-band, orange
+    // horizon. Earlier version used all -50 shades and read as cream,
+    // not sunset. The card sits at bg-white/70 over the top, so this
+    // page bg still washes to readable behind the content but the
+    // edges and decoration read as a real sunset sky.
+    page: 'bg-gradient-to-b from-amber-200 via-pink-300 to-orange-400',
+    card: 'bg-white/70 backdrop-blur-md border border-orange-100/80 rounded-3xl shadow-lg shadow-orange-300/40',
     text: 'text-stone-900',
     textMuted: 'text-stone-500',
     bioQuote: 'text-stone-700',
@@ -226,7 +231,10 @@ export const THEMES: Record<ThemeKey, Theme> = {
     statValueClass: '',
     blurb: 'Warm gradient, serif type, travel-mag feel.',
     og: {
-      bg: 'linear-gradient(135deg, #fff7ed 0%, #fce7f3 50%, #fef3c7 100%)',
+      // Vertical sunset palette matching the live card's page bg, with
+      // OG-strength saturation so the social preview actually reads as a
+      // sunset (the previous bg was so pale it scanned as cream paper).
+      bg: 'linear-gradient(180deg, #fde68a 0%, #fbcfe8 55%, #fb923c 100%)',
       fg: '#1c1917',
       muted: '#78716c',
       divider: '#fed7aa',

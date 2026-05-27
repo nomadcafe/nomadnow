@@ -30,16 +30,33 @@ export function ThemeDecoration({ variant }: { variant: Variant }) {
       )
 
     case 'sunset-band':
-      // Thin gradient rail at the very top of the card — magazine-issue
-      // "ribbon" feel without taking vertical space from the content.
+      // Two-layer sunset:
+      //   1. A warm radial "sun" lowering at the top-right — the strongest
+      //      sunset signal, sits behind the avatar/name without crowding
+      //      them (off-center horizontally so it reads as a setting sun,
+      //      not a halo around the user's head).
+      //   2. A saturated horizon ribbon at the very bottom — picks up the
+      //      "magazine issue" feel of the original variant without
+      //      relying on it as the sole sunset cue.
+      // The previous variant was just the thin ribbon; combined with a
+      // pastel page bg, the theme read as "cream" rather than "sunset".
       return (
-        <div
-          className="absolute top-0 left-0 right-0 h-1.5 pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(90deg, #fb923c 0%, #f472b6 50%, #fbbf24 100%)',
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute -top-32 -right-20 w-[34rem] h-[34rem] rounded-full opacity-55 blur-3xl"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(251,146,60,0.85) 0%, rgba(244,114,182,0.45) 45%, transparent 72%)',
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 h-2 opacity-80"
+            style={{
+              background:
+                'linear-gradient(90deg, #fb923c 0%, #f472b6 50%, #fbbf24 100%)',
+            }}
+          />
+        </div>
       )
 
     case 'mono-grid':
