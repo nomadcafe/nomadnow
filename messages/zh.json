@@ -158,6 +158,10 @@
       "ogImage": "自动生成分享图(OG)",
       "themes": "主题(7 套预设,可完全自定义)",
       "customization": "按钮形状·背景·字体",
+      "accentCustom": "自定义 HEX 强调色",
+      "handles": "Handle 数量(每账户的公开卡片)",
+      "handlesBasic": "1",
+      "handlesPro": "最多 5",
       "linksLabel": "带品牌图标的链接(11 个平台)",
       "embeds": "YouTube · Spotify · Vimeo 内嵌",
       "verifiedBadge": "认证徽章",
@@ -406,7 +410,9 @@
       "description": "重新着色链接按钮、Hire / Meetup CTA、品牌图标色调、地图上的城市点。可任选颜色,或退回主题默认色。",
       "pickerLabel": "强调色选择器",
       "useThemeDefault": "用主题默认色",
-      "themeDefaultLabel": "主题默认色:"
+      "themeDefaultLabel": "主题默认色:",
+      "proLockHint": "自定义强调色是 Pro 专属功能 —— 你的卡片当前使用主题默认色。",
+      "upgradeCta": "升级到 Pro"
     },
     "overrides": {
       "title": "主题细节",

@@ -12,6 +12,7 @@ import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { NomadCard } from '@/components/NomadCard'
 import { createBrowserSupabase } from '@/lib/supabase/browser'
+import { isPro } from '@/lib/billing'
 import {
   THEMES,
   THEME_KEYS,
@@ -115,6 +116,11 @@ export function LookSettingsForm() {
     () => JSON.stringify(settings) !== savedSerialized,
     [settings, savedSerialized],
   )
+  // The Look tab is auth-gated to the card owner, so previewData.user.plan
+  // is the editor's own plan. Drives both the picker UI (paywall vs picker)
+  // and the live preview's accent rendering (Basic ignores accent_color so
+  // the preview matches what the public card actually renders).
+  const ownerIsPro = isPro(previewData?.user.plan)
   // Dragging the color / angle inputs fires onChange on every pixel of
   // movement, and the embedded NomadCard preview (theme, fonts, WorldMap
   // SVG, etc.) is expensive to re-render. useDeferredValue lets React
@@ -371,7 +377,8 @@ export function LookSettingsForm() {
             {/* Accent color — overrides the theme preset's accentHex.
                 Repaints links, both CTAs, brand-chip tints on monochrome
                 platforms, and the map's city dots. NULL = use the preset's
-                default so the picker still shows where you're starting from. */}
+                default so the picker still shows where you're starting from.
+                Pro-only: Basic sees a paywall card linking to /pricing. */}
             <Section
               title={t('accent.title')}
               description={t('accent.description')}
@@ -381,6 +388,26 @@ export function LookSettingsForm() {
                 const themeDefaultAccent = themePreset.accentHex
                 const override = settings.accent_color ?? null
                 const effectiveAccent = override || themeDefaultAccent
+                if (!ownerIsPro) {
+                  return (
+                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 flex items-center gap-3 flex-wrap">
+                      <span
+                        className="w-8 h-8 rounded-md border border-gray-300 shrink-0"
+                        style={{ background: themeDefaultAccent }}
+                        aria-hidden
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700">{t('accent.proLockHint')}</p>
+                      </div>
+                      <Link
+                        href="/pricing"
+                        className="text-sm font-medium px-4 py-2 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition"
+                      >
+                        {t('accent.upgradeCta')}
+                      </Link>
+                    </div>
+                  )
+                }
                 return (
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 flex-wrap">
@@ -864,7 +891,7 @@ export function LookSettingsForm() {
               <div className="rounded-2xl border border-gray-200 overflow-hidden bg-gray-50">
                 {previewData ? (
                   <NomadCard
-                    user={previewData.user}
+                    user={ownerIsPro ? previewData.user : { ...previewData.user, verified: false }}
                     links={previewData.links}
                     stays={previewData.stays}
                     blurbs={previewData.blurbs}
@@ -873,7 +900,7 @@ export function LookSettingsForm() {
                     backgroundMode={deferredSettings.background_mode}
                     backgroundValue={deferredSettings.background_value}
                     fontFamily={deferredSettings.font_family}
-                    accentColor={deferredSettings.accent_color}
+                    accentColor={ownerIsPro ? deferredSettings.accent_color : null}
                     decorationOverride={deferredSettings.decoration_override}
                     avatarStyleOverride={deferredSettings.avatar_style_override}
                     bioQuoteStyleOverride={deferredSettings.bio_quote_style_override}

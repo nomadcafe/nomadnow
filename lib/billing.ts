@@ -1,6 +1,14 @@
 import { createAdminSupabase } from './supabase/admin'
 import type { Plan } from './stripe/server'
 
+// Pro-tier feature gate. Called at render paths that ship Pro-only output
+// (custom accent, verified badge, …) to decide whether to honor or drop the
+// owner's setting. The check is value-coerced so callers can pass the raw
+// `users.plan` column (string | null | undefined) without pre-narrowing.
+export function isPro(plan: Plan | string | null | undefined): boolean {
+  return plan === 'pro'
+}
+
 // "Active" subscription state: Stripe says the customer is paid up AND the
 // current billing period hasn't ended yet. We accept past_due as a grace
 // state — Stripe retries failed charges for up to a week, and locking users

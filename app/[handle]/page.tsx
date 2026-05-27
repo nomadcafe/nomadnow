@@ -5,7 +5,7 @@ import { ProfileExpired } from '@/components/ProfileExpired'
 import { CelebrationBanner } from '@/components/CelebrationBanner'
 import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
-import { getBillingState } from '@/lib/billing'
+import { getBillingState, isPro } from '@/lib/billing'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { getProfileByHandle } from '@/lib/profile'
 import { buildProfileJsonLd, buildProfileBreadcrumbJsonLd } from '@/lib/seo/profile-jsonld'
@@ -122,6 +122,13 @@ export default async function ProfilePage({
 
   const isOwner = viewerResult.data.user?.id === user.id
 
+  // Pro-tier gates. Owner's saved values stay in the DB; the render path
+  // simply ignores them when the account isn't Pro. Upgrading later instantly
+  // restores the saved accent / badge without the user re-entering anything.
+  const ownerIsPro = isPro(billing.plan)
+  const effectiveUser = ownerIsPro ? user : { ...user, verified: false }
+  const effectiveAccent = ownerIsPro ? settings?.accent_color : null
+
   const jsonLd = buildProfileJsonLd(user, nomadStays || [])
   const breadcrumbJsonLd = buildProfileBreadcrumbJsonLd(user)
 
@@ -142,7 +149,7 @@ export default async function ProfilePage({
       {showCelebration && <CelebrationBanner handle={handle} />}
 
       <NomadCardServer
-        user={user}
+        user={effectiveUser}
         links={nomadLinks || []}
         stays={nomadStays || []}
         blurbs={nomadBlurbs || []}
@@ -152,7 +159,7 @@ export default async function ProfilePage({
         backgroundMode={settings?.background_mode}
         backgroundValue={settings?.background_value}
         fontFamily={settings?.font_family}
-        accentColor={settings?.accent_color}
+        accentColor={effectiveAccent}
         decorationOverride={settings?.decoration_override}
         avatarStyleOverride={settings?.avatar_style_override}
         bioQuoteStyleOverride={settings?.bio_quote_style_override}
