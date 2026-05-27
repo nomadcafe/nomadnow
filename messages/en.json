@@ -87,6 +87,12 @@
       "body": "Pick a preset like freelancing or full-time, or write your own. Visible above the fold, never out of date.",
       "slowTravel": "Slow travel mode"
     },
+    "feature4": {
+      "label": "Get hired",
+      "title": "Land work while you travel.",
+      "body": "A solid \"Hire me\" button and a softer \"Grab a coffee\" pair, right under your name. Most freelancers' link-in-bio is a landing page in disguise — your card just says so out loud.",
+      "caption": "Pair the primary hire path with a peer-meetup CTA. Either, both, or neither."
+    },
     "comparison": {
       "title": "Why not just Linktree?",
       "subtitle": "Because you don't live in one place.",
@@ -96,7 +102,8 @@
       "row3": "Country tracker",
       "row4": "No ads, no transaction fees",
       "row5": "Custom domain",
-      "row6": "Unlimited links"
+      "row6": "Unlimited links",
+      "row7": "Built-in Hire / Meetup CTA"
     },
     "darkCta": {
       "line1": "One link.",

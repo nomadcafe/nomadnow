@@ -60,14 +60,13 @@ const HERO_LINKS: NomadLink[] = [
     updated_at: '',
   },
 ]
-// Keep the hero card compact. Earlier iterations also rendered stats
-// and a third link — together they pushed the card past 700px tall,
-// which buried the hero CTA on shorter viewports. Now: identity
-// (avatar/name/location), the strongest visual hook (the map), and
-// just enough link rows to signal "link in bio" without bloat. Bio,
-// stays, status, and the stat strip stay off the hero — they all
-// get their own treatment in the editorial Feature rows below.
-const HERO_SECTIONS = ['avatar', 'name', 'location', 'map', 'links']
+// Hero card layout — kept compact (stays under 700px to keep the CTA
+// above the fold on shorter viewports) but now surfaces the dual
+// conversion buttons that drive the freelancer wedge. Order matters:
+// identity → location → CTAs (the conversion path the page is pitching)
+// → map (visual hook) → links. Bio, stays, status, and the stat strip
+// stay off the hero; they each get their own editorial Feature row.
+const HERO_SECTIONS = ['avatar', 'name', 'location', 'hire', 'meetup', 'map', 'links']
 
 export default async function Home() {
   // Account state resolved server-side so the nav's @handle paints in the
@@ -300,6 +299,37 @@ export default async function Home() {
               </div>
             }
           />
+
+          {/* Feature 4 — the freelancer wedge. Most product investment
+              recently (hire_cta / meetup_cta / open_to_coffee / blurbs /
+              featured works) is aimed at "nomad freelancer → land
+              client". Without this row, the landing told a generic
+              travel story while the product was tilting toward
+              conversion. Visual uses the real NomadCardServer with only
+              the hire + meetup sections enabled so every visual upgrade
+              to those buttons ships on the homepage automatically — same
+              real-component policy as the hero card preview. */}
+          <FeatureRow
+            label={t('feature4.label')}
+            title={t('feature4.title')}
+            body={t('feature4.body')}
+            reverse
+            visual={
+              <div className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-10 shadow-sm">
+                <NomadCardServer
+                  user={HERO_USER}
+                  links={[]}
+                  themeKey="classic"
+                  enabledSections={['hire', 'meetup']}
+                  sectionOrder={['hire', 'meetup']}
+                  embedded
+                />
+                <p className="mt-4 text-xs text-gray-500 text-center">
+                  {t('feature4.caption')}
+                </p>
+              </div>
+            }
+          />
         </div>
       </section>
 
@@ -322,6 +352,12 @@ export default async function Home() {
               [t('comparison.row1'), false, true],
               [t('comparison.row2'), false, true],
               [t('comparison.row3'), false, true],
+              // Hire CTA differentiator — Linktree has generic "buttons" but
+              // not the role-specific "Hire me" + "Grab a coffee" pair that
+              // turns a profile into a freelancer conversion path. Added so
+              // the comparison reflects the freelancer wedge the product is
+              // actually betting on, not just the travel-map novelty.
+              [t('comparison.row7'), false, true],
               [t('comparison.row4'), false, true],
               [t('comparison.row5'), true, 'soon'],
               [t('comparison.row6'), true, true],

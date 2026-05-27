@@ -87,6 +87,12 @@
       "body": "选个预设(自由职业、全职等),或者自己写一句。永远在卡片首屏可见,永远不会过时。",
       "slowTravel": "慢旅行模式"
     },
+    "feature4": {
+      "label": "接客户",
+      "title": "边旅行边接活。",
+      "body": "名字下面就是一个实心的「Hire me」按钮 + 一个软风格的「约咖啡」按钮。大多数 freelancer 的 link-in-bio 其实就是一个变相的 landing page —— 你的卡片直接把这件事讲透。",
+      "caption": "主导流的 Hire CTA + 偏休闲的 Meetup CTA。可以两个都填、只填一个,也可以都不填。"
+    },
     "comparison": {
       "title": "为什么不直接用 Linktree?",
       "subtitle": "因为你不只住一个地方。",
@@ -96,7 +102,8 @@
       "row3": "国家追踪",
       "row4": "无广告无抽成",
       "row5": "自定义域名",
-      "row6": "无限链接"
+      "row6": "无限链接",
+      "row7": "内置 Hire / Meetup CTA"
     },
     "darkCta": {
       "line1": "一条链接。",
