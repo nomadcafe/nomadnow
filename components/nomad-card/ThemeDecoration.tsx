@@ -90,28 +90,45 @@ export function ThemeDecoration({ variant }: { variant: Variant }) {
       )
 
     case 'forest-leaves':
-      // Two corner leaf silhouettes — quietly nods to the "slow / grounded"
-      // identity without becoming literal. SVG paths use currentColor so
-      // they pick up the emerald palette via inheritance.
+      // Two-layer forest decoration:
+      //   1. Dappled canopy light — a warm mint radial at top-left
+      //      suggesting sunlight piercing through leaves. Compounds with
+      //      the leaf shapes below so the card reads as "in a forest"
+      //      rather than just "dark green card".
+      //   2. Two corner leaf silhouettes, now at emerald-400 / opacity
+      //      0.22 instead of emerald-700 / 0.12. The earlier values
+      //      put mid-green leaves on very-dark-green bg at 12% opacity —
+      //      effectively invisible. Lighter color + higher opacity makes
+      //      the silhouettes actually readable while still subtle enough
+      //      to not compete with the content.
       return (
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none text-emerald-700 opacity-[0.12]"
-        >
-          <svg
-            className="absolute -top-6 -right-6 w-32 h-32"
-            viewBox="0 0 64 64"
-            fill="currentColor"
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute -top-32 -left-20 w-[28rem] h-[28rem] rounded-full opacity-30 blur-3xl"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(110,231,183,0.55) 0%, transparent 70%)',
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 text-emerald-400 opacity-[0.22]"
           >
-            <path d="M32 4C16 8 4 22 4 38c0 14 10 22 22 22 4 0 8-1 12-3-8-2-14-8-16-16 6 2 14 0 20-6 8-8 8-22-10-31z" />
-          </svg>
-          <svg
-            className="absolute -bottom-6 -left-6 w-28 h-28 rotate-180"
-            viewBox="0 0 64 64"
-            fill="currentColor"
-          >
-            <path d="M32 4C16 8 4 22 4 38c0 14 10 22 22 22 4 0 8-1 12-3-8-2-14-8-16-16 6 2 14 0 20-6 8-8 8-22-10-31z" />
-          </svg>
+            <svg
+              className="absolute -top-6 -right-6 w-32 h-32"
+              viewBox="0 0 64 64"
+              fill="currentColor"
+            >
+              <path d="M32 4C16 8 4 22 4 38c0 14 10 22 22 22 4 0 8-1 12-3-8-2-14-8-16-16 6 2 14 0 20-6 8-8 8-22-10-31z" />
+            </svg>
+            <svg
+              className="absolute -bottom-6 -left-6 w-28 h-28 rotate-180"
+              viewBox="0 0 64 64"
+              fill="currentColor"
+            >
+              <path d="M32 4C16 8 4 22 4 38c0 14 10 22 22 22 4 0 8-1 12-3-8-2-14-8-16-16 6 2 14 0 20-6 8-8 8-22-10-31z" />
+            </svg>
+          </div>
         </div>
       )
 
