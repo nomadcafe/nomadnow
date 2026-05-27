@@ -401,10 +401,10 @@
       "noCard": "你还没有创建卡片。",
       "createCard": "去创建"
     },
-    "profile": {
-      "title": "卡片信息",
-      "description": "姓名、Bio、当前城市、链接、访问国家。",
-      "edit": "编辑卡片"
+    "account": {
+      "title": "账户",
+      "description": "登录信息。",
+      "emailLabel": "邮箱"
     },
     "layout": {
       "title": "布局",

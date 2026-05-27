@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { createBrowserSupabase } from '@/lib/supabase/browser'
 
 interface BillingDisplayState {
   plan: 'basic' | 'pro' | null
@@ -13,16 +15,21 @@ interface BillingDisplayState {
   currentPeriodEnd: string | null
 }
 
-// Account tab content — profile link + billing only. No save flow (billing
+// Account tab content — sign-in details + billing. No save flow (billing
 // changes go through the Stripe portal), no preview, no dirty tracking. The
 // look/appearance editor lives in LookSettingsForm; this component never
 // touches /api/settings.
-export function AccountSection() {
+//
+// Email is passed from the server-side wrapper page so the address renders
+// on first paint without a client-side auth round-trip.
+export function AccountSection({ email }: { email: string | null }) {
   const t = useTranslations('settings')
+  const tNav = useTranslations('nav')
   const tCommon = useTranslations('common')
   const tBilling = useTranslations('settings.billing')
   const tBillingStatus = useTranslations('settings.billing.status')
   const locale = useLocale()
+  const router = useRouter()
   const { toasts, showError, removeToast } = useToast()
 
   const [loading, setLoading] = useState(true)
@@ -56,6 +63,16 @@ export function AccountSection() {
       alive = false
     }
   }, [])
+
+  const signOut = async () => {
+    const supabase = createBrowserSupabase()
+    await supabase.auth.signOut()
+    // Send the user back to /login so the post-signout state is unambiguous —
+    // refresh() alone would just leave them staring at /edit/account with no
+    // clear "you're signed out now" signal.
+    router.push('/login')
+    router.refresh()
+  }
 
   const openBillingPortal = async () => {
     setPortalLoading(true)
@@ -100,19 +117,32 @@ export function AccountSection() {
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-12">
         <div className="space-y-10">
+          {/* Account — sign-in metadata + sign-out. Replaces the previous
+              "Edit profile" link section which was just a duplicate of the
+              Content tab nav directly above. */}
           <Section
-            title={t('profile.title')}
-            description={t('profile.description')}
+            title={t('account.title')}
+            description={t('account.description')}
           >
-            <Link
-              href="/edit/content"
-              className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border border-gray-300 hover:border-gray-900 transition"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              {t('profile.edit')}
-            </Link>
+            <div className="rounded-xl border border-gray-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="min-w-0">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    {t('account.emailLabel')}
+                  </div>
+                  <div className="text-sm font-medium text-gray-900 font-mono break-all">
+                    {email ?? '—'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="text-sm font-medium px-4 py-2 rounded-full border border-gray-300 hover:border-gray-900 transition"
+                >
+                  {tNav('signout')}
+                </button>
+              </div>
+            </div>
           </Section>
 
           <Section
