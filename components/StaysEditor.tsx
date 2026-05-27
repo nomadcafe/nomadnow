@@ -29,6 +29,12 @@ export interface StayDraft {
 
 const PHOTO_CAP = 6
 
+// Cap for the <input type="month"> max attribute — prevents picking a
+// future month, which makes no sense for a stay (and falsely inflates
+// the day-count math). Read at module load; close enough across a long
+// session that we don't bother recomputing per-render.
+const TODAY_MONTH = new Date().toISOString().slice(0, 7)
+
 export function emptyStay(): StayDraft {
   return {
     city: '',
@@ -165,29 +171,62 @@ export function StaysEditor({ stays, onChange }: StaysEditorProps) {
               </select>
             </div>
 
+            {/* Month-level granularity is plenty for "I stayed in Lisbon for
+                a while" — the card already aggregates day counts up to
+                weeks / months at render time, so day-precision input was
+                just resume-grade overhead nobody filled. Stored as
+                YYYY-MM-01 in the DB so existing day-precision rows keep
+                rendering unchanged. */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label className="text-xs text-gray-600">
                 <span className="block mb-1">{t('startDate')}</span>
                 <input
-                  type="date"
-                  value={stay.start_date}
-                  onChange={(e) => update(idx, { start_date: e.target.value })}
+                  type="month"
+                  value={stay.start_date.slice(0, 7)}
+                  onChange={(e) =>
+                    update(idx, {
+                      start_date: e.target.value ? `${e.target.value}-01` : '',
+                    })
+                  }
+                  max={TODAY_MONTH}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm"
                 />
               </label>
-              <label className="text-xs text-gray-600">
-                <span className="block mb-1">
-                  {t('endDate')}{' '}
-                  <span className="text-gray-400 font-normal">{t('endDateHint')}</span>
-                </span>
+              <div className="text-xs text-gray-600">
+                <div className="flex items-center justify-between mb-1">
+                  <span>{t('endDate')}</span>
+                  {/* Toggle that flips end_date between "" (currently here)
+                      and the current month. Far less confusing than "leave
+                      blank if still here" — explicit affordance with the
+                      same data shape. */}
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={!stay.end_date}
+                      onChange={(e) =>
+                        update(idx, {
+                          end_date: e.target.checked ? '' : `${TODAY_MONTH}-01`,
+                        })
+                      }
+                      className="w-3 h-3 rounded border-gray-300 text-gray-900 focus:ring-1 focus:ring-gray-900/15"
+                    />
+                    <span>{t('stillHere')}</span>
+                  </label>
+                </div>
                 <input
-                  type="date"
-                  value={stay.end_date}
-                  onChange={(e) => update(idx, { end_date: e.target.value })}
-                  min={stay.start_date || undefined}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm"
+                  type="month"
+                  value={stay.end_date.slice(0, 7)}
+                  onChange={(e) =>
+                    update(idx, {
+                      end_date: e.target.value ? `${e.target.value}-01` : '',
+                    })
+                  }
+                  min={stay.start_date ? stay.start_date.slice(0, 7) : undefined}
+                  max={TODAY_MONTH}
+                  disabled={!stay.end_date}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm ${!stay.end_date ? 'opacity-40 bg-gray-50' : ''}`}
                 />
-              </label>
+              </div>
             </div>
 
             <input
