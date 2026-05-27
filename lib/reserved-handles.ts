@@ -51,6 +51,34 @@ const RESERVED = new Set<string>([
   'link', 'domain',
   // AI-era brand-magnets — both generic categories and OpenAI's `gpt` mark.
   'ai', 'gpt', 'chat',
+
+  // Locale / region codes — i18n is cookie-based today (no /en/foo routing),
+  // but users typing `/en` expect a language switch, not a stranger's card.
+  // Future-proofs against a switch to URL-based locales.
+  'en', 'ja', 'zh', 'cn', 'jp', 'us', 'uk', 'tw', 'hk',
+
+  // Auth synonyms — login/logout are already blocked above; add the common
+  // variants people try.
+  'signup', 'signin', 'signout', 'register', 'oauth', 'sso',
+
+  // Generic action verbs — collide with hypothetical CRUD routes and read
+  // ambiguously in URLs.
+  'new', 'create', 'delete', 'update', 'search',
+
+  // Asset / CDN / upload conventions — names hosting platforms reserve and
+  // users assume are system paths.
+  'cdn', 'static', 'assets', 'public', 'media', 'files', 'upload',
+
+  // Feed / community conventions.
+  'feed', 'news', 'tag', 'tags', 'category', 'community', 'forum',
+
+  // Platform / framework names — defensive against impersonation and
+  // confusion with Next.js / Vercel internals.
+  'vercel', 'next',
+
+  // Null-poisoning / error-string lookalikes — blocking these prevents
+  // handles that read as bugs in logs or string-interpolated URLs.
+  'null', 'undefined', 'true', 'false', 'none', 'nil', 'error', 'notfound', '404',
 ])
 
 export function isReservedHandle(handle: string | undefined | null): boolean {
