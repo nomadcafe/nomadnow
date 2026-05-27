@@ -23,7 +23,7 @@ import type {
 // to any visitor. `plan` is intentionally included so the public card can
 // render Pro-only features.
 const PUBLIC_USER_COLUMNS =
-  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,profile_type,verified,hire_cta_label,hire_cta_url,meetup_cta_label,meetup_cta_url,plan,created_at,updated_at' as const
+  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,nomad_since,profile_type,verified,hire_cta_label,hire_cta_url,meetup_cta_label,meetup_cta_url,open_to_coffee,plan,created_at,updated_at' as const
 
 export interface PublicProfile {
   user: User
