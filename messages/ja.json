@@ -401,10 +401,10 @@
       "noCard": "まだカードを作成していません。",
       "createCard": "作成する"
     },
-    "profile": {
-      "title": "プロフィール情報",
-      "description": "名前、自己紹介、現在地、リンク、訪問国。",
-      "edit": "プロフィールを編集"
+    "account": {
+      "title": "アカウント",
+      "description": "サインイン情報。",
+      "emailLabel": "メール"
     },
     "layout": {
       "title": "レイアウト",

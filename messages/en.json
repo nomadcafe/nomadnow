@@ -401,10 +401,10 @@
       "noCard": "You haven't created your card yet.",
       "createCard": "Create one"
     },
-    "profile": {
-      "title": "Profile info",
-      "description": "Your name, bio, current city, links, visited countries.",
-      "edit": "Edit profile"
+    "account": {
+      "title": "Account",
+      "description": "Your sign-in details.",
+      "emailLabel": "Email"
     },
     "layout": {
       "title": "Layout",
