@@ -25,3 +25,10 @@ ALTER TABLE users
     nomad_since IS NULL
     OR (nomad_since >= DATE '2000-01-01' AND nomad_since <= CURRENT_DATE)
   );
+
+-- Column-level GRANT — migration 0007 swapped users to column-level
+-- grants, so every new column must explicitly grant SELECT to the
+-- end-user roles or PostgREST queries fail (and SELECTs containing
+-- this column return zero rows). See 0014 / 0016 / 0019 for the
+-- same pattern on prior additions.
+GRANT SELECT (nomad_since) ON public.users TO anon, authenticated;
