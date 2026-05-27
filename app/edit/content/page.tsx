@@ -64,6 +64,7 @@ export default async function EditContentPage() {
     hire_cta_url: (profile.hire_cta_url as string | null) ?? '',
     meetup_cta_label: (profile.meetup_cta_label as string | null) ?? '',
     meetup_cta_url: (profile.meetup_cta_url as string | null) ?? '',
+    open_to_coffee: (profile.open_to_coffee as boolean | null) ?? false,
     links: (links ?? []).map((l) => ({
       type: l.type as InitialCardData['links'][number]['type'],
       label: (l.label as string | null) ?? '',

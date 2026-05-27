@@ -106,6 +106,7 @@ export function useSubmitCard({
         hire_cta_url: formData.hire_cta_url.trim() || null,
         meetup_cta_label: formData.meetup_cta_label.trim() || null,
         meetup_cta_url: formData.meetup_cta_url.trim() || null,
+        open_to_coffee: formData.open_to_coffee,
       }
 
       const response = await fetch('/api/users', {

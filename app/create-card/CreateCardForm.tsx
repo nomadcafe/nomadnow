@@ -373,6 +373,35 @@ export default function CreateCardForm({
                         <p className="mt-1.5 text-xs text-gray-500">{t('meetupCta.urlHint')}</p>
                       </div>
 
+                      {/* Open-to-coffee toggle. Soft signal independent of
+                          meetup_cta — a user can be "open to coffee" without
+                          publishing a cal.com / Telegram link. Renders on
+                          the card as a chip in the status row, suppressed
+                          automatically when current_city is empty (a chip
+                          that reads "open to coffee in nowhere" would just
+                          confuse). */}
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="open_to_coffee"
+                          checked={formData.open_to_coffee}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, open_to_coffee: e.target.checked }))
+                          }
+                          className="mt-0.5 w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900/15"
+                        />
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium text-gray-900">
+                            {t('openToCoffee.label')}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {formData.current_city
+                              ? t('openToCoffee.hintWithCity', { city: formData.current_city })
+                              : t('openToCoffee.hintNoCity')}
+                          </div>
+                        </div>
+                      </label>
+
                       <BlurbsField blurbs={blurbs} onChange={setBlurbs} />
 
                       <FeaturedWorksField works={featuredWorks} onChange={setFeaturedWorks} />

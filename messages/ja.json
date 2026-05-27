@@ -337,6 +337,11 @@
       "urlPlaceholder": "https://cal.com/you/coffee または mailto:…",
       "urlHint": "カレンダーリンクが最適。メール(mailto:…)や Telegram(tg://…)も使えます。"
     },
+    "openToCoffee": {
+      "label": "知らない人とのコーヒーも歓迎",
+      "hintWithCity": "カードに「☕️ {city} でコーヒー誘ってOK」と小さく表示されます。やわらかい合図 — リンクや Meetup CTA から声をかけてもらえます。",
+      "hintNoCity": "上で現在の都市を入れると、カードに表示されます。"
+    },
     "blurbs": {
       "title": "ブラーブ",
       "description": "ラベル/内容のペアを並べる小さなセクション — Now reading・Booking・Rate・Tools など、仕事の雰囲気が伝わる任意の項目を。",
@@ -557,6 +562,7 @@
   },
   "card": {
     "verified": "認証済み",
+    "openToCoffee": "{city} でコーヒー誘ってOK",
     "shareTitle": "このカードをシェア",
     "copyLink": "リンクをコピー",
     "copied": "コピーしました!",

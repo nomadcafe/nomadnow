@@ -56,6 +56,7 @@ const createUserSchema = z.object({
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
   nomad_since: nomadSinceSchema,
+  open_to_coffee: z.boolean().optional(),
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
@@ -79,6 +80,7 @@ const updateUserSchema = z.object({
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
   nomad_since: nomadSinceSchema,
+  open_to_coffee: z.boolean().optional(),
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
@@ -117,6 +119,12 @@ export async function POST(request: NextRequest) {
         timezone: validation.data.timezone || null,
         visited_countries: validation.data.visited_countries || null,
         nomad_since: validation.data.nomad_since || null,
+        // Column is NOT NULL with DEFAULT FALSE — omit when not specified
+        // so the DB default wins instead of writing a misleading explicit
+        // false (no-op in effect, but makes intent clearer in audit logs).
+        ...(validation.data.open_to_coffee !== undefined
+          ? { open_to_coffee: validation.data.open_to_coffee }
+          : {}),
         profile_type: validation.data.profile_type || 'creator',
         // CTAs the form may have submitted on first-time create. Previously
         // dropped here (only PUT applied them), forcing users to save the
