@@ -451,71 +451,6 @@ export function LookSettingsForm() {
               })()}
             </Section>
 
-            {/* Theme overrides — mix-and-match across presets. Each axis
-                (decoration / avatar / bio quote) defaults to the preset's
-                baked-in choice when its override is null; setting any axis
-                pins it to the user's pick regardless of which theme is
-                selected. */}
-            <Section
-              title={t('overrides.title')}
-              description={t('overrides.description')}
-            >
-              {(() => {
-                const themePreset = THEMES[settings.theme_color ?? 'classic']
-                const decorationDefault = themePreset.decoration
-                const avatarDefault = themePreset.avatarStyle
-                const bioDefault = themePreset.bioQuoteStyle
-                const decorationOverride = settings.decoration_override ?? null
-                const avatarOverride = settings.avatar_style_override ?? null
-                const bioOverride = settings.bio_quote_style_override ?? null
-                const tDecoration = (key: string) =>
-                  // Maps `mono-grid` → key in the i18n namespace.
-                  t(`overrides.decoration.${key}`)
-                const tAvatar = (key: string) => t(`overrides.avatar.${key}`)
-                const tBio = (key: string) => t(`overrides.bioQuote.${key}`)
-                return (
-                  <div className="space-y-6">
-                    <OverrideRow
-                      label={t('overrides.decorationLabel')}
-                      defaultKey={decorationDefault}
-                      override={decorationOverride}
-                      options={DECORATION_KEYS as readonly string[]}
-                      tLabel={tDecoration}
-                      onSelect={(key) =>
-                        setSettings((prev) => ({ ...prev, decoration_override: key }))
-                      }
-                      resetLabel={t('overrides.useThemeDefault')}
-                      defaultBadgeLabel={t('overrides.themeDefaultBadge')}
-                    />
-                    <OverrideRow
-                      label={t('overrides.avatarLabel')}
-                      defaultKey={avatarDefault}
-                      override={avatarOverride}
-                      options={AVATAR_STYLE_KEYS as readonly string[]}
-                      tLabel={tAvatar}
-                      onSelect={(key) =>
-                        setSettings((prev) => ({ ...prev, avatar_style_override: key }))
-                      }
-                      resetLabel={t('overrides.useThemeDefault')}
-                      defaultBadgeLabel={t('overrides.themeDefaultBadge')}
-                    />
-                    <OverrideRow
-                      label={t('overrides.bioQuoteLabel')}
-                      defaultKey={bioDefault}
-                      override={bioOverride}
-                      options={BIO_QUOTE_STYLE_KEYS as readonly string[]}
-                      tLabel={tBio}
-                      onSelect={(key) =>
-                        setSettings((prev) => ({ ...prev, bio_quote_style_override: key }))
-                      }
-                      resetLabel={t('overrides.useThemeDefault')}
-                      defaultBadgeLabel={t('overrides.themeDefaultBadge')}
-                    />
-                  </div>
-                )
-              })()}
-            </Section>
-
             {/* Background — solid or gradient overrides the theme's
                 outer bg. Six preset gradients give a one-click "looks
                 nice" path; two color inputs let users fine-tune. The
@@ -779,11 +714,13 @@ export function LookSettingsForm() {
               </div>
             </Section>
 
-            {/* Sections — reorder only. Empty sections already auto-hide in
-                NomadCard, so the old show/hide toggle was redundant.
-                Reordering is niche so we tuck it behind a disclosure with
-                a sliders icon + "Advanced" pill to signal "power-user
-                territory; safe to skip". */}
+            {/* Theme overrides — mix-and-match across presets. Each axis
+                (decoration / avatar / bio quote) defaults to the preset's
+                baked-in choice when its override is null. The concept
+                (preset unbundling) is genuinely advanced — casual users
+                don't think in these axes, so we tuck it into a disclosure
+                next to the section reorder to keep the main scroll quiet.
+                Power users who want fine-grained control still find it. */}
             <details className="group">
               <summary className="cursor-pointer list-none flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition">
                 <svg
@@ -795,15 +732,85 @@ export function LookSettingsForm() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
+                {t('overrides.title')}
+                <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wide bg-gray-100 text-gray-500 border border-gray-200">
+                  {t('sections.advancedLabel')}
+                </span>
+              </summary>
+              <p className="mt-2 ml-6 text-xs text-gray-500">{t('overrides.description')}</p>
+              <div className="mt-4">
+                {(() => {
+                  const themePreset = THEMES[settings.theme_color ?? 'classic']
+                  const decorationDefault = themePreset.decoration
+                  const avatarDefault = themePreset.avatarStyle
+                  const bioDefault = themePreset.bioQuoteStyle
+                  const decorationOverride = settings.decoration_override ?? null
+                  const avatarOverride = settings.avatar_style_override ?? null
+                  const bioOverride = settings.bio_quote_style_override ?? null
+                  const tDecoration = (key: string) =>
+                    // Maps `mono-grid` → key in the i18n namespace.
+                    t(`overrides.decoration.${key}`)
+                  const tAvatar = (key: string) => t(`overrides.avatar.${key}`)
+                  const tBio = (key: string) => t(`overrides.bioQuote.${key}`)
+                  return (
+                    <div className="space-y-6">
+                      <OverrideRow
+                        label={t('overrides.decorationLabel')}
+                        defaultKey={decorationDefault}
+                        override={decorationOverride}
+                        options={DECORATION_KEYS as readonly string[]}
+                        tLabel={tDecoration}
+                        onSelect={(key) =>
+                          setSettings((prev) => ({ ...prev, decoration_override: key }))
+                        }
+                        resetLabel={t('overrides.useThemeDefault')}
+                        defaultBadgeLabel={t('overrides.themeDefaultBadge')}
+                      />
+                      <OverrideRow
+                        label={t('overrides.avatarLabel')}
+                        defaultKey={avatarDefault}
+                        override={avatarOverride}
+                        options={AVATAR_STYLE_KEYS as readonly string[]}
+                        tLabel={tAvatar}
+                        onSelect={(key) =>
+                          setSettings((prev) => ({ ...prev, avatar_style_override: key }))
+                        }
+                        resetLabel={t('overrides.useThemeDefault')}
+                        defaultBadgeLabel={t('overrides.themeDefaultBadge')}
+                      />
+                      <OverrideRow
+                        label={t('overrides.bioQuoteLabel')}
+                        defaultKey={bioDefault}
+                        override={bioOverride}
+                        options={BIO_QUOTE_STYLE_KEYS as readonly string[]}
+                        tLabel={tBio}
+                        onSelect={(key) =>
+                          setSettings((prev) => ({ ...prev, bio_quote_style_override: key }))
+                        }
+                        resetLabel={t('overrides.useThemeDefault')}
+                        defaultBadgeLabel={t('overrides.themeDefaultBadge')}
+                      />
+                    </div>
+                  )
+                })()}
+              </div>
+            </details>
+
+            {/* Sections — reorder only. Empty sections already auto-hide in
+                NomadCard, so the old show/hide toggle was redundant.
+                Reordering is niche so we tuck it behind a disclosure with
+                an "Advanced" pill to signal "power-user territory; safe to
+                skip". */}
+            <details className="group">
+              <summary className="cursor-pointer list-none flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition">
                 <svg
-                  className="w-4 h-4 text-gray-500"
+                  className="w-4 h-4 transition group-open:rotate-90 text-gray-400"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth={1.8}
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h12M3 12h7m-7 6h12M17 4v4m0 4v4m0 4v0M21 8h-8m8 8h-8" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
                 {t('sections.title')}
                 <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wide bg-gray-100 text-gray-500 border border-gray-200">
