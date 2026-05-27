@@ -32,6 +32,9 @@ export interface PreviewFormState {
   // Meetup CTA — twin of hire_cta. Both blank hides the section.
   meetup_cta_label?: string
   meetup_cta_url?: string
+  // Soft availability signal — drives the "Open to coffee in {city}"
+  // chip in the status row. False (or missing current_city) hides it.
+  open_to_coffee?: boolean
 }
 
 export interface PreviewStay {
@@ -107,6 +110,9 @@ const SAMPLE_FORM: PreviewFormState = {
   hire_cta_url: 'mailto:kenji@example.com',
   meetup_cta_label: 'Grab a coffee in Bangkok',
   meetup_cta_url: 'https://cal.com/kenji/coffee',
+  // Sample card has it ON so new users see the chip and intuit what the
+  // toggle does without reading the /edit copy.
+  open_to_coffee: true,
 }
 const SAMPLE_LINKS: PreviewLink[] = [
   { type: 'instagram', url: 'https://instagram.com/kenji' },
@@ -193,6 +199,7 @@ export function LiveCardPreview({
     hire_cta_url: effectiveForm.hire_cta_url || null,
     meetup_cta_label: effectiveForm.meetup_cta_label || null,
     meetup_cta_url: effectiveForm.meetup_cta_url || null,
+    open_to_coffee: effectiveForm.open_to_coffee === true,
     created_at: NOW_ISO,
     updated_at: NOW_ISO,
   }

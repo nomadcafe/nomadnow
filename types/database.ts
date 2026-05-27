@@ -39,6 +39,11 @@ export interface User {
   // button on the card so it reads as paired-but-secondary to Hire CTA.
   meetup_cta_label?: string | null
   meetup_cta_url?: string | null
+  // Soft availability signal — when TRUE, the public card shows an
+  // "☕️ Open to coffee in {current_city}" chip in the status row. Hidden
+  // automatically when current_city is empty. Independent from meetup_cta:
+  // this is a stance, meetup_cta is the channel.
+  open_to_coffee?: boolean
   // Stripe billing — see supabase/migrations/0003_subscriptions.sql
   stripe_customer_id?: string | null
   plan?: 'basic' | 'pro' | null

@@ -615,7 +615,13 @@ export function createSectionRenderers(
       const showVerified = user.verified === true
       const showWorkStatus =
         !!user.work_status && !REMOVED_STATUS_KEYS.has(user.work_status)
-      if (!showVerified && !showWorkStatus) return null
+      // Chip suppressed when current_city is empty — "open to coffee in
+      // nowhere" reads as a data bug, not an availability signal.
+      const coffeeCity =
+        user.open_to_coffee === true && user.current_city?.trim()
+          ? user.current_city.trim()
+          : null
+      if (!showVerified && !showWorkStatus && !coffeeCity) return null
       return (
         <div key="status" className="flex items-center justify-center flex-wrap gap-2 mb-8">
           {showVerified && (
@@ -639,6 +645,14 @@ export function createSectionRenderers(
               {(WORK_STATUS_KEYS as readonly string[]).includes(user.work_status!)
                 ? tStatus(user.work_status!)
                 : user.work_status}
+            </span>
+          )}
+          {coffeeCity && (
+            <span
+              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${theme.pillNeutral}`}
+            >
+              <span aria-hidden="true">☕️</span>
+              {t('openToCoffee', { city: coffeeCity })}
             </span>
           )}
         </div>

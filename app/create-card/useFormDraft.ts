@@ -31,6 +31,9 @@ export interface FormData {
   // Meetup CTA fields. Empty strings = section hidden.
   meetup_cta_label: string
   meetup_cta_url: string
+  // Soft availability toggle — "☕️ Open to coffee in {current_city}" chip
+  // on the public card. Hidden automatically when current_city is empty.
+  open_to_coffee: boolean
 }
 
 // Initial-state snapshot the server hands down in edit mode. In create mode
@@ -57,6 +60,7 @@ export interface FormInitial {
   hire_cta_url: string
   meetup_cta_label: string
   meetup_cta_url: string
+  open_to_coffee: boolean
 }
 
 interface UseFormDraftResult {
@@ -127,6 +131,7 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
     hire_cta_url: initial?.hire_cta_url ?? draft?.hire_cta_url ?? '',
     meetup_cta_label: initial?.meetup_cta_label ?? draft?.meetup_cta_label ?? '',
     meetup_cta_url: initial?.meetup_cta_url ?? draft?.meetup_cta_url ?? '',
+    open_to_coffee: initial?.open_to_coffee ?? draft?.open_to_coffee ?? false,
   })
   const [visitedCountries, setVisitedCountries] = useState<string[]>(
     initial?.visited_countries ?? draft?.visitedCountries ?? [],

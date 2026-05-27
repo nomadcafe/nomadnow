@@ -337,6 +337,11 @@
       "urlPlaceholder": "https://cal.com/you/coffee or mailto:…",
       "urlHint": "Calendar link works best. Email (mailto:…) and Telegram (tg://…) also accepted."
     },
+    "openToCoffee": {
+      "label": "I'm open to coffee with strangers",
+      "hintWithCity": "A ☕️ chip on your card will say “Open to coffee in {city}”. Soft signal — visitors can reach out via your links or Meetup CTA.",
+      "hintNoCity": "Add a current city above to make this show on your card."
+    },
     "blurbs": {
       "title": "Blurbs",
       "description": "Short label/value pairs shown next to your bio — Now reading, Booking, Rate, Tools, anything that gives a flavour of how you work.",
@@ -557,6 +562,7 @@
   },
   "card": {
     "verified": "Verified",
+    "openToCoffee": "Open to coffee in {city}",
     "shareTitle": "Share this card",
     "copyLink": "Copy link",
     "copied": "Copied!",

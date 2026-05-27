@@ -337,6 +337,11 @@
       "urlPlaceholder": "https://cal.com/you/coffee 或 mailto:…",
       "urlHint": "日历链接最合适。邮箱(mailto:…)、Telegram(tg://…)也可以。"
     },
+    "openToCoffee": {
+      "label": "欢迎陌生人来约咖啡",
+      "hintWithCity": "卡片上会有一行小字「☕️ 在 {city} 可以约咖啡」。一个软信号 —— 想约的人会通过你的链接或 Meetup CTA 找你。",
+      "hintNoCity": "在上面填一下当前城市,卡片上就会显示。"
+    },
     "blurbs": {
       "title": "随身小卡片",
       "description": "在简介旁边放几对 标签/内容,用来传达你的工作状态 —— 现在在读、接单时段、报价、用啥工具,什么都行。",
@@ -557,6 +562,7 @@
   },
   "card": {
     "verified": "已认证",
+    "openToCoffee": "在 {city} 可以约咖啡",
     "shareTitle": "分享这张卡片",
     "copyLink": "复制链接",
     "copied": "已复制!",
