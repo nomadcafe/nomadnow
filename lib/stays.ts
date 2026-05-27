@@ -33,7 +33,12 @@ export function formatDuration(days: number): { value: number; unit: 'day' | 'we
 export interface TravelStats {
   /** Distinct cities visited (de-duped by city+country). */
   cityCount: number
-  /** Sum of stayDayCount across the supplied stays. */
+  /**
+   * Days on the road. When `nomad_since` is supplied, derived from
+   * today - nomad_since (the user's stated truth). Otherwise falls
+   * back to sum(stay durations) for power users who logged stays
+   * instead of setting nomad_since.
+   */
   totalDays: number
 }
 
@@ -41,6 +46,11 @@ export interface TravelStats {
  * Derives stat-strip numbers from a list of stays. Pass the same
  * "visited" slice the rest of the card uses (current + past, not
  * upcoming) so the strip agrees with the map and the country count.
+ *
+ * `nomadSince` (YYYY-MM-DD) takes priority for the totalDays figure when
+ * present: it's the user-stated "I've been nomading since" date, which
+ * casual users will fill out in 5 seconds vs. logging every individual
+ * stay. Stays-sum fallback keeps power users covered.
  */
 export function computeTravelStats<
   T extends {
@@ -49,14 +59,36 @@ export function computeTravelStats<
     start_date: string
     end_date?: string | null
   },
->(stays: ReadonlyArray<T> | null | undefined): TravelStats {
+>(
+  stays: ReadonlyArray<T> | null | undefined,
+  nomadSince?: string | null,
+): TravelStats {
   const cities = new Set<string>()
-  let totalDays = 0
+  let stayDays = 0
   for (const s of stays ?? []) {
     if (s.city && s.country) cities.add(`${s.city}|${s.country}`)
-    totalDays += stayDayCount(s.start_date, s.end_date ?? null)
+    stayDays += stayDayCount(s.start_date, s.end_date ?? null)
   }
-  return { cityCount: cities.size, totalDays }
+  const sinceDays = nomadDaysSince(nomadSince)
+  return {
+    cityCount: cities.size,
+    totalDays: sinceDays ?? stayDays,
+  }
+}
+
+/**
+ * Days from `nomad_since` to today, or null if the input is missing /
+ * malformed / in the future. Centralised so renderers don't each guard
+ * the bad-input cases.
+ */
+export function nomadDaysSince(nomadSince?: string | null): number | null {
+  if (!nomadSince) return null
+  const startTs = Date.parse(nomadSince)
+  if (Number.isNaN(startTs)) return null
+  const now = Date.now()
+  if (startTs > now) return null
+  // +1 so a same-day start reads as 1 day, matching stayDayCount semantics.
+  return Math.floor((now - startTs) / MS_PER_DAY) + 1
 }
 
 /**

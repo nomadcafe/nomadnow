@@ -265,7 +265,7 @@
         "role": "職種を追加",
         "bio": "一言自己紹介を追加",
         "city": "現在地を追加",
-        "stays": "都市の滞在記録を追加",
+        "nomadSince": "ノマド開始時期を入力",
         "countries": "訪問国をマーク",
         "links": "少なくとも 1 つリンクを追加"
       }
@@ -356,6 +356,8 @@
     },
     "visitedCountries": "訪れた国",
     "visitedCountriesHint": "カードの地図に表示されます。すべて思い出せない場合は、後から追加できます。",
+    "nomadSinceLabel": "ノマド開始",
+    "nomadSinceHint": "月だけ選べばOK — カードの「○年間ノマド」表示に使われます。詳しく記録したい場合は下の滞在記録へ。",
     "submit": "カードを確保",
     "submitting": "確保中…",
     "submitNote": "月額 $1.98 から。いつでも解約可 — 当該期間終了までカードは表示されます。",
@@ -449,6 +451,12 @@
       "rounded": "丸み",
       "square": "四角"
     },
+    "linksLayout": {
+      "title": "リンクの配置",
+      "description": "ラベル付きの横長ボタン、またはコンパクトなアイコン列。カスタムリンクと埋め込みは常に横長のまま。",
+      "rows": "行",
+      "icons": "アイコン"
+    },
     "background": {
       "title": "背景",
       "description": "テーマの背景を単色またはグラデーションで上書き。",
@@ -524,6 +532,8 @@
     "currentLabel": "現在の滞在",
     "editorTitle": "滞在",
     "editorHint": "ノマドした都市。日数は自動計算されます。",
+    "optional": "任意",
+    "collapsedHint": "都市を記録 — 地図にピンを立てたい、または滞在中のコーヒー誘いを受けたい場合のみ。",
     "emptyHint": "まだ滞在がありません — 下から追加してください。",
     "addStay": "+ 滞在を追加",
     "remove": "削除",

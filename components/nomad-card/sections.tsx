@@ -214,6 +214,10 @@ export interface SectionContext {
   featuredWorks: NomadFeaturedWork[]
   theme: Theme
   shape: ButtonShapeClasses
+  // 'icons' renders preset-brand links as a compact icon strip; anything
+  // else (including null/undefined) falls back to the labelled full-row
+  // layout. 'other' links and embeddable URLs always stay full-row.
+  linksLayout: 'rows' | 'icons'
   t: Translator
   tStays: Translator
   tStatus: Translator
@@ -245,6 +249,7 @@ export function createSectionRenderers(
     featuredWorks,
     theme,
     shape,
+    linksLayout,
     t,
     tStays,
     tStatus,
@@ -523,11 +528,16 @@ export function createSectionRenderers(
     },
     stats: () => {
       // The strip is the nomad equivalent of a creator's "followers/posts/likes"
-      // header: countries · cities · time on the road.
-      const { cityCount, totalDays } = computeTravelStats(visitedStays)
-      // Hide the whole strip if there's literally nothing to show. Once any
-      // one bucket has data we render the full strip and the empty buckets
-      // simply read "0" — easier to scan than "sometimes 1, sometimes 3 columns".
+      // header: countries · (cities) · time on the road.
+      //
+      // totalDays priority: user.nomad_since (a single-field input most users
+      // fill in 5s) wins over sum(stays). See computeTravelStats — the
+      // fallback keeps power users who only filled stays accurate too.
+      const { cityCount, totalDays } = computeTravelStats(
+        visitedStays,
+        user.nomad_since,
+      )
+      // Hide the whole strip if there's literally nothing to show.
       if (visitedCount === 0 && cityCount === 0 && totalDays === 0) return null
       const road = formatTimeOnTheRoad(totalDays)
       const roadUnitLabel =
@@ -536,6 +546,12 @@ export function createSectionRenderers(
           : road.unit === 'month'
             ? t('unitMonth')
             : t('unitDay')
+      // The city column is meaningful only when the user has actually
+      // logged stays. Without stays it would always read "0" — visually
+      // identical to "missing data" and giving up valuable strip width
+      // for no signal. Drop it in that case so the strip stays clean
+      // for the 80% of users who only filled nomad_since + countries.
+      const showCityStat = cityCount > 0
       return (
         <div key="stats" className="my-6">
           {/* Section title disambiguates the strip below — "23 countries"
@@ -556,12 +572,14 @@ export function createSectionRenderers(
               mutedClass={theme.textMuted}
               valueClass={theme.statValueClass}
             />
-            <Stat
-              value={cityCount}
-              label={cityCount === 1 ? t('cityOne') : t('cityMany')}
-              mutedClass={theme.textMuted}
-              valueClass={theme.statValueClass}
-            />
+            {showCityStat && (
+              <Stat
+                value={cityCount}
+                label={cityCount === 1 ? t('cityOne') : t('cityMany')}
+                mutedClass={theme.textMuted}
+                valueClass={theme.statValueClass}
+              />
+            )}
             <Stat
               value={road.value}
               label={roadUnitLabel}
@@ -699,70 +717,131 @@ export function createSectionRenderers(
     },
     links: () => {
       if (!links.length) return null
+      // Pre-classify so the icon-strip and full-row groups can render as
+      // two independent blocks. Embeds always win regardless of layout —
+      // a YouTube link the user wanted inline shouldn't silently collapse
+      // into a tiny icon. 'other' has no recognisable glyph, so it stays
+      // labelled even in icons mode.
+      type Slot =
+        | { kind: 'embed'; link: NomadLink; embed: NonNullable<ReturnType<typeof detectEmbed>> }
+        | { kind: 'row'; link: NomadLink }
+        | { kind: 'icon'; link: NomadLink }
+      const slots: Slot[] = []
+      for (const link of links) {
+        if (!link.url) continue
+        const embed = detectEmbed(link.url)
+        if (embed) {
+          slots.push({ kind: 'embed', link, embed })
+          continue
+        }
+        if (linksLayout === 'icons' && link.type !== 'other') {
+          slots.push({ kind: 'icon', link })
+        } else {
+          slots.push({ kind: 'row', link })
+        }
+      }
+
+      const renderEmbed = (slot: Extract<Slot, { kind: 'embed' }>, key: React.Key) => {
+        const iframeStyle: React.CSSProperties = slot.embed.aspectRatio
+          ? { aspectRatio: slot.embed.aspectRatio, width: '100%' }
+          : { height: `${slot.embed.height}px`, width: '100%' }
+        return (
+          <iframe
+            key={key}
+            src={slot.embed.embedUrl}
+            title={slot.embed.title}
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowFullScreen
+            className={`${shape.row} border-0 block`}
+            style={iframeStyle}
+          />
+        )
+      }
+
+      const renderRow = (link: NomadLink, key: React.Key) => {
+        const brandColor = LINK_BRAND_COLORS[link.type]
+        const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} font-medium group touch-manipulation transition-all duration-200 ${theme.linkHover} ${theme.linkRow}`
+        return (
+          <a
+            key={key}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={baseClass}
+          >
+            <span
+              className={`inline-flex items-center justify-center w-9 h-9 ${shape.chip} shrink-0 transition group-hover:scale-105`}
+              style={
+                brandColor ? { backgroundColor: `${brandColor}1f`, color: brandColor } : undefined
+              }
+            >
+              {getLinkIcon(link.type)}
+            </span>
+            <span className="flex-1 text-left">{getLinkLabel(link.type, link.label)}</span>
+            <svg
+              className={`w-5 h-5 transition ${theme.linkArrow}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </a>
+        )
+      }
+
+      const renderIcon = (link: NomadLink, key: React.Key) => {
+        const brandColor = LINK_BRAND_COLORS[link.type]
+        const label = getLinkLabel(link.type, link.label)
+        return (
+          <a
+            key={key}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            title={label}
+            className={`inline-flex items-center justify-center w-12 h-12 ${shape.chip} ${theme.linkHover} ${theme.linkRow} transition-all duration-200 hover:scale-110 touch-manipulation`}
+            style={
+              brandColor ? { backgroundColor: `${brandColor}1f`, color: brandColor } : undefined
+            }
+          >
+            {getLinkIcon(link.type)}
+          </a>
+        )
+      }
+
+      // Icons mode lifts every iconable link into a single strip at the
+      // top, then renders anything that has to stay full-width (custom
+      // 'other' labels, YouTube / Spotify embeds) below it in original
+      // order. Interleaving — preserving the user's link order — left
+      // 'other' links sandwiched between two icon strips, which looked
+      // accidental rather than deliberate.
+      const blocks: React.ReactNode[] = []
+      const iconLinks = slots.filter((s): s is Extract<Slot, { kind: 'icon' }> => s.kind === 'icon')
+      if (iconLinks.length > 0) {
+        blocks.push(
+          <div key="icons" className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            {iconLinks.map((slot, i) => renderIcon(slot.link, i))}
+          </div>,
+        )
+      }
+      slots.forEach((slot, i) => {
+        if (slot.kind === 'embed') blocks.push(renderEmbed(slot, `embed-${i}`))
+        else if (slot.kind === 'row') blocks.push(renderRow(slot.link, `row-${i}`))
+      })
+
       return (
         <div key="links" className="space-y-2 sm:space-y-3">
-          {links
-            .filter((link) => link.url)
-            .map((link, index) => {
-              // In-place embed (YouTube / Spotify) takes precedence over the
-              // click-out button. detectEmbed returns null when the URL doesn't
-              // match a supported pattern, so arbitrary http://... links fall
-              // through to the regular button path below.
-              const embed = detectEmbed(link.url)
-              if (embed) {
-                const iframeStyle: React.CSSProperties = embed.aspectRatio
-                  ? { aspectRatio: embed.aspectRatio, width: '100%' }
-                  : { height: `${embed.height}px`, width: '100%' }
-                return (
-                  <iframe
-                    key={index}
-                    src={embed.embedUrl}
-                    title={embed.title}
-                    loading="lazy"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                    allowFullScreen
-                    className={`${shape.row} border-0 block`}
-                    style={iframeStyle}
-                  />
-                )
-              }
-              const brandColor = LINK_BRAND_COLORS[link.type]
-              const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} font-medium group touch-manipulation transition-all duration-200 ${theme.linkHover} ${theme.linkRow}`
-              return (
-                <a
-                  key={index}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={baseClass}
-                >
-                  <span
-                    className={`inline-flex items-center justify-center w-9 h-9 ${shape.chip} shrink-0 transition group-hover:scale-105`}
-                    style={
-                      brandColor ? { backgroundColor: `${brandColor}1f`, color: brandColor } : undefined
-                    }
-                  >
-                    {getLinkIcon(link.type)}
-                  </span>
-                  <span className="flex-1 text-left">{getLinkLabel(link.type, link.label)}</span>
-                  <svg
-                    className={`w-5 h-5 transition ${theme.linkArrow}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
-                </a>
-              )
-            })}
+          {blocks}
         </div>
       )
     },
