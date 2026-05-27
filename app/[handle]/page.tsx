@@ -163,6 +163,7 @@ export default async function ProfilePage({
         decorationOverride={settings?.decoration_override}
         avatarStyleOverride={settings?.avatar_style_override}
         bioQuoteStyleOverride={settings?.bio_quote_style_override}
+        linksLayout={settings?.links_layout}
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
         isOwner={isOwner}

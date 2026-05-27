@@ -61,6 +61,9 @@ interface ProfileSettings {
   decoration_override?: string | null
   avatar_style_override?: string | null
   bio_quote_style_override?: string | null
+  // 'rows' (default) renders full-width labelled link rows; 'icons' collapses
+  // preset-brand links into a compact icon strip.
+  links_layout?: 'rows' | 'icons'
   section_order?: string[]
 }
 
@@ -99,6 +102,7 @@ export function LookSettingsForm() {
     decoration_override: null,
     avatar_style_override: null,
     bio_quote_style_override: null,
+    links_layout: 'rows',
     section_order: NOMAD_DEFAULT_ORDER,
   }
   const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_SETTINGS)
@@ -182,6 +186,8 @@ export function LookSettingsForm() {
           const decoration_override = (data.settings.decoration_override as string | null | undefined) ?? null
           const avatar_style_override = (data.settings.avatar_style_override as string | null | undefined) ?? null
           const bio_quote_style_override = (data.settings.bio_quote_style_override as string | null | undefined) ?? null
+          const rawLinksLayout = data.settings.links_layout as string | null | undefined
+          const links_layout: 'rows' | 'icons' = rawLinksLayout === 'icons' ? 'icons' : 'rows'
           const loaded: ProfileSettings = {
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
@@ -192,6 +198,7 @@ export function LookSettingsForm() {
             decoration_override,
             avatar_style_override,
             bio_quote_style_override,
+            links_layout,
             section_order: order,
           }
           setSettings(loaded)
@@ -698,6 +705,53 @@ export function LookSettingsForm() {
               </div>
             </Section>
 
+            {/* Links layout — full-width labelled rows vs compact icon
+                strip. Each option's tile previews its own shape so the
+                picker doubles as a mini preview. Custom 'other' links
+                and embeds always stay full-row regardless of the choice
+                — that constraint lives in the renderer, not the picker. */}
+            <Section
+              title={t('linksLayout.title')}
+              description={t('linksLayout.description')}
+            >
+              <div className="grid grid-cols-2 gap-2 max-w-md">
+                {(['rows', 'icons'] as const).map((key) => {
+                  const active = (settings.links_layout ?? 'rows') === key
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSettings((prev) => ({ ...prev, links_layout: key }))}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition ${
+                        active
+                          ? 'border-gray-900 bg-gray-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {key === 'rows' ? (
+                        <div className="w-full space-y-1.5" aria-hidden>
+                          <div className="h-3 rounded-md bg-gray-900/85" />
+                          <div className="h-3 rounded-md bg-gray-900/85" />
+                          <div className="h-3 rounded-md bg-gray-900/85" />
+                        </div>
+                      ) : (
+                        <div className="w-full h-[42px] flex items-center justify-center gap-1.5" aria-hidden>
+                          <div className="w-5 h-5 rounded-md bg-gray-900/85" />
+                          <div className="w-5 h-5 rounded-md bg-gray-900/85" />
+                          <div className="w-5 h-5 rounded-md bg-gray-900/85" />
+                          <div className="w-5 h-5 rounded-md bg-gray-900/85" />
+                          <div className="w-5 h-5 rounded-md bg-gray-900/85" />
+                        </div>
+                      )}
+                      <span className="text-xs font-medium text-gray-700">
+                        {t(`linksLayout.${key}`)}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </Section>
+
             {/* Font family — orthogonal to theme. Each option renders its
                 own label in its own font so the picker is its own preview. */}
             <Section
@@ -904,6 +958,7 @@ export function LookSettingsForm() {
                     decorationOverride={deferredSettings.decoration_override}
                     avatarStyleOverride={deferredSettings.avatar_style_override}
                     bioQuoteStyleOverride={deferredSettings.bio_quote_style_override}
+                    linksLayout={deferredSettings.links_layout}
                     sectionOrder={deferredSettings.section_order}
                     embedded
                   />

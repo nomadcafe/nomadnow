@@ -37,6 +37,8 @@ interface NomadCardServerProps {
   decorationOverride?: string | null
   avatarStyleOverride?: string | null
   bioQuoteStyleOverride?: string | null
+  // 'rows' (default) or 'icons'. Anything else falls back to 'rows'.
+  linksLayout?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
   // When true, the floating "Make yours →" CTA is suppressed. Used on the
@@ -72,6 +74,7 @@ export async function NomadCardServer({
   decorationOverride,
   avatarStyleOverride,
   bioQuoteStyleOverride,
+  linksLayout,
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
@@ -114,6 +117,7 @@ export async function NomadCardServer({
     featuredWorks,
     theme,
     shape,
+    linksLayout: linksLayout === 'icons' ? 'icons' : 'rows',
     t,
     tStays,
     tStatus,

@@ -47,6 +47,9 @@ interface NomadCardProps {
   decorationOverride?: string | null
   avatarStyleOverride?: string | null
   bioQuoteStyleOverride?: string | null
+  // 'rows' (default) or 'icons'. Anything else falls back to 'rows' so
+  // junk values can't break the render.
+  linksLayout?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
   // When true, the floating "Make yours →" CTA is suppressed. Use on the
@@ -80,6 +83,7 @@ export function NomadCard({
   decorationOverride,
   avatarStyleOverride,
   bioQuoteStyleOverride,
+  linksLayout,
   enabledSections,
   sectionOrder,
   hideMakeYoursCTA = false,
@@ -135,6 +139,7 @@ export function NomadCard({
     featuredWorks,
     theme,
     shape,
+    linksLayout: linksLayout === 'icons' ? 'icons' : 'rows',
     t,
     tStays,
     tStatus,

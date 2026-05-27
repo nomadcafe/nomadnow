@@ -49,6 +49,9 @@ const updateSettingsSchema = z.object({
   decoration_override: z.enum(DECORATION_KEYS).nullable().optional(),
   avatar_style_override: z.enum(AVATAR_STYLE_KEYS).nullable().optional(),
   bio_quote_style_override: z.enum(BIO_QUOTE_STYLE_KEYS).nullable().optional(),
+  // Compact icon strip vs the default full-width labelled rows. Null clears
+  // the setting and falls back to 'rows' so existing cards render unchanged.
+  links_layout: z.enum(['rows', 'icons']).nullable().optional(),
   // The Nomad Card catalog has ~8 section IDs and each is a short string —
   // anything bigger is junk or abuse. Defensive caps so a malformed POST
   // can't blow up a row size or shove a giant JSONB blob into the DB.
@@ -153,6 +156,7 @@ export async function GET() {
           decoration_override: null,
           avatar_style_override: null,
           bio_quote_style_override: null,
+          links_layout: 'rows',
           section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
         },
       })
