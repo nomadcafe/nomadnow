@@ -71,7 +71,7 @@ export default async function PreviewPage({
   const themeKey = (params.theme as ThemeKey | undefined) ?? 'classic'
   const buttonShape = params.shape ?? 'rounded'
   const fontFamily = params.font ?? 'theme'
-  const linksLayout = params.linksLayout === 'icons' ? 'icons' : 'rows'
+  const linksLayout = params.linksLayout === 'rows' ? 'rows' : 'icons'
   // ?order=name,location,bio,stats,map,avatar,status,links — for design QA.
   const customOrder = params.order ? params.order.split(',').map((s) => s.trim()) : undefined
   // ?disable=bio,map — comma-separated section IDs to hide.

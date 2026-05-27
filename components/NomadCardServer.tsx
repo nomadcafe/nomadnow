@@ -37,7 +37,9 @@ interface NomadCardServerProps {
   decorationOverride?: string | null
   avatarStyleOverride?: string | null
   bioQuoteStyleOverride?: string | null
-  // 'rows' (default) or 'icons'. Anything else falls back to 'rows'.
+  // 'icons' (default) or 'rows'. Anything else falls back to 'icons'.
+  // Default flipped — preset-brand glyphs are universally recognised
+  // and full-row labelled buttons read as generic.
   linksLayout?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
@@ -117,7 +119,7 @@ export async function NomadCardServer({
     featuredWorks,
     theme,
     shape,
-    linksLayout: linksLayout === 'icons' ? 'icons' : 'rows',
+    linksLayout: linksLayout === 'rows' ? 'rows' : 'icons',
     t,
     tStays,
     tStatus,

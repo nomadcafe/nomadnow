@@ -47,8 +47,10 @@ interface NomadCardProps {
   decorationOverride?: string | null
   avatarStyleOverride?: string | null
   bioQuoteStyleOverride?: string | null
-  // 'rows' (default) or 'icons'. Anything else falls back to 'rows' so
-  // junk values can't break the render.
+  // 'icons' (default) or 'rows'. Anything else falls back to 'icons' so
+  // junk values can't break the render. Default flipped to 'icons' because
+  // preset-brand glyphs are universally recognised — full-row labelled
+  // buttons are vertical-space-heavy and read as generic Linktree.
   linksLayout?: string | null
   enabledSections?: string[] | null
   sectionOrder?: string[] | null
@@ -139,7 +141,7 @@ export function NomadCard({
     featuredWorks,
     theme,
     shape,
-    linksLayout: linksLayout === 'icons' ? 'icons' : 'rows',
+    linksLayout: linksLayout === 'rows' ? 'rows' : 'icons',
     t,
     tStays,
     tStatus,
