@@ -22,3 +22,10 @@ ALTER TABLE users
 CREATE INDEX IF NOT EXISTS idx_users_open_to_coffee
   ON users (current_city)
   WHERE open_to_coffee = TRUE;
+
+-- Column-level GRANT — migration 0007 swapped users to column-level
+-- grants, so every new column must explicitly grant SELECT to the
+-- end-user roles or PostgREST queries fail (and SELECTs containing
+-- this column return zero rows). See 0014 / 0016 / 0019 for the
+-- same pattern on prior additions.
+GRANT SELECT (open_to_coffee) ON public.users TO anon, authenticated;
