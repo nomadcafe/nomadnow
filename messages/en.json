@@ -158,6 +158,10 @@
       "ogImage": "Auto-generated share image (OG)",
       "themes": "Themes (7 presets, fully customizable)",
       "customization": "Button shape, background, font",
+      "accentCustom": "Custom hex accent color",
+      "handles": "Handles (live cards per account)",
+      "handlesBasic": "1",
+      "handlesPro": "Up to 5",
       "linksLabel": "Brand-icon links (11 platforms)",
       "embeds": "Inline YouTube / Spotify / Vimeo embeds",
       "verifiedBadge": "Verified badge",
@@ -406,7 +410,9 @@
       "description": "Repaints link buttons, the Hire / Meetup CTAs, brand-icon tints, and the map's city dots. Pick any color or fall back to the theme's default.",
       "pickerLabel": "Accent color picker",
       "useThemeDefault": "Use theme default",
-      "themeDefaultLabel": "Theme default:"
+      "themeDefaultLabel": "Theme default:",
+      "proLockHint": "Custom accent is a Pro feature — your card uses the theme's default color.",
+      "upgradeCta": "Upgrade to Pro"
     },
     "overrides": {
       "title": "Theme details",

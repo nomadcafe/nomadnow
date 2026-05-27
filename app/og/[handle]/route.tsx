@@ -3,6 +3,7 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { getCountryFlag } from '@/lib/countries'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { getTheme, type ThemeKey } from '@/lib/themes'
+import { isPro } from '@/lib/billing'
 import {
   computeTravelStats,
   formatTimeOnTheRoad,
@@ -27,6 +28,7 @@ type OgUser = {
   created_at?: string | null
   bio?: string | null
   verified?: boolean | null
+  plan?: string | null
 }
 
 type OgStay = {
@@ -46,8 +48,10 @@ const PREVIEW_USER: OgUser = {
   visited_countries: ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'PH', 'MX', 'ES', 'GE'],
   created_at: '2024-03-15T00:00:00.000Z',
   bio: 'Designer building tools for remote life. Slow traveler, fast typer.',
-  // Verified so the QA preview keeps exercising the pill rendering.
+  // Verified + Pro so the QA preview keeps exercising the badge rendering
+  // (which is double-gated on plan === 'pro').
   verified: true,
+  plan: 'pro',
 }
 
 // Sample stays for preview mode — enough to exercise the city-count and
@@ -86,7 +90,7 @@ export async function GET(
       const lower = handle.toLowerCase()
       const { data: userData } = await supabase
         .from('users')
-        .select('id, handle, display_name, role, current_city, timezone, visited_countries, created_at, bio, verified')
+        .select('id, handle, display_name, role, current_city, timezone, visited_countries, created_at, bio, verified, plan')
         .eq('handle', lower)
         .maybeSingle()
       user = (userData as OgUser | null) ?? null
@@ -175,7 +179,7 @@ export async function GET(
           <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}>
             nomad.now/<span style={{ color: og.brandFg, fontWeight: 600 }}>{handle}</span>
           </span>
-          {user?.verified && (
+          {user?.verified && isPro(user?.plan) && (
             <span
               style={{
                 background: og.pillBg,

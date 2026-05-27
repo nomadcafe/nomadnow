@@ -42,16 +42,23 @@ const FEATURE_ROWS: { sectionKey: string; items: Feature[] }[] = [
     sectionKey: 'yourCard',
     items: [
       { key: 'publicProfile', basic: true, pro: true },
+      // Handles per account. Basic = 1 card; Pro = up to 5 (multi-card
+      // workspace, lets one account own e.g. designer/writer/photographer
+      // cards). Multi-handle is the Pro flagship — schema split lands in a
+      // follow-up commit, so this row carries `soon`.
+      { key: 'handles', basic: 'handlesBasic', basicKey: 'handlesBasic', pro: 'handlesPro', proKey: 'handlesPro', soon: true },
       { key: 'worldMap', basic: true, pro: true },
       { key: 'liveTimezone', basic: true, pro: true },
       { key: 'stays', basic: true, pro: true },
       { key: 'travelStats', basic: true, pro: true },
       { key: 'ogImage', basic: true, pro: true },
-      // Customization: themes / button shape / background / font are all
-      // user-controllable on every plan today. If a future paywall gates
-      // any of these, flip these rows to label cells.
+      // Customization: themes / button shape / background / font / per-axis
+      // overrides are all available on every plan. Custom hex accent is the
+      // one Pro-gated knob — see `accentCustom` below — because it's the
+      // most-visible "personalize my brand" signal.
       { key: 'themes', basic: true, pro: true },
       { key: 'customization', basic: true, pro: true },
+      { key: 'accentCustom', basic: false, pro: true },
       { key: 'linksLabel', basic: true, pro: true },
       { key: 'embeds', basic: true, pro: true },
       { key: 'verifiedBadge', basic: false, pro: true },
@@ -61,7 +68,8 @@ const FEATURE_ROWS: { sectionKey: string; items: Feature[] }[] = [
   {
     sectionKey: 'distribution',
     items: [
-      { key: 'listingDefault', basic: true, pro: 'listingFeatured', proKey: 'listingFeatured' },
+      // Featured placement is roadmap — /explore today sorts by recency only.
+      { key: 'listingDefault', basic: true, pro: 'listingFeatured', proKey: 'listingFeatured', soon: true },
       { key: 'embed', basic: 'embedBasic', basicKey: 'embedBasic', pro: 'embedPro', proKey: 'embedPro', soon: true },
       { key: 'customDomain', basic: false, pro: true, soon: true },
     ],

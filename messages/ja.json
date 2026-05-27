@@ -158,6 +158,10 @@
       "ogImage": "自動生成シェア画像 (OG)",
       "themes": "テーマ(7 プリセット、フルカスタマイズ可)",
       "customization": "ボタン形状・背景・フォント",
+      "accentCustom": "カスタム HEX アクセントカラー",
+      "handles": "ハンドル(アカウントあたりの公開カード)",
+      "handlesBasic": "1",
+      "handlesPro": "最大 5",
       "linksLabel": "ブランドアイコン付きリンク(11 プラットフォーム)",
       "embeds": "YouTube・Spotify・Vimeo のインライン埋め込み",
       "verifiedBadge": "認証バッジ",
@@ -406,7 +410,9 @@
       "description": "リンクボタン・Hire / Meetup CTA・ブランドアイコンの色味・地図上の都市ドットを塗り替えます。好きな色を選ぶか、テーマのデフォルトに戻せます。",
       "pickerLabel": "アクセントカラーピッカー",
       "useThemeDefault": "テーマのデフォルトに戻す",
-      "themeDefaultLabel": "テーマのデフォルト:"
+      "themeDefaultLabel": "テーマのデフォルト:",
+      "proLockHint": "カスタムアクセントは Pro 限定の機能です — カードはテーマのデフォルト色で表示されます。",
+      "upgradeCta": "Pro にアップグレード"
     },
     "overrides": {
       "title": "テーマの細部",
