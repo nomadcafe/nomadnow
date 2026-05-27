@@ -16,6 +16,10 @@ export interface PreviewFormState {
   role: string
   bio: string
   current_city: string
+  // ISO α-2 derived when the user picked a CityAutocomplete suggestion;
+  // drives the country flag in the preview's location row. Optional so
+  // legacy form-state shapes without it still type-check.
+  country?: string
   avatar_url: string
   // Free-form: preset slugs render through i18n in NomadCard, custom strings
   // render verbatim. Empty hides the status pill entirely.
@@ -96,6 +100,7 @@ const SAMPLE_FORM: PreviewFormState = {
   avatar_url: '',
   work_status: 'freelancing',
   timezone: 'Asia/Bangkok',
+  country: 'TH',
   // ~3.4 years on the road — anchors the "years nomading" stat for the
   // example card so new visitors see what the stat strip looks like
   // populated. Computed from today so the example doesn't drift stale.
@@ -187,6 +192,7 @@ export function LiveCardPreview({
     bio: effectiveForm.bio || undefined,
     role: effectiveForm.role || undefined,
     current_city: effectiveForm.current_city || undefined,
+    country: effectiveForm.country || undefined,
     work_status: effectiveForm.work_status,
     timezone: effectiveForm.timezone || undefined,
     // Form is a month picker (YYYY-MM); the saved column is YYYY-MM-DD.

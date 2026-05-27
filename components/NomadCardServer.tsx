@@ -108,7 +108,15 @@ export async function NomadCardServer({
   const nextStay = upcomingStays[0] ?? null
   const visitedStays = currentStay ? [currentStay, ...pastStays] : pastStays
   const displayLocation = currentStay?.city || user.current_city || user.location
-  const displayCountryFlag = currentStay ? getCountryFlag(currentStay.country) : null
+  // Flag for the location row: prefer the country of the current stay
+  // (most precise), fall back to user.country (auto-set when current_city
+  // was picked from CityAutocomplete). When neither is available, the
+  // renderer falls back to a generic 📍 emoji.
+  const displayCountryFlag = currentStay
+    ? getCountryFlag(currentStay.country)
+    : user.country
+      ? getCountryFlag(user.country)
+      : null
   const visitedCount = mergedVisitedCodes(user.visited_countries, visitedStays).size
 
   const ctx: SectionContext = {

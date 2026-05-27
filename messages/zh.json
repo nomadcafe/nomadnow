@@ -340,7 +340,14 @@
     "openToCoffee": {
       "label": "欢迎陌生人来约咖啡",
       "hintWithCity": "卡片上会有一行小字「☕️ 在 {city} 可以约咖啡」。一个软信号 —— 想约的人会通过你的链接或 Meetup CTA 找你。",
-      "hintNoCity": "在上面填一下当前城市,卡片上就会显示。"
+      "hintNoCity": "在上面填一下当前城市,卡片上就会显示。",
+      "warningNoCity": "当前城市还是空的 —— 上面填了之后,这条才会出现在卡片上。"
+    },
+    "moreSection": {
+      "about": "关于你",
+      "conversion": "接单 · 约见",
+      "travel": "旅行",
+      "extras": "其它"
     },
     "blurbs": {
       "title": "随身小卡片",
@@ -360,7 +367,7 @@
       "remove": "删除"
     },
     "visitedCountries": "你去过的国家",
-    "visitedCountriesHint": "会画在卡片地图上。一次想不起来全部没关系,以后随时可加。",
+    "visitedCountriesHint": "点击你去过的国家旗 —— 会在卡片地图上点亮。",
     "nomadSinceLabel": "从什么时候开始 nomad",
     "nomadSinceHint": "选个月份就好 —— 卡片上的「nomad 了 X 年」靠这个算。想详细记录每个城市,可以打开下面的停留记录。",
     "submit": "占下我的卡片",

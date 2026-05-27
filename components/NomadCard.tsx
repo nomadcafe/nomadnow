@@ -126,7 +126,15 @@ export function NomadCard({
   // gone to yet shouldn't bump my country count or light up the map.
   const visitedStays = currentStay ? [currentStay, ...pastStays] : pastStays
   const displayLocation = currentStay?.city || user.current_city || user.location
-  const displayCountryFlag = currentStay ? getCountryFlag(currentStay.country) : null
+  // Flag for the location row: prefer the country of the current stay
+  // (most precise), fall back to user.country (auto-set when current_city
+  // was picked from CityAutocomplete). When neither is available, the
+  // renderer falls back to a generic 📍 emoji.
+  const displayCountryFlag = currentStay
+    ? getCountryFlag(currentStay.country)
+    : user.country
+      ? getCountryFlag(user.country)
+      : null
   const visitedCount = mergedVisitedCodes(user.visited_countries, visitedStays).size
 
   const formatShortDate = useMemo(() => makeFormatShortDate(locale), [locale])

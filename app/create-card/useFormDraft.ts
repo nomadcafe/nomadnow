@@ -16,6 +16,11 @@ export interface FormData {
   role: string
   bio: string
   current_city: string
+  // ISO 3166-1 alpha-2 code, derived when the user picks an autocomplete
+  // suggestion for current_city. Drives the country flag in the card's
+  // location row; never user-edited directly. Empty when the user typed
+  // their city manually instead of picking from the dropdown.
+  country: string
   // Free-form string. Preset slugs (busy / freelancing / fulltime) get
   // their localised labels on the card; anything else renders verbatim.
   work_status: string
@@ -45,6 +50,7 @@ export interface FormInitial {
   role: string
   bio: string
   current_city: string
+  country: string
   avatar_url: string
   work_status: string
   timezone: string
@@ -118,6 +124,7 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
     role: initial?.role ?? draft?.role ?? '',
     bio: initial?.bio ?? draft?.bio ?? '',
     current_city: initial?.current_city ?? draft?.current_city ?? '',
+    country: initial?.country ?? draft?.country ?? '',
     work_status: initial?.work_status ?? draft?.work_status ?? '',
     avatar_url: initial?.avatar_url ?? draft?.avatar_url ?? '',
     // Defaults: edit mode → keep saved zone. New card → seed from browser

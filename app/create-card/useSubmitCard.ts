@@ -88,7 +88,10 @@ export function useSubmitCard({
         bio: formData.bio || undefined,
         location: formData.current_city || undefined,
         avatar_url: formData.avatar_url || undefined,
-        country: undefined,
+        // ISO α-2 code, only present when the user picked from
+        // CityAutocomplete. Manual-typed cities have no country derived,
+        // so we send '' which the API treats as "clear".
+        country: formData.country || '',
         role: formData.role || undefined,
         current_city: formData.current_city || undefined,
         work_status: formData.work_status,

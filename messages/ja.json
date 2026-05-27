@@ -340,7 +340,14 @@
     "openToCoffee": {
       "label": "知らない人とのコーヒーも歓迎",
       "hintWithCity": "カードに「☕️ {city} でコーヒー誘ってOK」と小さく表示されます。やわらかい合図 — リンクや Meetup CTA から声をかけてもらえます。",
-      "hintNoCity": "上で現在の都市を入れると、カードに表示されます。"
+      "hintNoCity": "上で現在の都市を入れると、カードに表示されます。",
+      "warningNoCity": "現在の都市が空欄です — 上で都市を入力するまで、カードには表示されません。"
+    },
+    "moreSection": {
+      "about": "自己紹介",
+      "conversion": "依頼を受ける・会う",
+      "travel": "旅",
+      "extras": "その他"
     },
     "blurbs": {
       "title": "ブラーブ",
@@ -360,7 +367,7 @@
       "remove": "削除"
     },
     "visitedCountries": "訪れた国",
-    "visitedCountriesHint": "カードの地図に表示されます。すべて思い出せない場合は、後から追加できます。",
+    "visitedCountriesHint": "行ったことのある国の旗をタップ — カードの地図が点灯します。",
     "nomadSinceLabel": "ノマド開始",
     "nomadSinceHint": "月だけ選べばOK — カードの「○年間ノマド」表示に使われます。詳しく記録したい場合は下の滞在記録へ。",
     "submit": "カードを確保",
