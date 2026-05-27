@@ -25,6 +25,9 @@ type OgUser = {
   current_city?: string | null
   timezone?: string | null
   visited_countries?: string[] | null
+  // YYYY-MM-DD. When set, drives the "time on the road" stat — same priority
+  // rule as the public card. NULL falls back to sum(stays).
+  nomad_since?: string | null
   created_at?: string | null
   bio?: string | null
   verified?: boolean | null
@@ -46,6 +49,8 @@ const PREVIEW_USER: OgUser = {
   current_city: 'Bangkok',
   timezone: 'Asia/Bangkok',
   visited_countries: ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'PH', 'MX', 'ES', 'GE'],
+  // ~3 years before created_at so the preview exercises "years nomading".
+  nomad_since: '2021-09-01',
   created_at: '2024-03-15T00:00:00.000Z',
   bio: 'Designer building tools for remote life. Slow traveler, fast typer.',
   // Verified + Pro so the QA preview keeps exercising the badge rendering
@@ -90,7 +95,7 @@ export async function GET(
       const lower = handle.toLowerCase()
       const { data: userData } = await supabase
         .from('users')
-        .select('id, handle, display_name, role, current_city, timezone, visited_countries, created_at, bio, verified, plan')
+        .select('id, handle, display_name, role, current_city, timezone, visited_countries, nomad_since, created_at, bio, verified, plan')
         .eq('handle', lower)
         .maybeSingle()
       user = (userData as OgUser | null) ?? null
@@ -128,7 +133,8 @@ export async function GET(
   const { current, past } = splitStays(stays)
   const visitedStays = current ? [current, ...past] : past
   const mergedCountries = mergedVisitedCodes(user?.visited_countries, visitedStays)
-  const { cityCount, totalDays } = computeTravelStats(visitedStays)
+  // nomad_since wins over stays-sum — same priority rule as the live card.
+  const { cityCount, totalDays } = computeTravelStats(visitedStays, user?.nomad_since)
   const road = formatTimeOnTheRoad(totalDays)
   const roadUnit =
     road.unit === 'year'
@@ -264,22 +270,27 @@ export async function GET(
                 {countryCount === 1 ? 'country' : 'countries'}
               </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
-                {cityCount}
-              </span>
-              <span
-                style={{
-                  fontSize: 16,
-                  color: og.muted,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginTop: 6,
-                }}
-              >
-                {cityCount === 1 ? 'city' : 'cities'}
-              </span>
-            </div>
+            {/* City column only when stays were logged. Without them
+                it reads "0 cities" which is visually equivalent to
+                missing data — same rule as the live card. */}
+            {cityCount > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
+                  {cityCount}
+                </span>
+                <span
+                  style={{
+                    fontSize: 16,
+                    color: og.muted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginTop: 6,
+                  }}
+                >
+                  {cityCount === 1 ? 'city' : 'cities'}
+                </span>
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: 48, fontWeight: 600, color: og.fg, lineHeight: 1 }}>
                 {road.value}

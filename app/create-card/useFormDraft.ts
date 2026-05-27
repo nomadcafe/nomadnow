@@ -21,6 +21,10 @@ export interface FormData {
   work_status: string
   avatar_url: string
   timezone: string
+  // YYYY-MM (the <input type="month"> value). Server normalises to
+  // YYYY-MM-01 before save. Empty = no nomad_since set; the card falls
+  // back to summing stays.
+  nomad_since: string
   // Hire CTA fields. Empty strings = section hidden on the public card.
   hire_cta_label: string
   hire_cta_url: string
@@ -41,6 +45,9 @@ export interface FormInitial {
   avatar_url: string
   work_status: string
   timezone: string
+  // YYYY-MM. Empty when the user hasn't set a nomad-since date — card
+  // falls back to summing stays for "time on the road" in that case.
+  nomad_since: string
   visited_countries: string[]
   links: NomadLinkDraft[]
   stays: StayDraft[]
@@ -115,6 +122,7 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
     // mount detection can run; useState initialisers are render-time and
     // calling Intl during SSR would mismatch hydration.
     timezone: initial?.timezone ?? draft?.timezone ?? '',
+    nomad_since: initial?.nomad_since ?? draft?.nomad_since ?? '',
     hire_cta_label: initial?.hire_cta_label ?? draft?.hire_cta_label ?? '',
     hire_cta_url: initial?.hire_cta_url ?? draft?.hire_cta_url ?? '',
     meetup_cta_label: initial?.meetup_cta_label ?? draft?.meetup_cta_label ?? '',

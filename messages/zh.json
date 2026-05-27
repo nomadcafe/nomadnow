@@ -265,7 +265,7 @@
         "role": "填写职业",
         "bio": "加一句简介",
         "city": "填写当前城市",
-        "stays": "添加城市停留记录",
+        "nomadSince": "填一下从什么时候开始 nomad",
         "countries": "标记去过的国家",
         "links": "至少加一条链接"
       }
@@ -356,6 +356,8 @@
     },
     "visitedCountries": "你去过的国家",
     "visitedCountriesHint": "会画在卡片地图上。一次想不起来全部没关系,以后随时可加。",
+    "nomadSinceLabel": "从什么时候开始 nomad",
+    "nomadSinceHint": "选个月份就好 —— 卡片上的「nomad 了 X 年」靠这个算。想详细记录每个城市,可以打开下面的停留记录。",
     "submit": "占下我的卡片",
     "submitting": "占用中…",
     "submitNote": "每月 $1.98 起。随时可取消 —— 卡片在当期结束前保持在线。",
@@ -449,6 +451,12 @@
       "rounded": "圆角",
       "square": "直角"
     },
+    "linksLayout": {
+      "title": "链接布局",
+      "description": "整行带标签按钮，或紧凑的图标排。自定义链接和内嵌内容始终保持整行。",
+      "rows": "整行",
+      "icons": "图标"
+    },
     "background": {
       "title": "背景",
       "description": "用纯色或渐变覆盖主题背景。",
@@ -524,6 +532,8 @@
     "currentLabel": "现在在",
     "editorTitle": "停留城市",
     "editorHint": "你 nomad 过的城市。天数自动计算。",
+    "optional": "可选",
+    "collapsedHint": "记录具体城市 —— 想在地图上点亮城市,或者让别人知道你现在在哪可以约咖啡时才需要。",
     "emptyHint": "还没有停留记录 —— 在下面添加第一条吧。",
     "addStay": "+ 添加停留",
     "remove": "删除",

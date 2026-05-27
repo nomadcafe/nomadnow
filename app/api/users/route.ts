@@ -19,6 +19,26 @@ const hireCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(''
 const meetupCtaLabelSchema = z.string().max(30).nullable().optional().or(z.literal(''))
 const meetupCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(''))
 
+// nomad_since: YYYY-MM-DD ISO date. Form is a month picker, so day is
+// always 01. Range matches the DB CHECK constraint in migration 0023 —
+// anything before 2000 or in the future is a typo, not a real value.
+// Empty string accepted so users can clear the field from the edit form.
+const nomadSinceSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date')
+  .refine(
+    (v) => {
+      const t = Date.parse(v)
+      if (Number.isNaN(t)) return false
+      const min = Date.parse('2000-01-01')
+      return t >= min && t <= Date.now()
+    },
+    { message: 'Date out of range' },
+  )
+  .nullable()
+  .optional()
+  .or(z.literal(''))
+
 const createUserSchema = z.object({
   handle: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Handle can only contain letters, numbers, underscores, and hyphens'),
   display_name: z.string().max(100).optional(),
@@ -35,6 +55,7 @@ const createUserSchema = z.object({
   work_status: z.string().max(60).optional().or(z.literal('')),
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
+  nomad_since: nomadSinceSchema,
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
@@ -57,6 +78,7 @@ const updateUserSchema = z.object({
   work_status: z.string().max(60).optional().or(z.literal('')),
   timezone: z.string().max(50).optional(),
   visited_countries: z.array(z.string()).optional(),
+  nomad_since: nomadSinceSchema,
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
@@ -94,6 +116,7 @@ export async function POST(request: NextRequest) {
         work_status: validation.data.work_status || 'available',
         timezone: validation.data.timezone || null,
         visited_countries: validation.data.visited_countries || null,
+        nomad_since: validation.data.nomad_since || null,
         profile_type: validation.data.profile_type || 'creator',
         // CTAs the form may have submitted on first-time create. Previously
         // dropped here (only PUT applied them), forcing users to save the
@@ -218,6 +241,10 @@ export async function PUT(request: NextRequest) {
     const cleanData = Object.fromEntries(
       Object.entries(validation.data).filter(([, v]) => v !== undefined)
     )
+    // nomad_since is a DATE column — empty string would fail at PG. Coerce
+    // '' → null so users can clear the field from the edit form by emptying
+    // the month picker.
+    if (cleanData.nomad_since === '') cleanData.nomad_since = null
 
     const { data, error } = await supabase
       .from('users')

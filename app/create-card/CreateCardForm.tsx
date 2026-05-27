@@ -9,7 +9,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
 import { AvatarUploader } from '@/components/AvatarUploader'
 import { LiveCardPreview, isPreviewEmpty } from '@/components/LiveCardPreview'
-import { StaysEditor } from '@/components/StaysEditor'
+import { StaysEditor, type StayDraft } from '@/components/StaysEditor'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ROLES, TIMEZONE_LIST } from './form-constants'
@@ -148,7 +148,10 @@ export default function CreateCardForm({
                   { key: 'role', filled: !!formData.role },
                   { key: 'bio', filled: !!formData.bio.trim() },
                   { key: 'city', filled: !!formData.current_city.trim() },
-                  { key: 'stays', filled: stays.some((s) => s.city.trim() && s.country && s.start_date) },
+                  // nomad_since replaces the previous 'stays' nudge — a
+                  // single month picker is a far gentler ask than logging
+                  // city stays, and feeds the same "time on the road" stat.
+                  { key: 'nomadSince', filled: !!formData.nomad_since },
                   { key: 'countries', filled: visitedCountries.length > 0 },
                   { key: 'links', filled: links.some((l) => l.url.trim()) },
                 ]}
@@ -376,19 +379,33 @@ export default function CreateCardForm({
 
                       <LinksField links={links} onChange={setLinks} />
 
-                      {/* Stays — city-level travel with day counts. Lives
-                          above the country-level multi-select because most
-                          users want to add city detail and the country list
-                          still has value as a quick "I've been here" picker. */}
+                      {/* Nomad since — single month picker. Drives the
+                          "X years on the road" stat on the card without
+                          forcing the user to log individual stays. */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                          {tStays('editorTitle')}
+                        <label htmlFor="nomad_since" className="block text-sm font-medium text-gray-900 mb-1.5">
+                          {t('nomadSinceLabel')}
                         </label>
-                        <p className="mb-3 text-xs text-gray-500">{tStays('editorHint')}</p>
-                        <StaysEditor stays={stays} onChange={setStays} />
+                        <input
+                          type="month"
+                          id="nomad_since"
+                          name="nomad_since"
+                          value={formData.nomad_since}
+                          onChange={handleChange}
+                          // Month picker has built-in min/max. Mirrors the DB
+                          // CHECK in migration 0023 so users can't pick a
+                          // future month or anything pre-2000.
+                          min="2000-01"
+                          max={new Date().toISOString().slice(0, 7)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
+                        />
+                        <p className="mt-1.5 text-xs text-gray-500">{t('nomadSinceHint')}</p>
                       </div>
 
-                      {/* Visited countries */}
+                      {/* Visited countries — the low-friction "where I've
+                          been" input. Promoted above Stays because anyone
+                          can tap flags in 10 seconds, whereas Stays needs
+                          dates + cities the user might not remember. */}
                       <div>
                         <label className="block text-sm font-medium text-gray-900 mb-1.5">
                           {t('visitedCountries')}
@@ -401,6 +418,19 @@ export default function CreateCardForm({
                           {t('visitedCountriesHint')}
                         </p>
                       </div>
+
+                      {/* Stays — demoted to an inner collapse. This is the
+                          richest data (city + dates + photos), but most
+                          casual users won't fill it in. The collapse keeps
+                          /edit visually calm for the 80% case while still
+                          letting power users (those who want city pins on
+                          the map / meetup signalling) opt into the full
+                          editor. */}
+                      <CollapsibleStays
+                        stays={stays}
+                        setStays={setStays}
+                        tStays={tStays}
+                      />
                     </div>
                   )}
                 </div>
@@ -465,5 +495,65 @@ export default function CreateCardForm({
         </main>
       </div>
     </>
+  )
+}
+
+// Inline collapse for the Stays editor. Default-closed when there are no
+// stays yet (the casual-user case); auto-opens if the user already has
+// stays in the draft / their saved card so existing data isn't hidden
+// from them. Local state — no need to lift it; the editor itself is the
+// only thing the toggle controls.
+function CollapsibleStays({
+  stays,
+  setStays,
+  tStays,
+}: {
+  stays: StayDraft[]
+  setStays: React.Dispatch<React.SetStateAction<StayDraft[]>>
+  tStays: ReturnType<typeof useTranslations>
+}) {
+  const hasStays = stays.length > 0
+  const [open, setOpen] = useState(hasStays)
+  // Keep the toggle in sync if the user adds a stay via some other path
+  // (e.g. paste from draft); never auto-close so the user doesn't lose
+  // sight of an editor they're mid-way through.
+  useEffect(() => {
+    if (hasStays) setOpen(true)
+  }, [hasStays])
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-gray-50/50">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
+        aria-expanded={open}
+      >
+        <div className="min-w-0">
+          <div className="text-sm font-medium text-gray-900">
+            {tStays('editorTitle')}{' '}
+            <span className="text-gray-400 font-normal">({tStays('optional')})</span>
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            {tStays('collapsedHint')}
+          </div>
+        </div>
+        <svg
+          className={`w-4 h-4 flex-shrink-0 text-gray-500 transition ${open ? 'rotate-90' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="px-4 pb-4 pt-1 border-t border-gray-200">
+          <p className="mb-3 text-xs text-gray-500">{tStays('editorHint')}</p>
+          <StaysEditor stays={stays} onChange={setStays} />
+        </div>
+      )}
+    </div>
   )
 }

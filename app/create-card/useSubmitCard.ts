@@ -93,6 +93,10 @@ export function useSubmitCard({
         current_city: formData.current_city || undefined,
         work_status: formData.work_status,
         timezone: formData.timezone || undefined,
+        // Form holds YYYY-MM (month picker). Server expects YYYY-MM-DD so
+        // append -01. Empty string -> null on the server so the user can
+        // clear the field by blanking the picker.
+        nomad_since: formData.nomad_since ? `${formData.nomad_since}-01` : null,
         visited_countries: visitedCountries,
         profile_type: 'nomad',
         // Use null (not undefined) so cleanData on the server keeps the

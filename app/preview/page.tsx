@@ -18,6 +18,9 @@ const previewUser: User = {
   timezone: 'Asia/Bangkok',
   work_status: 'available',
   visited_countries: ['TH', 'JP', 'PT', 'VN', 'MY', 'ID', 'PH', 'MX', 'ES', 'GE'],
+  // ~3 years on the road — exercises the "years nomading" stat in the
+  // preview/QA route without needing any stays logged.
+  nomad_since: '2022-04-01',
   profile_type: 'nomad',
   location: 'Bangkok',
   country: 'TH',
@@ -60,12 +63,13 @@ const previewLinks: NomadLink[] = [
 export default async function PreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ theme?: string; order?: string; disable?: string; shape?: string; font?: string }>
+  searchParams: Promise<{ theme?: string; order?: string; disable?: string; shape?: string; font?: string; linksLayout?: string }>
 }) {
   const params = await searchParams
   const themeKey = (params.theme as ThemeKey | undefined) ?? 'classic'
   const buttonShape = params.shape ?? 'rounded'
   const fontFamily = params.font ?? 'theme'
+  const linksLayout = params.linksLayout === 'icons' ? 'icons' : 'rows'
   // ?order=name,location,bio,stats,map,avatar,status,links — for design QA.
   const customOrder = params.order ? params.order.split(',').map((s) => s.trim()) : undefined
   // ?disable=bio,map — comma-separated section IDs to hide.
@@ -105,6 +109,7 @@ export default async function PreviewPage({
         themeKey={themeKey}
         buttonShape={buttonShape}
         fontFamily={fontFamily}
+        linksLayout={linksLayout}
         sectionOrder={customOrder}
         enabledSections={enabledSections}
         hideMakeYoursCTA

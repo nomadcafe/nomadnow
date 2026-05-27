@@ -56,6 +56,9 @@ export default async function EditContentPage() {
     avatar_url: (profile.avatar_url as string | null) ?? '',
     work_status: (profile.work_status as string | null) ?? '',
     timezone: (profile.timezone as string | null) ?? '',
+    // DB stores YYYY-MM-DD; the form input is <input type="month"> so we
+    // slice to YYYY-MM. Empty string when null so the picker reads blank.
+    nomad_since: ((profile.nomad_since as string | null) ?? '').slice(0, 7),
     visited_countries: (profile.visited_countries as string[] | null) ?? [],
     hire_cta_label: (profile.hire_cta_label as string | null) ?? '',
     hire_cta_url: (profile.hire_cta_url as string | null) ?? '',

@@ -21,6 +21,10 @@ export interface PreviewFormState {
   // render verbatim. Empty hides the status pill entirely.
   work_status: string
   timezone: string
+  // YYYY-MM (month-picker shape). The synthesised User below converts to
+  // YYYY-MM-01 so the stats renderer can parse it the same way it parses
+  // the saved DB value.
+  nomad_since?: string
   // Hire CTA — both blank hides the section. The synthesised User below
   // carries them through to the section renderer.
   hire_cta_label?: string
@@ -89,6 +93,14 @@ const SAMPLE_FORM: PreviewFormState = {
   avatar_url: '',
   work_status: 'freelancing',
   timezone: 'Asia/Bangkok',
+  // ~3.4 years on the road — anchors the "years nomading" stat for the
+  // example card so new visitors see what the stat strip looks like
+  // populated. Computed from today so the example doesn't drift stale.
+  nomad_since: (() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 3, d.getMonth() - 4, 1)
+    return d.toISOString().slice(0, 7)
+  })(),
   // Sample card shows both CTAs paired so new users see how the dual
   // primary/secondary conversion is meant to read.
   hire_cta_label: 'Hire me',
@@ -171,6 +183,10 @@ export function LiveCardPreview({
     current_city: effectiveForm.current_city || undefined,
     work_status: effectiveForm.work_status,
     timezone: effectiveForm.timezone || undefined,
+    // Form is a month picker (YYYY-MM); the saved column is YYYY-MM-DD.
+    // Append -01 so the live preview matches what the public card will
+    // actually compute after save.
+    nomad_since: effectiveForm.nomad_since ? `${effectiveForm.nomad_since}-01` : null,
     visited_countries: effectiveCountries,
     profile_type: 'nomad',
     hire_cta_label: effectiveForm.hire_cta_label || null,

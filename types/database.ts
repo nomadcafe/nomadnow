@@ -16,6 +16,12 @@ export interface User {
   work_status?: string
   timezone?: string
   visited_countries?: string[]
+  // ISO date (YYYY-MM-DD, always YYYY-MM-01 in practice — the form is a
+  // month picker). When set, drives the "X years on the road" stat on the
+  // public card. NULL falls back to sum(nomad_stays.duration) so power
+  // users who fill out stays still get an accurate number without ever
+  // touching this field.
+  nomad_since?: string | null
   // Kept as string for forward compat. App code treats every profile as nomad
   // since the Creator Profile wedge was deprecated. The DB column still exists
   // and the `users` table still holds whatever was saved on signup.
@@ -76,6 +82,11 @@ export interface ProfileSettings {
   decoration_override?: string | null
   avatar_style_override?: string | null
   bio_quote_style_override?: string | null
+  // 'rows' (default) renders each link as a full-width labelled button.
+  // 'icons' collapses preset-brand links into a centred icon strip; custom
+  // 'other' links and embeddable URLs (YouTube / Spotify iframes) always
+  // stay as full rows so their labels / embeds remain legible.
+  links_layout?: 'rows' | 'icons' | null
   created_at: string
   updated_at: string
 }
