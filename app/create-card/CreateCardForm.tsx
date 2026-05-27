@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/Toast'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
+import { CityAutocomplete } from '@/components/CityAutocomplete'
 import { AvatarUploader } from '@/components/AvatarUploader'
 import { LiveCardPreview, isPreviewEmpty } from '@/components/LiveCardPreview'
 import { StaysEditor, type StayDraft } from '@/components/StaysEditor'
@@ -186,20 +187,29 @@ export default function CreateCardForm({
                     />
                   </div>
 
-                  {/* Current city */}
+                  {/* Current city — autocomplete so picking a suggestion
+                      also fills country (ISO α-2). That country code drives
+                      the flag emoji in the public card's location row, and
+                      previously was never set because the field was a plain
+                      <input type="text">. Manual typing still works; users
+                      who skip the suggestion just won't get a flag. */}
                   <div>
                     <label htmlFor="current_city" className="block text-sm font-medium text-gray-900 mb-1.5">
                       {t('currentCity')}
                     </label>
-                    <input
-                      type="text"
-                      id="current_city"
-                      name="current_city"
+                    <CityAutocomplete
                       value={formData.current_city}
-                      onChange={handleChange}
-                      maxLength={100}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
                       placeholder={t('currentCityPlaceholder')}
+                      onCityChange={(city) =>
+                        setFormData((prev) => ({ ...prev, current_city: city }))
+                      }
+                      onSelect={(s) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          current_city: s.city,
+                          country: s.country,
+                        }))
+                      }
                     />
                     <p className="mt-1.5 text-xs text-gray-500">{t('currentCityHint')}</p>
                   </div>
@@ -226,6 +236,28 @@ export default function CreateCardForm({
                     </select>
                     <p className="mt-1.5 text-xs text-gray-500">{t('timezoneHint')}</p>
                   </div>
+
+                  {/* Nomading since — single month picker. Drives the "X
+                      years on the road" stat on the card. Lives next to
+                      current_city / timezone because it's the same kind of
+                      signal ("where I am / since when"). Skipping it falls
+                      back to summing logged stays. */}
+                  <div>
+                    <label htmlFor="nomad_since" className="block text-sm font-medium text-gray-900 mb-1.5">
+                      {t('nomadSinceLabel')}
+                    </label>
+                    <input
+                      type="month"
+                      id="nomad_since"
+                      name="nomad_since"
+                      value={formData.nomad_since}
+                      onChange={handleChange}
+                      min="2000-01"
+                      max={new Date().toISOString().slice(0, 7)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
+                    />
+                    <p className="mt-1.5 text-xs text-gray-500">{t('nomadSinceHint')}</p>
+                  </div>
                 </div>
 
                 {/* Customize more — collapsible */}
@@ -250,216 +282,203 @@ export default function CreateCardForm({
                   </button>
 
                   {showMore && (
-                    <div id="more-fields" className="mt-5 space-y-5 border-t border-gray-100 pt-6">
-                      {/* Role + Work status */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div id="more-fields" className="mt-5 space-y-8 border-t border-gray-100 pt-6">
+                      {/* About — avatar/bio/role/status. Card-rendering side
+                          of the user's identity, distinct from the time-and-
+                          place essentials above. */}
+                      <FormSubsection title={t('moreSection.about')}>
                         <div>
-                          <label htmlFor="role" className="block text-sm font-medium text-gray-900 mb-1.5">
-                            {t('role')}
+                          <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                            {t('avatar.label')}
                           </label>
-                          <select
-                            id="role"
-                            name="role"
-                            value={formData.role}
-                            onChange={handleChange}
-                            className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
-                          >
-                            <option value="">—</option>
-                            {ROLES.map((role) => (
-                              <option key={role} value={role}>{tRole(role)}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <WorkStatusField
-                          value={formData.work_status}
-                          onChange={(next) => setFormData((prev) => ({ ...prev, work_status: next }))}
-                        />
-                      </div>
-
-                      {/* Bio */}
-                      <div>
-                        <label htmlFor="bio" className="block text-sm font-medium text-gray-900 mb-1.5">
-                          {t('bio')}
-                        </label>
-                        <textarea
-                          id="bio"
-                          name="bio"
-                          value={formData.bio}
-                          onChange={handleChange}
-                          maxLength={500}
-                          rows={5}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 resize-y transition"
-                          placeholder={t('bioPlaceholder')}
-                        />
-                        <p className="mt-1 text-xs text-gray-400 text-right">{formData.bio.length}/500</p>
-                      </div>
-
-                      {/* Avatar */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                          {t('avatar.label')}
-                        </label>
-                        <AvatarUploader
-                          value={formData.avatar_url}
-                          onChange={(url) => setFormData((prev) => ({ ...prev, avatar_url: url }))}
-                        />
-                      </div>
-
-                      {/* Hire CTA — solid-accent button on the public card
-                          (distinct from the bordered link rows below).
-                          Both fields blank = section hidden. */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                          {t('hireCta.title')}
-                        </label>
-                        <p className="mb-3 text-xs text-gray-500">{t('hireCta.description')}</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            name="hire_cta_label"
-                            value={formData.hire_cta_label}
-                            onChange={handleChange}
-                            maxLength={30}
-                            placeholder={t('hireCta.labelPlaceholder')}
-                            aria-label={t('hireCta.labelInput')}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
-                          />
-                          <input
-                            type="text"
-                            name="hire_cta_url"
-                            value={formData.hire_cta_url}
-                            onChange={handleChange}
-                            maxLength={2048}
-                            placeholder={t('hireCta.urlPlaceholder')}
-                            aria-label={t('hireCta.urlInput')}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base font-mono"
+                          <AvatarUploader
+                            value={formData.avatar_url}
+                            onChange={(url) => setFormData((prev) => ({ ...prev, avatar_url: url }))}
                           />
                         </div>
-                        <p className="mt-1.5 text-xs text-gray-500">{t('hireCta.urlHint')}</p>
-                      </div>
 
-                      {/* Meetup CTA — twin of Hire CTA but for peer meetups
-                          (Grab a coffee in {city}, Say hi on Telegram).
-                          Renders as a secondary outlined button on the card,
-                          paired with but visually subordinate to the solid
-                          Hire button. Both fields blank = section hidden. */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                          {t('meetupCta.title')}
-                        </label>
-                        <p className="mb-3 text-xs text-gray-500">{t('meetupCta.description')}</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            name="meetup_cta_label"
-                            value={formData.meetup_cta_label}
+                        <div>
+                          <label htmlFor="bio" className="block text-sm font-medium text-gray-900 mb-1.5">
+                            {t('bio')}
+                          </label>
+                          <textarea
+                            id="bio"
+                            name="bio"
+                            value={formData.bio}
                             onChange={handleChange}
-                            maxLength={30}
-                            placeholder={t('meetupCta.labelPlaceholder')}
-                            aria-label={t('meetupCta.labelInput')}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+                            maxLength={500}
+                            rows={5}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 resize-y transition"
+                            placeholder={t('bioPlaceholder')}
                           />
-                          <input
-                            type="text"
-                            name="meetup_cta_url"
-                            value={formData.meetup_cta_url}
-                            onChange={handleChange}
-                            maxLength={2048}
-                            placeholder={t('meetupCta.urlPlaceholder')}
-                            aria-label={t('meetupCta.urlInput')}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base font-mono"
+                          <p className="mt-1 text-xs text-gray-400 text-right">{formData.bio.length}/500</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="role" className="block text-sm font-medium text-gray-900 mb-1.5">
+                              {t('role')}
+                            </label>
+                            <select
+                              id="role"
+                              name="role"
+                              value={formData.role}
+                              onChange={handleChange}
+                              className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
+                            >
+                              <option value="">—</option>
+                              {ROLES.map((role) => (
+                                <option key={role} value={role}>{tRole(role)}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <WorkStatusField
+                            value={formData.work_status}
+                            onChange={(next) => setFormData((prev) => ({ ...prev, work_status: next }))}
                           />
                         </div>
-                        <p className="mt-1.5 text-xs text-gray-500">{t('meetupCta.urlHint')}</p>
-                      </div>
+                      </FormSubsection>
 
-                      {/* Open-to-coffee toggle. Soft signal independent of
-                          meetup_cta — a user can be "open to coffee" without
-                          publishing a cal.com / Telegram link. Renders on
-                          the card as a chip in the status row, suppressed
-                          automatically when current_city is empty (a chip
-                          that reads "open to coffee in nowhere" would just
-                          confuse). */}
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="open_to_coffee"
-                          checked={formData.open_to_coffee}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, open_to_coffee: e.target.checked }))
+                      {/* Conversion — the freelancer wedge's headline:
+                          Hire CTA + Meetup CTA + Open-to-coffee chip. All
+                          three are about turning card views into
+                          conversations. Hire / Meetup default-collapsed
+                          when empty so an unfilled card doesn't waste 200px
+                          of edit space; auto-expand when there's content. */}
+                      <FormSubsection title={t('moreSection.conversion')}>
+                        <Collapsible
+                          title={t('hireCta.title')}
+                          summary={t('hireCta.description')}
+                          defaultOpen={
+                            !!formData.hire_cta_label.trim() ||
+                            !!formData.hire_cta_url.trim()
                           }
-                          className="mt-0.5 w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900/15"
-                        />
-                        <div className="min-w-0">
-                          <div className="text-sm font-medium text-gray-900">
-                            {t('openToCoffee.label')}
+                        >
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              name="hire_cta_label"
+                              value={formData.hire_cta_label}
+                              onChange={handleChange}
+                              maxLength={30}
+                              placeholder={t('hireCta.labelPlaceholder')}
+                              aria-label={t('hireCta.labelInput')}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+                            />
+                            <input
+                              type="text"
+                              name="hire_cta_url"
+                              value={formData.hire_cta_url}
+                              onChange={handleChange}
+                              maxLength={2048}
+                              placeholder={t('hireCta.urlPlaceholder')}
+                              aria-label={t('hireCta.urlInput')}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base font-mono"
+                            />
                           </div>
-                          <div className="text-xs text-gray-500 mt-0.5">
-                            {formData.current_city
-                              ? t('openToCoffee.hintWithCity', { city: formData.current_city })
-                              : t('openToCoffee.hintNoCity')}
+                          <p className="mt-1.5 text-xs text-gray-500">{t('hireCta.urlHint')}</p>
+                        </Collapsible>
+
+                        <Collapsible
+                          title={t('meetupCta.title')}
+                          summary={t('meetupCta.description')}
+                          defaultOpen={
+                            !!formData.meetup_cta_label.trim() ||
+                            !!formData.meetup_cta_url.trim()
+                          }
+                        >
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              name="meetup_cta_label"
+                              value={formData.meetup_cta_label}
+                              onChange={handleChange}
+                              maxLength={30}
+                              placeholder={t('meetupCta.labelPlaceholder')}
+                              aria-label={t('meetupCta.labelInput')}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+                            />
+                            <input
+                              type="text"
+                              name="meetup_cta_url"
+                              value={formData.meetup_cta_url}
+                              onChange={handleChange}
+                              maxLength={2048}
+                              placeholder={t('meetupCta.urlPlaceholder')}
+                              aria-label={t('meetupCta.urlInput')}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base font-mono"
+                            />
                           </div>
+                          <p className="mt-1.5 text-xs text-gray-500">{t('meetupCta.urlHint')}</p>
+                        </Collapsible>
+
+                        {/* Open-to-coffee — soft signal, independent of
+                            meetup_cta. Chip on the card requires
+                            current_city, so we surface an explicit warning
+                            when the toggle is on but current_city is empty
+                            (avoids the silent-fail of "I checked the box
+                            but nothing showed up"). */}
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="open_to_coffee"
+                            checked={formData.open_to_coffee}
+                            onChange={(e) =>
+                              setFormData((prev) => ({ ...prev, open_to_coffee: e.target.checked }))
+                            }
+                            className="mt-0.5 w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900/15"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-900">
+                              {t('openToCoffee.label')}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {formData.current_city
+                                ? t('openToCoffee.hintWithCity', { city: formData.current_city })
+                                : t('openToCoffee.hintNoCity')}
+                            </div>
+                            {formData.open_to_coffee && !formData.current_city.trim() && (
+                              <div className="mt-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
+                                {t('openToCoffee.warningNoCity')}
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      </FormSubsection>
+
+                      {/* Travel — countries visited (low-friction tap-flags)
+                          and the optional Stays log. nomad_since is now in
+                          Essentials above; this group is just for past
+                          travel data. */}
+                      <FormSubsection title={t('moreSection.travel')}>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                            {t('visitedCountries')}
+                          </label>
+                          <CountrySelector
+                            selectedCountries={visitedCountries}
+                            onChange={setVisitedCountries}
+                          />
+                          <p className="mt-1.5 text-xs text-gray-500">
+                            {t('visitedCountriesHint')}
+                          </p>
                         </div>
-                      </label>
 
-                      <BlurbsField blurbs={blurbs} onChange={setBlurbs} />
-
-                      <FeaturedWorksField works={featuredWorks} onChange={setFeaturedWorks} />
-
-                      <LinksField links={links} onChange={setLinks} />
-
-                      {/* Nomad since — single month picker. Drives the
-                          "X years on the road" stat on the card without
-                          forcing the user to log individual stays. */}
-                      <div>
-                        <label htmlFor="nomad_since" className="block text-sm font-medium text-gray-900 mb-1.5">
-                          {t('nomadSinceLabel')}
-                        </label>
-                        <input
-                          type="month"
-                          id="nomad_since"
-                          name="nomad_since"
-                          value={formData.nomad_since}
-                          onChange={handleChange}
-                          // Month picker has built-in min/max. Mirrors the DB
-                          // CHECK in migration 0023 so users can't pick a
-                          // future month or anything pre-2000.
-                          min="2000-01"
-                          max={new Date().toISOString().slice(0, 7)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
+                        <CollapsibleStays
+                          stays={stays}
+                          setStays={setStays}
+                          tStays={tStays}
                         />
-                        <p className="mt-1.5 text-xs text-gray-500">{t('nomadSinceHint')}</p>
-                      </div>
+                      </FormSubsection>
 
-                      {/* Visited countries — the low-friction "where I've
-                          been" input. Promoted above Stays because anyone
-                          can tap flags in 10 seconds, whereas Stays needs
-                          dates + cities the user might not remember. */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                          {t('visitedCountries')}
-                        </label>
-                        <CountrySelector
-                          selectedCountries={visitedCountries}
-                          onChange={setVisitedCountries}
-                        />
-                        <p className="mt-1.5 text-xs text-gray-500">
-                          {t('visitedCountriesHint')}
-                        </p>
-                      </div>
-
-                      {/* Stays — demoted to an inner collapse. This is the
-                          richest data (city + dates + photos), but most
-                          casual users won't fill it in. The collapse keeps
-                          /edit visually calm for the 80% case while still
-                          letting power users (those who want city pins on
-                          the map / meetup signalling) opt into the full
-                          editor. */}
-                      <CollapsibleStays
-                        stays={stays}
-                        setStays={setStays}
-                        tStays={tStays}
-                      />
+                      {/* Extras — content/portfolio enrichments. None of
+                          these are required; the card just doesn't render
+                          the corresponding section when empty. */}
+                      <FormSubsection title={t('moreSection.extras')}>
+                        <BlurbsField blurbs={blurbs} onChange={setBlurbs} />
+                        <FeaturedWorksField works={featuredWorks} onChange={setFeaturedWorks} />
+                        <LinksField links={links} onChange={setLinks} />
+                      </FormSubsection>
                     </div>
                   )}
                 </div>
@@ -527,29 +546,47 @@ export default function CreateCardForm({
   )
 }
 
-// Inline collapse for the Stays editor. Default-closed when there are no
-// stays yet (the casual-user case); auto-opens if the user already has
-// stays in the draft / their saved card so existing data isn't hidden
-// from them. Local state — no need to lift it; the editor itself is the
-// only thing the toggle controls.
-function CollapsibleStays({
-  stays,
-  setStays,
-  tStays,
+// Group header for the four sub-sections inside "Customize more"
+// (About / Conversion / Travel / Extras). Quiet uppercase label so it
+// reads as scaffolding, not as another piece of UI competing for
+// attention with the inputs below it.
+function FormSubsection({
+  title,
+  children,
 }: {
-  stays: StayDraft[]
-  setStays: React.Dispatch<React.SetStateAction<StayDraft[]>>
-  tStays: ReturnType<typeof useTranslations>
+  title: string
+  children: React.ReactNode
 }) {
-  const hasStays = stays.length > 0
-  const [open, setOpen] = useState(hasStays)
-  // Keep the toggle in sync if the user adds a stay via some other path
-  // (e.g. paste from draft); never auto-close so the user doesn't lose
-  // sight of an editor they're mid-way through.
-  useEffect(() => {
-    if (hasStays) setOpen(true)
-  }, [hasStays])
+  return (
+    <div>
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-4">
+        {title}
+      </h4>
+      <div className="space-y-5">{children}</div>
+    </div>
+  )
+}
 
+// Generic header-+-disclosure block. Used for Hire CTA, Meetup CTA, and
+// the Stays editor. Default-open is parametric so each call site can
+// auto-expand when there's already content (filled fields / saved rows)
+// without ever auto-collapsing — losing sight of in-progress data would
+// be worse than the cleaner empty state we get on first paint.
+function Collapsible({
+  title,
+  summary,
+  defaultOpen,
+  children,
+}: {
+  title: string
+  summary?: string
+  defaultOpen: boolean
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  useEffect(() => {
+    if (defaultOpen) setOpen(true)
+  }, [defaultOpen])
   return (
     <div className="rounded-xl border border-gray-200 bg-gray-50/50">
       <button
@@ -559,13 +596,10 @@ function CollapsibleStays({
         aria-expanded={open}
       >
         <div className="min-w-0">
-          <div className="text-sm font-medium text-gray-900">
-            {tStays('editorTitle')}{' '}
-            <span className="text-gray-400 font-normal">({tStays('optional')})</span>
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            {tStays('collapsedHint')}
-          </div>
+          <div className="text-sm font-medium text-gray-900">{title}</div>
+          {summary && (
+            <div className="text-xs text-gray-500 mt-0.5">{summary}</div>
+          )}
         </div>
         <svg
           className={`w-4 h-4 flex-shrink-0 text-gray-500 transition ${open ? 'rotate-90' : ''}`}
@@ -578,11 +612,32 @@ function CollapsibleStays({
         </svg>
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t border-gray-200">
-          <p className="mb-3 text-xs text-gray-500">{tStays('editorHint')}</p>
-          <StaysEditor stays={stays} onChange={setStays} />
-        </div>
+        <div className="px-4 pb-4 pt-1 border-t border-gray-200">{children}</div>
       )}
     </div>
+  )
+}
+
+// Stays-specific wrapper around Collapsible. Splits out so the call site
+// in the Travel sub-section stays readable and the Stays-specific
+// behavior (auto-open when there are existing stays) lives here.
+function CollapsibleStays({
+  stays,
+  setStays,
+  tStays,
+}: {
+  stays: StayDraft[]
+  setStays: React.Dispatch<React.SetStateAction<StayDraft[]>>
+  tStays: ReturnType<typeof useTranslations>
+}) {
+  return (
+    <Collapsible
+      title={`${tStays('editorTitle')} (${tStays('optional')})`}
+      summary={tStays('collapsedHint')}
+      defaultOpen={stays.length > 0}
+    >
+      <p className="mb-3 text-xs text-gray-500">{tStays('editorHint')}</p>
+      <StaysEditor stays={stays} onChange={setStays} />
+    </Collapsible>
   )
 }

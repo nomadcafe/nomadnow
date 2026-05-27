@@ -340,7 +340,14 @@
     "openToCoffee": {
       "label": "I'm open to coffee with strangers",
       "hintWithCity": "A ☕️ chip on your card will say “Open to coffee in {city}”. Soft signal — visitors can reach out via your links or Meetup CTA.",
-      "hintNoCity": "Add a current city above to make this show on your card."
+      "hintNoCity": "Add a current city above to make this show on your card.",
+      "warningNoCity": "Current city is empty — this won't show on your card until you add one above."
+    },
+    "moreSection": {
+      "about": "About",
+      "conversion": "Get hired · Meet people",
+      "travel": "Travel",
+      "extras": "Extras"
     },
     "blurbs": {
       "title": "Blurbs",
@@ -360,7 +367,7 @@
       "remove": "Remove work"
     },
     "visitedCountries": "Countries you've been to",
-    "visitedCountriesHint": "Plotted on the map on your card. Add the rest later if you don't remember them all now.",
+    "visitedCountriesHint": "Tap the flags of countries you've visited — lights up the map on your card.",
     "nomadSinceLabel": "Nomading since",
     "nomadSinceHint": "One month picker — drives the “X years on the road” stat. Skip if you'd rather log individual stays below.",
     "submit": "Claim my card",

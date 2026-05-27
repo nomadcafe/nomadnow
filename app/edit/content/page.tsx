@@ -53,6 +53,7 @@ export default async function EditContentPage() {
     role: (profile.role as string | null) ?? '',
     bio: (profile.bio as string | null) ?? '',
     current_city: (profile.current_city as string | null) ?? '',
+    country: (profile.country as string | null) ?? '',
     avatar_url: (profile.avatar_url as string | null) ?? '',
     work_status: (profile.work_status as string | null) ?? '',
     timezone: (profile.timezone as string | null) ?? '',
