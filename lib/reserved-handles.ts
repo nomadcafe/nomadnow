@@ -6,6 +6,7 @@ const RESERVED = new Set<string>([
   'api',
   'auth',
   'create-card',
+  'edit',
   'explore',
   'import',
   'in',
