@@ -196,8 +196,10 @@
     },
     "proBullets": {
       "everythingInBasic": "包含 Basic 全部内容",
-      "customDomain": "自定义域名",
+      "accentCustom": "自定义强调色(任意 HEX)",
       "verifiedBadge": "认证徽章",
+      "handles": "一个账户最多 5 个 handle",
+      "customDomain": "自定义域名",
       "featured": "在 /map 和 /in/{country} 优先展示",
       "analytics": "访客分析(地理 + 来源)",
       "drafts": "多张草稿卡片",

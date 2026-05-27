@@ -196,8 +196,10 @@
     },
     "proBullets": {
       "everythingInBasic": "Everything in Basic",
-      "customDomain": "Custom domain",
+      "accentCustom": "Custom accent color (any hex)",
       "verifiedBadge": "Verified badge",
+      "handles": "Up to 5 handles on one account",
+      "customDomain": "Custom domain",
       "featured": "Featured on /map and /in/{country}",
       "analytics": "Visitor analytics (geo + referrers)",
       "drafts": "Multiple draft cards",

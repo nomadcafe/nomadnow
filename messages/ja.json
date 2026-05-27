@@ -196,8 +196,10 @@
     },
     "proBullets": {
       "everythingInBasic": "Basic のすべて",
-      "customDomain": "カスタムドメイン",
+      "accentCustom": "アクセントカラーを自由に(任意の HEX)",
       "verifiedBadge": "認証バッジ",
+      "handles": "1 アカウントで最大 5 ハンドル",
+      "customDomain": "カスタムドメイン",
       "featured": "/map と /in/{country} のおすすめ枠",
       "analytics": "訪問者分析(地域 + リファラー)",
       "drafts": "複数の下書きカード",

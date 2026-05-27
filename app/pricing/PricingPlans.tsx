@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
 
@@ -24,11 +23,17 @@ const BASIC_BULLET_KEYS = [
   'footer',
 ] as const
 
+// Pro bullets — order is by "what's live today first, roadmap after" so the
+// reader hits the live differentiators (accent / verified) before the soon
+// pills start. Must agree with the FEATURE_ROWS table on page.tsx — every
+// row marked `soon` in the table is mirrored here.
 const PRO_BULLET_KEYS: { key: string; soon?: boolean }[] = [
   { key: 'everythingInBasic' },
-  { key: 'customDomain', soon: true },
+  { key: 'accentCustom' },
   { key: 'verifiedBadge' },
-  { key: 'featured' },
+  { key: 'handles', soon: true },
+  { key: 'customDomain', soon: true },
+  { key: 'featured', soon: true },
   { key: 'analytics', soon: true },
   { key: 'drafts', soon: true },
   { key: 'autoSync', soon: true },
@@ -64,42 +69,18 @@ export function PricingPlans({ currentPlan }: Props) {
   const t = useTranslations('pricing')
   const tCommon = useTranslations('common')
   const soonLabel = tCommon('soon').toUpperCase()
-  const [billing, setBilling] = useState<Billing>('monthly')
-  const isYearly = billing === 'yearly'
-  const unit = isYearly ? t('perYear') : t('perMonth')
+  // Monthly/yearly toggle is hidden until yearly Stripe price IDs are wired
+  // and the checkout path supports the yearly interval. The previous UI
+  // showed a yearly tab that flipped the prices but disabled the checkout
+  // button — a dead-end funnel where users committed to a price and then
+  // discovered they couldn't actually pay it. Better to not offer the
+  // option until it actually works. The yearly branch and PRICES.yearly
+  // entries are kept so re-enabling is just restoring the toggle here.
+  const isYearly: boolean = false
+  const unit = t('perMonth')
 
   return (
     <>
-      <div className="flex justify-center mb-8">
-        <div role="tablist" aria-label={t('billing.aria')} className="inline-flex items-center bg-gray-100 p-1 rounded-full text-sm">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={!isYearly}
-            onClick={() => setBilling('monthly')}
-            className={`px-4 py-1.5 rounded-full transition ${
-              !isYearly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {t('billing.monthly')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isYearly}
-            onClick={() => setBilling('yearly')}
-            className={`px-4 py-1.5 rounded-full transition inline-flex items-center gap-2 ${
-              isYearly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <span>{t('billing.yearly')}</span>
-            <span className="text-[10px] font-semibold uppercase tracking-wide bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">
-              {t('billing.save')}
-            </span>
-          </button>
-        </div>
-      </div>
-
       <div className="grid md:grid-cols-2 gap-6 items-stretch">
         {/* Basic — featured. */}
         <div className="relative rounded-2xl border-2 border-gray-900 bg-gray-900 text-white p-7 sm:p-8 flex flex-col shadow-xl shadow-gray-900/20">
