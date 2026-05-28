@@ -155,7 +155,11 @@ function CellValue({
 
 const FAQ_KEYS = ['noFree', 'cancel', 'data', 'switch', 'fees'] as const
 
-export default async function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>
+}) {
   const t = await getTranslations('pricing')
   const tCommon = await getTranslations('common')
   const tNav = await getTranslations('nav')
@@ -170,10 +174,23 @@ export default async function PricingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const [currentPlan, accountInitial] = await Promise.all([
+  const [currentPlan, accountInitial, params] = await Promise.all([
     user ? getBillingState(user.id).then((b) => b.plan) : Promise.resolve(null),
     getAccountInitial(),
+    searchParams,
   ])
+
+  // /create-card submit hands off here with ?from=create when the user has no
+  // active plan. The form has already POSTed /api/users, so the handle row
+  // exists and accountInitial.handle is populated — we use that to close the
+  // loop ("your handle is reserved") before showing the paywall. Skip the
+  // banner if someone hit /pricing?from=create directly without a handle.
+  const showCreateHandoff =
+    params.from === 'create' &&
+    accountInitial.status === 'signedIn' &&
+    !!accountInitial.handle
+  const handoffHandle =
+    showCreateHandoff && accountInitial.status === 'signedIn' ? accountInitial.handle : null
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -193,6 +210,27 @@ export default async function PricingPage() {
           </div>
         </div>
       </nav>
+
+      {handoffHandle && (
+        <div className="border-b border-emerald-100 bg-emerald-50/60">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3.5 sm:py-4 flex items-center gap-3">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500 text-white shrink-0">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+            <div className="text-sm sm:text-[15px] min-w-0">
+              <span className="text-gray-900 font-medium">
+                {t.rich('almostThere.title', {
+                  handle: handoffHandle,
+                  mono: (chunks) => <span className="font-mono">{chunks}</span>,
+                })}
+              </span>
+              <span className="text-gray-600"> {t('almostThere.subtitle')}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <header className="relative overflow-hidden">
