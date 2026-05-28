@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 import { DECORATION_KEYS, AVATAR_STYLE_KEYS, BIO_QUOTE_STYLE_KEYS } from '@/lib/themes'
+import { NOMAD_DEFAULT_ORDER } from '@/lib/sections'
 
 // Settings the user can actually change today. Dropped fields (visibility,
 // delay_days, layout_template, enabled_sections) had UI but were never read
@@ -157,7 +158,14 @@ export async function GET() {
           avatar_style_override: null,
           bio_quote_style_override: null,
           links_layout: 'icons',
-          section_order: ['avatar', 'name', 'location', 'bio', 'stats', 'map', 'status', 'links'],
+          // Source from NOMAD_DEFAULT_ORDER (the canonical list in
+          // lib/sections.ts) instead of a hardcoded subset. The previous
+          // hardcoded list was a stale 8-section snapshot that missed
+          // hire/meetup/blurbs/work/stays — anyone who pulled this
+          // default into their settings ended up with those five
+          // sections dumped to the bottom of their card after
+          // reconcileSectionOrder appended the missing IDs.
+          section_order: NOMAD_DEFAULT_ORDER,
         },
       })
     }
