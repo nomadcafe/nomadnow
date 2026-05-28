@@ -280,7 +280,7 @@
       }
     },
     "title": "占下你的卡片。",
-    "subtitle": "三个字段即可开始。其他都是可选,稍后可改。",
+    "subtitle": "只需两个 —— handle 和姓名。其它都可选,随时能改。",
     "editTitle": "编辑你的卡片。",
     "editSubtitle": "更新你公开主页上显示的内容。",
     "editSubmit": "保存修改",

@@ -111,7 +111,15 @@ function readDraft(isEdit: boolean) {
 //   2. Persist the working draft to localStorage on every change in create
 //      mode, so a refresh / crash doesn't lose typing. Edit mode skips.
 //   3. Expose `clearDraft()` for the submit handler to call on success.
-export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
+export function useFormDraft(
+  initial: FormInitial | null,
+  // Server-derived handle pre-fill (from the auth email's local part).
+  // Only kicks in when both `initial?.handle` and the persisted draft
+  // are empty — i.e. a genuine first-time visitor with no prior state.
+  // Editing-mode users (initial present) and returning create-mode
+  // users (draft present) keep what they had.
+  handleSuggestion?: string,
+): UseFormDraftResult {
   const isEdit = Boolean(initial)
   // Read once at hook setup so React's useState initializers can use it.
   // Reading inside the body is intentional — useState fires once anyway and
@@ -119,7 +127,7 @@ export function useFormDraft(initial: FormInitial | null): UseFormDraftResult {
   const draft = readDraft(isEdit)
 
   const [formData, setFormData] = useState<FormData>({
-    handle: initial?.handle ?? draft?.handle ?? '',
+    handle: initial?.handle ?? draft?.handle ?? handleSuggestion ?? '',
     display_name: initial?.display_name ?? draft?.display_name ?? '',
     role: initial?.role ?? draft?.role ?? '',
     bio: initial?.bio ?? draft?.bio ?? '',

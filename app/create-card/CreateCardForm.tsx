@@ -33,12 +33,18 @@ export type InitialCardData = FormInitial
 export default function CreateCardForm({
   initial,
   embedded = false,
+  handleSuggestion,
 }: {
   initial?: InitialCardData | null
   // When true, the form skips its own top nav + min-h-screen wrapper because
   // the host (e.g. /edit layout) already provides them. Keeps the form's
   // controls and live preview the same in both contexts.
   embedded?: boolean
+  // Pre-fill for the handle input in create mode. Only used when the user
+  // has no saved draft and no existing card row — the server derives this
+  // from their auth email so a first-time visitor isn't staring at an
+  // empty "pick a permanent URL" field with no starting point.
+  handleSuggestion?: string
 }) {
   const isEdit = Boolean(initial)
   const t = useTranslations('createCard')
@@ -61,7 +67,7 @@ export default function CreateCardForm({
     setFeaturedWorks,
     draftHasOptionalData,
     clearDraft,
-  } = useFormDraft(initial ?? null)
+  } = useFormDraft(initial ?? null, handleSuggestion)
 
   // Auto-expand the optional section when there's draft data in it, so users
   // don't lose visibility into in-progress work. Edit mode opens it by
