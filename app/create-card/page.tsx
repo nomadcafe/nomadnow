@@ -110,5 +110,24 @@ export default async function CreateCardPage() {
       }
     : null
 
-  return <CreateCardForm initial={initial} />
+  // Derive a handle suggestion from the local part of the user's auth
+  // email. Pre-filling the handle field is the single biggest first-
+  // impression friction reducer: the handle is permanent, and asking a
+  // brand-new visitor to invent their URL slug as the FIRST action is
+  // decision-paralysis food. The suggestion is just a default — the
+  // user can edit it freely in the input.
+  const handleSuggestion = deriveHandleFromEmail(user.email)
+
+  return <CreateCardForm initial={initial} handleSuggestion={handleSuggestion} />
+}
+
+// Strip the email local part to handle-eligible characters. Mirrors the
+// server-side handle regex in /api/users (alphanumeric + underscore +
+// hyphen). Returns empty string if the local part has no eligible chars
+// (e.g., "+@example.com") so the form falls through to its draft / empty
+// default cleanly.
+function deriveHandleFromEmail(email: string | undefined): string {
+  if (!email) return ''
+  const local = email.split('@')[0] ?? ''
+  return local.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 50)
 }
