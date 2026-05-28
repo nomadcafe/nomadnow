@@ -12,25 +12,46 @@ export interface SectionDef {
   required?: boolean
 }
 
+// Default order is the "real visitor scan" order:
+//   identity (avatar / name / location)
+//   → vibe (status pills — verified / work status / open-to-coffee)
+//   → introduction (bio)
+//   → conversion (hire then meetup, primary before secondary)
+//   → proof (blurbs / featured work)
+//   → history (stays)
+//   → deep-dive (links / stats / map)
+//
+// The previous order buried hire_cta at position 12/13. A visitor had to
+// scroll past bio, blurbs, work, stays, map, stats, and status before
+// hitting the freelancer wedge's primary conversion button — effectively
+// hidden. Status pills were similarly buried at position 10 even though
+// they're the "vibe" signals a visitor reads earliest. Reordering here
+// only affects users who haven't customized their section_order;
+// reconcileSectionOrder preserves stored orders unchanged.
 export const NOMAD_SECTIONS: SectionDef[] = [
   { id: 'avatar', label: 'Avatar', description: 'Profile picture or initial' },
   { id: 'name', label: 'Name & role', description: 'Display name and what you do', required: true },
   { id: 'location', label: 'Currently in', description: 'City + live local time' },
+  // Verified + work status + Open-to-coffee chip — context signals a
+  // visitor reads right after "who and where". Promoted from position 10
+  // to right after location.
+  { id: 'status', label: 'Status pills', description: 'Verified badge + work status' },
   { id: 'bio', label: 'Bio', description: 'One-line introduction' },
+  // Solid-accent CTA button — the freelancer wedge's primary conversion
+  // path. Promoted from position 12 to right after bio, where a scanning
+  // visitor still encounters it without depth-scrolling.
+  { id: 'hire', label: 'Hire CTA', description: 'Prominent "Hire me / Book a call" button' },
+  // Secondary outlined CTA — paired with hire above. Sits directly after
+  // hire so the pair reads as one conversion zone.
+  { id: 'meetup', label: 'Meetup CTA', description: 'Secondary "Grab a coffee / Say hi" button' },
   { id: 'blurbs', label: 'Blurbs', description: 'Label/value pairs — Now reading, Booking, Rate, Tools…' },
   // Clickable project tiles — case studies / portfolio pieces. Renders
   // only when at least one entry exists; cap of 6 enforced at the API.
   { id: 'work', label: 'Featured work', description: 'Project tiles — case studies, portfolio pieces (up to 6)' },
   { id: 'stays', label: 'Stays', description: 'City-level travel with day counts' },
+  { id: 'links', label: 'Links', description: 'External links' },
   { id: 'stats', label: 'Stats', description: 'Countries visited + member since' },
   { id: 'map', label: 'World map', description: 'Visited countries plotted as constellation' },
-  { id: 'status', label: 'Status pills', description: 'Verified badge + work status' },
-  // Secondary outlined CTA — paired with hire below. Renders only when both
-  // label and URL are set. Nomad-side conversion ("Grab a coffee in {city}").
-  { id: 'meetup', label: 'Meetup CTA', description: 'Secondary "Grab a coffee / Say hi" button' },
-  // Solid-accent CTA button. Renders only when both label and URL are set.
-  { id: 'hire', label: 'Hire CTA', description: 'Prominent "Hire me / Book a call" button' },
-  { id: 'links', label: 'Links', description: 'External links' },
 ]
 
 export const NOMAD_DEFAULT_ORDER = NOMAD_SECTIONS.map((s) => s.id)
