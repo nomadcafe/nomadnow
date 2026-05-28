@@ -122,6 +122,10 @@
     "comingMore": "More features rolling out regularly.",
     "headline": "Two plans. No ads. No fees.",
     "subhead": "We don't offer a free tier — it's how we keep the platform clean, ad-free, and built for nomads instead of advertisers.",
+    "almostThere": {
+      "title": "<mono>nomad.now/{handle}</mono> is reserved for you.",
+      "subtitle": "Pick a plan below to publish your card."
+    },
     "mostPopular": "Most popular",
     "perMonth": "/mo",
     "perYear": "/yr",

@@ -122,6 +122,10 @@
     "comingMore": "新機能を順次追加していきます。",
     "headline": "2 つのプラン。広告なし。手数料なし。",
     "subhead": "無料プランは提供していません — 広告主のためじゃなく、ノマドのために作られたクリーンなサービスを保つために。",
+    "almostThere": {
+      "title": "<mono>nomad.now/{handle}</mono> はあなたのために確保されています。",
+      "subtitle": "プランを選んでカードを公開しましょう。"
+    },
     "mostPopular": "人気",
     "perMonth": "/月",
     "perYear": "/年",

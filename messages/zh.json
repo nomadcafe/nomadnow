@@ -122,6 +122,10 @@
     "comingMore": "更多新功能陆续推出。",
     "headline": "两个套餐。没广告。没抽成。",
     "subhead": "我们不提供免费档 — 这样平台才能保持干净、无广告、为游民而生而不是为广告主而生。",
+    "almostThere": {
+      "title": "<mono>nomad.now/{handle}</mono> 已经为你保留。",
+      "subtitle": "选个套餐让卡片上线。"
+    },
     "mostPopular": "最受欢迎",
     "perMonth": "/月",
     "perYear": "/年",
