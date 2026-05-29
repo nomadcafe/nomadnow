@@ -2,8 +2,11 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import './globals.css'
 import { PerformanceMonitor } from '@/components/PerformanceMonitor'
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 const inter = Inter({
   subsets: ['latin'],
@@ -64,6 +67,7 @@ export default async function RootLayout({
         </NextIntlClientProvider>
         <PerformanceMonitor />
       </body>
+      {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
     </html>
   )
 }
