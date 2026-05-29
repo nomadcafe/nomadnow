@@ -16,6 +16,9 @@ const envSchema = z.object({
   // when it's actually required.
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_BASE_URL: z.string().url().optional(),
+  // Google Analytics 4 measurement ID (e.g. "G-XXXXXXXXXX"). Optional — when
+  // unset, the GA script is not loaded and the tracking helpers no-op.
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().min(1).optional(),
   // Optional — when both are set, API rate limiting uses Upstash Redis.
   // When unset, rate limiting silently no-ops (fine for local dev / preview deploys).
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
@@ -44,6 +47,7 @@ export function getEnv(): Env {
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
       NEXT_PUBLIC_BASE_URL: baseUrl,
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
       UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
       UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,

@@ -1,13 +1,19 @@
 /**
  * Analytics and tracking utilities
+ *
+ * The GA4 script itself is loaded in app/layout.tsx via <GoogleAnalytics />
+ * from @next/third-parties, which also sends pageviews on route changes
+ * automatically. These helpers are for manual events / explicit pageviews.
  */
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 /**
  * Track page view
  */
 export function trackPageView(path: string, title?: string) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    ;(window as any).gtag('config', 'GA_MEASUREMENT_ID', {
+  if (GA_MEASUREMENT_ID && typeof window !== 'undefined' && (window as any).gtag) {
+    ;(window as any).gtag('config', GA_MEASUREMENT_ID, {
       page_path: path,
       page_title: title,
     })
