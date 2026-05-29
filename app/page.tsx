@@ -358,6 +358,11 @@ export default async function Home() {
               // the comparison reflects the freelancer wedge the product is
               // actually betting on, not just the travel-map novelty.
               [t('comparison.row7'), false, true],
+              // Handle availability — Linktree's namespace is saturated, so
+              // newcomers can't get the handle that matches their brand.
+              // A fresh namespace is a real, emotionally-resonant win, so it
+              // sits in the winning cluster rather than after the weak rows.
+              [t('comparison.row8'), false, true],
               [t('comparison.row4'), false, true],
               [t('comparison.row5'), true, 'soon'],
               [t('comparison.row6'), true, true],
