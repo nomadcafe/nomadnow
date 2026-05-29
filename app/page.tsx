@@ -60,6 +60,31 @@ const HERO_LINKS: NomadLink[] = [
     updated_at: '',
   },
 ]
+// feature4's "Land work while you travel" visual must NOT restate the hero's
+// full Kenji card — same person + same hire/meetup buttons twice reads as a
+// duplicate. enabledSections can't trim a card down to just the CTAs:
+// reconcileEnabledSections re-adds every missing section (so a stale DB row
+// never hides a newly-shipped feature), which means a stored subset is treated
+// as "all on". So we trim through DATA instead — each section renderer returns
+// null when its field is empty. A user with only an avatar + name + the two
+// CTAs therefore renders exactly "buttons right under your name" (feature4.body)
+// and nothing else. Different identity + no city so it doesn't twin the hero,
+// and no work_status so it doesn't restate feature3's status chip either.
+const FEATURE4_USER: User = {
+  ...HERO_USER,
+  id: 'feature4-preview',
+  handle: 'sofia',
+  display_name: 'Sofia Reyes',
+  avatar_url: 'https://i.pravatar.cc/240?img=47',
+  role: 'Brand Designer',
+  current_city: '', // → location section renders null
+  work_status: '', // → status section renders null
+  visited_countries: [], // → map section renders null
+  hire_cta_label: 'Hire me',
+  hire_cta_url: 'mailto:sofia@example.com',
+  meetup_cta_label: 'Grab a coffee',
+  meetup_cta_url: 'https://cal.com/sofia/coffee',
+}
 // Hero card layout — kept compact (stays under 700px to keep the CTA
 // above the fold on shorter viewports) but now surfaces the dual
 // conversion buttons that drive the freelancer wedge. Order matters:
@@ -305,10 +330,12 @@ export default async function Home() {
               featured works) is aimed at "nomad freelancer → land
               client". Without this row, the landing told a generic
               travel story while the product was tilting toward
-              conversion. Visual uses the real NomadCardServer with only
-              the hire + meetup sections enabled so every visual upgrade
-              to those buttons ships on the homepage automatically — same
-              real-component policy as the hero card preview. */}
+              conversion. Visual uses the real NomadCardServer (same
+              real-component policy as the hero card preview, so button
+              upgrades ship here automatically) but a focused FEATURE4_USER
+              whose empty fields null out every section except avatar + name
+              + the two CTAs — so it shows "buttons under your name" without
+              re-rendering the hero's full card. */}
           <FeatureRow
             label={t('feature4.label')}
             title={t('feature4.title')}
@@ -317,11 +344,9 @@ export default async function Home() {
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-10 shadow-sm">
                 <NomadCardServer
-                  user={HERO_USER}
+                  user={FEATURE4_USER}
                   links={[]}
                   themeKey="classic"
-                  enabledSections={['hire', 'meetup']}
-                  sectionOrder={['hire', 'meetup']}
                   embedded
                 />
                 <p className="mt-4 text-xs text-gray-500 text-center">
