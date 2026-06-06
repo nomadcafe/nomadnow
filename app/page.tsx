@@ -134,14 +134,27 @@ export default async function Home() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
+        {/* Soft colour mesh + slow-drifting blobs. Kept low-opacity and behind
+            a -z-10 layer so the headline stays high-contrast and readable —
+            the brightness comes from the blobs, not a saturated wash. The
+            blob hues (violet → fuchsia → peach) are the same brand gradient
+            used on the headline highlight word and the primary CTA, so the
+            whole hero reads as one palette. */}
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 opacity-70"
+          className="absolute inset-0 -z-10"
           style={{
             background:
-              'radial-gradient(60% 50% at 80% 0%, rgba(255, 204, 153, 0.45) 0%, transparent 60%), radial-gradient(50% 50% at 10% 30%, rgba(220, 230, 255, 0.6) 0%, transparent 65%)',
+              'radial-gradient(55% 50% at 82% -5%, rgba(255, 196, 150, 0.5) 0%, transparent 60%), radial-gradient(50% 55% at 8% 20%, rgba(196, 181, 253, 0.5) 0%, transparent 62%), radial-gradient(45% 45% at 55% 8%, rgba(244, 170, 230, 0.32) 0%, transparent 60%)',
           }}
         />
+        <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="animate-blob absolute -top-16 right-[12%] h-72 w-72 rounded-full bg-gradient-to-br from-violet-400/40 to-fuchsia-300/30 blur-3xl" />
+          <div
+            className="animate-blob absolute top-24 -left-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-300/35 to-pink-300/30 blur-3xl"
+            style={{ animationDelay: '-6s' }}
+          />
+        </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 lg:pt-20 pb-20 sm:pb-28">
           {/* items-start so the left column anchors to the top of the hero
@@ -152,8 +165,11 @@ export default async function Home() {
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-start">
             {/* Left: copy */}
             <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-8">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 mb-8 rounded-full px-3 py-1 bg-gradient-to-r from-violet-50 to-fuchsia-50 ring-1 ring-violet-100">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                </span>
                 {t('eyebrow')}
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] font-semibold tracking-tighter leading-[0.95] mb-8">
@@ -161,7 +177,13 @@ export default async function Home() {
                 <br />
                 {t('heroLine2')}
                 <br />
-                <span className="text-gray-300">{t('heroLine3')}</span>
+                {/* Brand gradient highlight — the one warm-to-cool sweep reused
+                    on the eyebrow pill, primary CTA and dark-CTA button so the
+                    page reads as a single palette. pb-1 stops descenders (y, g)
+                    from clipping under bg-clip-text. */}
+                <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent inline-block pb-1">
+                  {t('heroLine3')}
+                </span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-lg leading-relaxed">
                 {t.rich('heroSub', {
@@ -170,14 +192,14 @@ export default async function Home() {
                   // around it differently than English, and the old
                   // heroSub1+URL+heroSub2 split forced a fixed order.
                   handle: (chunks) => (
-                    <span className="font-mono text-gray-800">{chunks}</span>
+                    <span className="font-mono font-medium text-fuchsia-600">{chunks}</span>
                   ),
                 })}
               </p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                 <GetYourCardButton
                   showArrow
-                  className="group inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-4 rounded-full font-medium text-base hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
+                  className="group inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-500 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.25)] px-7 py-4 rounded-full font-medium text-base shadow-lg shadow-fuchsia-500/30 hover:shadow-xl hover:shadow-fuchsia-500/40 hover:brightness-105 transition"
                 />
                 <div className="text-sm text-gray-500">
                   {t('heroPriceNote')}
@@ -276,6 +298,7 @@ export default async function Home() {
             label={t('feature1.label')}
             title={t('feature1.title')}
             body={t('feature1.body')}
+            accent="text-violet-600"
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
                 <WorldMap visitedCodes={previewVisited} />
@@ -291,6 +314,7 @@ export default async function Home() {
             label={t('feature2.label')}
             title={t('feature2.title')}
             body={t('feature2.body')}
+            accent="text-fuchsia-600"
             reverse
             visual={
               /* Ticks every minute — the whole feature row is about live
@@ -307,6 +331,7 @@ export default async function Home() {
             label={t('feature3.label')}
             title={t('feature3.title')}
             body={t('feature3.body')}
+            accent="text-rose-600"
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-10 shadow-sm flex flex-col items-center gap-3">
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-100">
@@ -340,6 +365,7 @@ export default async function Home() {
             label={t('feature4.label')}
             title={t('feature4.title')}
             body={t('feature4.body')}
+            accent="text-orange-600"
             reverse
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-10 shadow-sm">
@@ -371,7 +397,15 @@ export default async function Home() {
             <div className="grid grid-cols-3 px-4 sm:px-6 py-3 border-b border-gray-100 text-xs font-medium uppercase tracking-wider text-gray-500">
               <div></div>
               <div className="text-center">Linktree</div>
-              <div className="text-center">Nomad.now</div>
+              {/* Our column wins every row, so it gets weight + a single brand
+                  hue to set it apart from the gray Linktree column. Kept as a
+                  solid colour rather than the full gradient sweep, which is
+                  reserved for the page's real focal points (headline highlight
+                  + the two CTAs) so they don't have to compete with a table
+                  header for attention. */}
+              <div className="text-center font-semibold text-fuchsia-600">
+                Nomad.now
+              </div>
             </div>
             {([
               [t('comparison.row1'), false, true],
@@ -426,14 +460,16 @@ export default async function Home() {
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tighter leading-[1.05] mb-6">
             {t('darkCta.line1')}
             <br />
-            <span className="text-gray-500">{t('darkCta.line2')}</span>
+            <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-300 bg-clip-text text-transparent inline-block pb-1">
+              {t('darkCta.line2')}
+            </span>
           </h2>
           <p className="text-lg text-gray-300 mb-10 max-w-md mx-auto">
             {t('darkCta.body')}
           </p>
           <GetYourCardButton
             showArrow
-            className="inline-flex items-center gap-2 bg-white text-gray-900 px-7 py-4 rounded-full font-medium text-base hover:bg-gray-100 transition shadow-xl shadow-black/40"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-500 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.25)] px-7 py-4 rounded-full font-medium text-base hover:brightness-110 transition shadow-xl shadow-fuchsia-500/30"
           />
           <div className="mt-6 text-sm text-gray-500">
             {t('darkCta.note')}
@@ -479,17 +515,24 @@ function FeatureRow({
   body,
   visual,
   reverse = false,
+  accent = 'text-gray-500',
 }: {
   label: string
   title: string
   body: string
   visual: React.ReactNode
   reverse?: boolean
+  // Per-row label colour. Each feature gets its own hue, but all four are
+  // sampled off the brand arc (violet → fuchsia → rose → orange) so the
+  // section reads as a lively set without introducing colours that aren't in
+  // the headline/CTA gradient. Passed by the caller so the palette stays
+  // visible — and editable as one sequence — at the call site.
+  accent?: string
 }) {
   return (
     <div className={`grid lg:grid-cols-2 gap-10 lg:gap-16 items-center ${reverse ? 'lg:[&>div:first-child]:order-2' : ''}`}>
       <div>
-        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+        <div className={`text-xs font-semibold uppercase tracking-wider mb-3 ${accent}`}>
           {label}
         </div>
         <h3 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-[1.1] mb-5 max-w-md">
