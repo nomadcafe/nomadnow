@@ -2,6 +2,7 @@ import { cache } from 'react'
 import { createServerSupabase } from './supabase/server'
 import { handleSchema } from './validation'
 import { logError } from './errors'
+import { findUnsafeUrls } from './safe-browsing'
 import type {
   User,
   ProfileSettings,
@@ -86,13 +87,45 @@ export const getProfileByHandle = cache(
           .order('order_index', { ascending: true }),
       ])
 
+    const typedUser = user as unknown as User
+    const nomadLinks = (linksResult.data ?? []) as NomadLink[]
+    const nomadFeaturedWorks = (featuredWorksResult.data ?? []) as NomadFeaturedWork[]
+
+    // Safe Browsing scrub. The save-time check (in the link API routes) is the
+    // first gate, but it can't catch a link that was clean when saved and
+    // weaponised later — the classic "age the domain, then swap in the
+    // payload" play. So we re-check every user-supplied URL at read time and
+    // drop anything Google now flags before it reaches a visitor's browser.
+    // Dropped links simply vanish from the public card; the owner still sees
+    // them in edit mode (which reads straight from the DB), so a false
+    // positive is recoverable rather than destructive. findUnsafeUrls fails
+    // open, so an API outage degrades to "no scrub", never "blank card".
+    const unsafe = await findUnsafeUrls([
+      ...nomadLinks.map((l) => l.url),
+      ...nomadFeaturedWorks.map((w) => w.url),
+      typedUser.website,
+      typedUser.hire_cta_url,
+      typedUser.meetup_cta_url,
+    ].filter((u): u is string => typeof u === 'string' && u.length > 0))
+
+    if (unsafe.size > 0) {
+      logError(new Error('Safe Browsing flagged profile link(s)'), {
+        operation: 'getProfileByHandle.scrub',
+        handle,
+        flaggedCount: unsafe.size,
+      })
+      if (typedUser.website && unsafe.has(typedUser.website)) typedUser.website = undefined
+      if (typedUser.hire_cta_url && unsafe.has(typedUser.hire_cta_url)) typedUser.hire_cta_url = null
+      if (typedUser.meetup_cta_url && unsafe.has(typedUser.meetup_cta_url)) typedUser.meetup_cta_url = null
+    }
+
     return {
-      user: user as unknown as User,
+      user: typedUser,
       settings: (settingsResult.data ?? undefined) as ProfileSettings | undefined,
-      nomadLinks: (linksResult.data ?? []) as NomadLink[],
+      nomadLinks: nomadLinks.filter((l) => !unsafe.has(l.url)),
       nomadStays: (staysResult.data ?? []) as NomadStay[],
       nomadBlurbs: (blurbsResult.data ?? []) as NomadBlurb[],
-      nomadFeaturedWorks: (featuredWorksResult.data ?? []) as NomadFeaturedWork[],
+      nomadFeaturedWorks: nomadFeaturedWorks.filter((w) => !unsafe.has(w.url)),
     }
   },
 )
