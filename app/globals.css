@@ -94,6 +94,28 @@ html[data-scroll-behavior="smooth"] {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Slow organic drift for the soft colour blobs behind the hero / dark CTA.
+   Larger, slower travel than `float` so it reads as ambient background motion,
+   not a UI element bouncing. Neutralised by the global prefers-reduced-motion
+   block further down (it pins iteration-count to 1, and blob's 0%/100% frames
+   are identical, so the element settles with no transform). */
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(28px, -38px) scale(1.08);
+  }
+  66% {
+    transform: translate(-22px, 18px) scale(0.94);
+  }
+}
+
+.animate-blob {
+  animation: blob 16s ease-in-out infinite;
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
