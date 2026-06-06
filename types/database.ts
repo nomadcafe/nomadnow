@@ -44,6 +44,10 @@ export interface User {
   // automatically when current_city is empty. Independent from meetup_cta:
   // this is a stance, meetup_cta is the channel.
   open_to_coffee?: boolean
+  // Moderation kill switch (migration 0026). When TRUE the public read path
+  // (lib/profile.ts) treats the card as a 404, hiding a reported card and its
+  // links without deleting the row. Admin-toggled only.
+  suspended?: boolean
   // Stripe billing — see supabase/migrations/0003_subscriptions.sql
   stripe_customer_id?: string | null
   plan?: 'basic' | 'pro' | null
@@ -52,6 +56,23 @@ export interface User {
   current_period_end?: string | null
   created_at: string
   updated_at: string
+}
+
+// Abuse report (migration 0026). Internal-only — never returned on a public
+// read path. reported_handle is plain text (survives handle rename/delete);
+// reported_user_id is a best-effort snapshot, nulled if that user is deleted.
+export type ReportReason = 'phishing' | 'malware' | 'impersonation' | 'spam' | 'other'
+export type ReportStatus = 'open' | 'reviewing' | 'actioned' | 'dismissed'
+
+export interface Report {
+  id: string
+  reported_handle: string
+  reported_user_id: string | null
+  reason: ReportReason
+  details: string | null
+  reporter_ip: string | null
+  status: ReportStatus
+  created_at: string
 }
 
 export interface ProfileSettings {

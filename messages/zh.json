@@ -40,7 +40,30 @@
     "draftNotice": "本页面仍在拟定中,正式发布前会更新。",
     "privacyBody": "我们只收集渲染你的公开卡片所必需的信息 —— 你的 handle、你填写的资料字段,以及付费用户的 Stripe 客户 ID。不投放广告,不出售数据,不加载跟踪像素。",
     "termsBody": "不要冒充他人,不要发布违法内容,不要试图破坏服务。违反规则的 handle 我们会下架。订阅可随时在 /settings 中取消。",
-    "contactPrompt": "暂时有疑问?联系我们,我们会把不清楚的地方补到这页上。"
+    "contactPrompt": "暂时有疑问?联系我们,我们会把不清楚的地方补到这页上。",
+    "abuseContact": "举报滥用 —— 卡片上的钓鱼、病毒或冒充行为 —— 请发邮件至 <email>abuse@nomad.now</email>,或使用任意卡片上的「举报此页」链接。"
+  },
+  "report": {
+    "trigger": "举报此页",
+    "title": "举报此页",
+    "subtitle": "提交 nomad.now/{handle} 供审核。",
+    "reasonLabel": "有什么问题?",
+    "reasons": {
+      "phishing": "钓鱼 / 诈骗链接",
+      "malware": "恶意软件 / 病毒链接",
+      "impersonation": "冒充他人",
+      "spam": "垃圾信息",
+      "other": "其他问题"
+    },
+    "detailsLabel": "补充说明(可选)",
+    "detailsPlaceholder": "任何能帮助我们更快审核的信息。",
+    "submit": "提交举报",
+    "sending": "提交中…",
+    "cancel": "取消",
+    "error": "举报提交失败,请重试。",
+    "successTitle": "已收到你的举报,谢谢",
+    "successBody": "我们会审核这张卡片。感谢你帮助维护 nomad.now 的安全。",
+    "done": "完成"
   },
   "footer": {
     "tagline": "为不在一处定居的人准备的 bio 链接。",

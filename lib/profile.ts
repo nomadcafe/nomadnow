@@ -23,8 +23,11 @@ import type {
 // subscription_status, current_period_end) — they leak Stripe identifiers
 // to any visitor. `plan` is intentionally included so the public card can
 // render Pro-only features.
+// `suspended` is fetched (not rendered) purely so the read path can 404 a
+// moderated card — see the early return below. Requires GRANT SELECT
+// (suspended) from migration 0026 or this whole SELECT returns zero rows.
 const PUBLIC_USER_COLUMNS =
-  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,nomad_since,profile_type,verified,hire_cta_label,hire_cta_url,meetup_cta_label,meetup_cta_url,open_to_coffee,plan,created_at,updated_at' as const
+  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,nomad_since,profile_type,verified,hire_cta_label,hire_cta_url,meetup_cta_label,meetup_cta_url,open_to_coffee,suspended,plan,created_at,updated_at' as const
 
 export interface PublicProfile {
   user: User
@@ -61,6 +64,11 @@ export const getProfileByHandle = cache(
       return null
     }
     if (!user) return null
+
+    // Suspended (moderated) cards 404 — same outcome as a missing handle, so a
+    // reported phishing/malware card and its links stop rendering the moment a
+    // moderator flips the flag, without exposing that the handle exists.
+    if ((user as { suspended?: boolean }).suspended) return null
 
     const [settingsResult, linksResult, staysResult, blurbsResult, featuredWorksResult] =
       await Promise.all([

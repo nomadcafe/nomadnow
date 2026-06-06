@@ -6,6 +6,7 @@ import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { CardCopyLink } from './nomad-card/CardCopyLink'
+import { ReportLink } from './nomad-card/ReportLink'
 import { ThemeDecoration } from './nomad-card/ThemeDecoration'
 import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
@@ -188,6 +189,11 @@ export async function NomadCardServer({
             <div className={`mt-8 pt-8 border-t ${theme.divider} text-center`}>
               <p className={`text-sm mb-2 ${theme.textMuted}`}>{t('shareTitle')}</p>
               <CardCopyLink handle={user.handle} mutedClass={theme.textMuted} />
+              {/* Abuse reporting — visitors only (an owner reporting their own
+                  card is noise) and not in embedded previews. */}
+              {!isOwner && !embedded && (
+                <ReportLink handle={user.handle} mutedClass={theme.textMuted} />
+              )}
             </div>
           </div>
         </div>
