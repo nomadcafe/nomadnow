@@ -40,7 +40,30 @@
     "draftNotice": "This page is still being drafted before launch.",
     "privacyBody": "We collect only what's needed to render your public card — your handle, the profile fields you enter, and (for paid plans) the customer ID Stripe returns to us. We don't run ads, sell data, or load tracking pixels.",
     "termsBody": "Don't impersonate other people, don't post anything illegal, and don't try to break the service. We can take down handles that violate this. Subscriptions can be canceled any time from /settings.",
-    "contactPrompt": "Questions in the meantime? Reach out and we'll update this page with whatever's still unclear."
+    "contactPrompt": "Questions in the meantime? Reach out and we'll update this page with whatever's still unclear.",
+    "abuseContact": "Report abuse — phishing, malware, or impersonation on a card — at <email>abuse@nomad.now</email>, or use the “Report this page” link on any card."
+  },
+  "report": {
+    "trigger": "Report this page",
+    "title": "Report this page",
+    "subtitle": "Flag nomad.now/{handle} for review.",
+    "reasonLabel": "What's wrong?",
+    "reasons": {
+      "phishing": "Phishing / scam link",
+      "malware": "Malware / virus link",
+      "impersonation": "Impersonation",
+      "spam": "Spam",
+      "other": "Something else"
+    },
+    "detailsLabel": "Details (optional)",
+    "detailsPlaceholder": "Anything that helps us review this faster.",
+    "submit": "Submit report",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "error": "Couldn't send your report. Please try again.",
+    "successTitle": "Thanks — report received",
+    "successBody": "We'll review this card. Thanks for helping keep nomad.now safe.",
+    "done": "Done"
   },
   "footer": {
     "tagline": "The bio link for people who don't live in one place.",

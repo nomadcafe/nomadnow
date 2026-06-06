@@ -41,7 +41,16 @@ export default async function TermsPage() {
         <p className="text-base leading-relaxed text-gray-700 mb-6">
           {tLegal('termsBody')}
         </p>
-        <p className="text-sm text-gray-500">{tLegal('contactPrompt')}</p>
+        <p className="text-sm text-gray-500 mb-2">{tLegal('contactPrompt')}</p>
+        <p className="text-sm text-gray-500">
+          {tLegal.rich('abuseContact', {
+            email: (chunks) => (
+              <a href="mailto:abuse@nomad.now" className="underline hover:text-gray-900">
+                {chunks}
+              </a>
+            ),
+          })}
+        </p>
       </main>
     </div>
   )
