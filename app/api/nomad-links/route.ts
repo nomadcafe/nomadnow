@@ -4,6 +4,7 @@ import { createServerSupabase, requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 import { safeLinkUrlSchema } from '@/lib/validation'
+import { assertUrlsSafe } from '@/lib/safe-browsing'
 
 // Replace-all semantics: takes a links array and atomically replaces the
 // caller's nomad_links. Simpler than per-row create/update/delete for the
@@ -45,6 +46,11 @@ export async function PUT(request: NextRequest) {
     if (!validation.success) {
       throw new ValidationError('Invalid nomad link data', validation.error.errors)
     }
+
+    // Reject known-malicious links before they're stored. Fail-open: a Safe
+    // Browsing outage lets the save through, and the render-time scrub in
+    // lib/profile.ts is the second line of defence.
+    await assertUrlsSafe(validation.data.links.map((l) => l.url))
 
     // Wipe the existing set first. If we crash between delete and insert
     // (function timeout, etc.), the user sees no links and can resubmit —

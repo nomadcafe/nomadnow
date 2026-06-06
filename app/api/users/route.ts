@@ -8,6 +8,7 @@ import { isReservedHandle } from '@/lib/reserved-handles'
 import { bumpProfileCache } from '@/lib/revalidate'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
 import { safeLinkUrlSchema } from '@/lib/validation'
+import { assertUrlsSafe } from '@/lib/safe-browsing'
 
 // Reused on both create and update — keep them in lockstep so the form can
 // submit the same shape regardless of mode.
@@ -45,7 +46,9 @@ const createUserSchema = z.object({
   avatar_url: z.string().url().optional().or(z.literal('')),
   country: z.string().max(100).optional(),
   bio: z.string().max(500).optional(),
-  website: z.string().url().optional().or(z.literal('')),
+  // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
+  // can't be stored and later rendered as an href. Same allow-list as links.
+  website: safeLinkUrlSchema.optional().or(z.literal('')),
   location: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
@@ -69,7 +72,9 @@ const updateUserSchema = z.object({
   avatar_url: z.string().url().optional().or(z.literal('')),
   country: z.string().max(100).optional(),
   bio: z.string().max(500).optional(),
-  website: z.string().url().optional().or(z.literal('')),
+  // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
+  // can't be stored and later rendered as an href. Same allow-list as links.
+  website: safeLinkUrlSchema.optional().or(z.literal('')),
   location: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
@@ -101,6 +106,15 @@ export async function POST(request: NextRequest) {
     if (isReservedHandle(validation.data.handle)) {
       throw new ValidationError('Handle is reserved', { handle: 'This handle is reserved' })
     }
+
+    // Reject known-malicious CTA / website links (fail-open; render-time scrub
+    // in lib/profile.ts is the backstop). Non-string / mailto / tel values are
+    // ignored inside findUnsafeUrls.
+    await assertUrlsSafe(
+      [validation.data.hire_cta_url, validation.data.meetup_cta_url, validation.data.website].filter(
+        (u): u is string => typeof u === 'string' && u.length > 0,
+      ),
+    )
 
     const { data, error } = await supabase
       .from('users')
@@ -253,6 +267,13 @@ export async function PUT(request: NextRequest) {
     // '' → null so users can clear the field from the edit form by emptying
     // the month picker.
     if (cleanData.nomad_since === '') cleanData.nomad_since = null
+
+    // Re-scan CTA / website links on edit too (fail-open; see POST).
+    await assertUrlsSafe(
+      [cleanData.hire_cta_url, cleanData.meetup_cta_url, cleanData.website].filter(
+        (u): u is string => typeof u === 'string' && u.length > 0,
+      ),
+    )
 
     const { data, error } = await supabase
       .from('users')

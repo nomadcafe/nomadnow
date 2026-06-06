@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createServerSupabase, requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
+import { assertUrlsSafe } from '@/lib/safe-browsing'
 
 // Replace-all semantics — same shape as /api/blurbs and /api/nomad-links.
 // The form always submits the full desired set; server wipes and re-inserts.
@@ -48,6 +49,10 @@ export async function PUT(request: NextRequest) {
     if (!validation.success) {
       throw new ValidationError('Invalid featured work data', validation.error.errors)
     }
+
+    // Reject known-malicious links before storing (fail-open; render-time
+    // scrub is the backstop). See app/api/nomad-links/route.ts.
+    await assertUrlsSafe(validation.data.featured_works.map((w) => w.url))
 
     // Wipe-then-insert — same as nomad_blurbs replace-all. If we crash
     // between the two, the user sees no featured works and can resubmit;
