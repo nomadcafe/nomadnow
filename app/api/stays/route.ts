@@ -29,8 +29,24 @@ const replaceStaysSchema = z.object({
         // Up to 6 Supabase Storage URLs. Content checks (MIME, size,
         // path) already ran at upload time; we just shape-validate the
         // structural URL here. Cap matches the editor UI cap.
+        // https-only: our Storage URLs are always https, so this is a free
+        // tightening that blocks http:/javascript:/data: from ever being
+        // stored and later loaded as an <img src>. Mirrors the protocol
+        // allow-list policy on links (safeLinkUrlSchema).
         photo_urls: z
-          .array(z.string().url().max(2048))
+          .array(
+            z
+              .string()
+              .url()
+              .max(2048)
+              .refine((value) => {
+                try {
+                  return new URL(value).protocol === 'https:'
+                } catch {
+                  return false
+                }
+              }, 'Photo URL must use https'),
+          )
           .max(6)
           .optional()
           .nullable(),
