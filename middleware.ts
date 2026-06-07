@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { checkRateLimit } from '@/lib/rate-limit'
 
-const PROTECTED_PATHS = ['/create-card', '/settings']
+const PROTECTED_PATHS = ['/create-card', '/settings', '/admin']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

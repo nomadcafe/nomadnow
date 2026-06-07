@@ -175,7 +175,27 @@ NEXT_PUBLIC_BASE_URL=https://<prod-domain>
 # When absent, rate limiter no-ops (only do this on internal preview deploys).
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
+
+# Optional — comma-separated Supabase auth user IDs allowed into /admin (the
+# moderation console for suspending abusive cards). Empty/unset = nobody can
+# moderate via the UI. Find your id: Supabase dashboard → Authentication →
+# Users, or `select auth.uid()` while signed in.
+ADMIN_USER_IDS=
 ```
+
+## 7. Moderation (card takedown)
+
+Abuse reports (anonymous, rate-limited) land in the `reports` table and ping the
+operator via `notifyAbuseReport`. To review and act on them:
+
+1. Put your Supabase auth user id in `ADMIN_USER_IDS` (above) and redeploy.
+2. Visit `/admin` while signed in — it lists recent reports with one-click
+   **Suspend / Unsuspend** per card.
+
+Suspending flips `users.suspended` and **immediately** invalidates the profile
+cache, so the card (and its links, OG image, and directory listing) stops
+rendering within the request — no waiting out the ≤60s cache TTL. Non-admins
+get a 404 on both `/admin` and `POST /api/admin/suspend`.
 
 ## What's still TODO (tracked in ROADMAP)
 
