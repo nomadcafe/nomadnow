@@ -64,6 +64,9 @@ export async function POST(request: Request) {
   } catch (error) {
     logError(error, { operation: 'admin_suspend' })
     const r = formatErrorResponse(error)
-    return NextResponse.json({ error: r.error, code: r.code, details: r.details }, { status: r.statusCode })
+    // Full detail is logged above; don't echo an unexpected internal message
+    // (e.g. a missing-service-key error) back in the HTTP body.
+    const message = r.statusCode === 500 ? 'Internal error' : r.error
+    return NextResponse.json({ error: message, code: r.code, details: r.details }, { status: r.statusCode })
   }
 }
