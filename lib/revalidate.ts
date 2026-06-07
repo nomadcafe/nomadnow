@@ -12,6 +12,14 @@ export function bumpProfileCache(handle: string) {
   revalidatePath(`/${handle}`)
 }
 
+// Invalidates the cached /explore directory listings (app/explore/page.tsx).
+// Called when a signup or profile edit changes a field the directory shows
+// (display_name, role, current_city, bio, visited_countries), so new and
+// changed cards surface without waiting out the listing's TTL.
+export function bumpExploreCache() {
+  revalidateTag('explore')
+}
+
 // Invalidates the cached billing state (lib/billing.ts) for a user. Called from
 // the Stripe webhook so a plan change / cancellation is reflected immediately
 // instead of waiting out the cache TTL.

@@ -5,7 +5,7 @@ import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { isReservedHandle } from '@/lib/reserved-handles'
-import { bumpProfileCache, bumpBillingCache } from '@/lib/revalidate'
+import { bumpProfileCache, bumpBillingCache, bumpExploreCache } from '@/lib/revalidate'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
 import { safeLinkUrlSchema } from '@/lib/validation'
 import { assertUrlsSafe } from '@/lib/safe-browsing'
@@ -185,6 +185,7 @@ export async function POST(request: NextRequest) {
     }
 
     bumpProfileCache(validation.data.handle)
+    bumpExploreCache() // new card joins the directory
     return NextResponse.json({ success: true, user: userRow })
   } catch (error) {
     logError(error, { operation: 'create_user' })
@@ -300,6 +301,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (data.handle) bumpProfileCache(data.handle as string)
+    bumpExploreCache() // edited fields (name/role/city/bio/countries) show in the directory
     return NextResponse.json({ success: true, user: data })
   } catch (error) {
     logError(error, { operation: 'update_user' })

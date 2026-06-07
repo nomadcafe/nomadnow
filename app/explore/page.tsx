@@ -1,8 +1,9 @@
 import React from 'react'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
-import { createServerSupabase } from '@/lib/supabase/server'
-import ExploreClient from '@/components/ExploreClient'
+import { createPublicSupabase } from '@/lib/supabase/public'
+import ExploreClient, { type Nomad } from '@/components/ExploreClient'
 import { EmptyState } from '@/components/EmptyState'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
@@ -10,18 +11,47 @@ import type { Metadata } from 'next'
 
 type SortKey = 'recent' | 'countries' | 'alpha'
 
+type NomadsResult = {
+  nomads: Nomad[]
+  totalPages: number
+  currentPage: number
+  total: number
+}
+
+// Public directory read. Browse views (no search term) are cached across
+// requests — see getNomads. A search query bypasses the cache: search terms
+// are high-cardinality (every term a distinct key) and the searcher expects
+// fresh results.
 async function getNomads(
   filters?: { search?: string; country?: string; sortBy?: SortKey },
   page: number = 1,
   pageSize: number = 24
-) {
+): Promise<NomadsResult> {
+  if (filters?.search) {
+    return fetchNomads(filters, page, pageSize)
+  }
+  const cached = unstable_cache(
+    () => fetchNomads(filters, page, pageSize),
+    ['explore', filters?.country ?? '', filters?.sortBy ?? 'recent', String(page), String(pageSize)],
+    // 120s TTL backstop; the `explore` tag is bumped on signup / profile edit
+    // (lib/revalidate.ts) so new and changed cards surface promptly.
+    { tags: ['explore'], revalidate: 120 },
+  )
+  return cached()
+}
+
+async function fetchNomads(
+  filters?: { search?: string; country?: string; sortBy?: SortKey },
+  page: number = 1,
+  pageSize: number = 24
+): Promise<NomadsResult> {
   try {
     const env = await import('@/lib/env').then((m) => m.getEnvSafe())
     if (env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
       return { nomads: [], totalPages: 0, currentPage: page, total: 0 }
     }
 
-    const supabase = await createServerSupabase()
+    const supabase = createPublicSupabase()
     let query = supabase
       .from('users')
       .select(
@@ -76,7 +106,7 @@ async function getNomads(
     if (error) throw error
 
     return {
-      nomads: data ?? [],
+      nomads: (data ?? []) as Nomad[],
       totalPages: Math.ceil((count || 0) / pageSize),
       currentPage: page,
       total: count || 0,
