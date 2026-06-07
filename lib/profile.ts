@@ -1,5 +1,7 @@
 import { cache } from 'react'
-import { createServerSupabase } from './supabase/server'
+import { unstable_cache } from 'next/cache'
+import { createClient } from '@supabase/supabase-js'
+import { getEnvSafe } from './env'
 import { handleSchema } from './validation'
 import { logError } from './errors'
 import { findUnsafeUrls } from './safe-browsing'
@@ -38,6 +40,32 @@ export interface PublicProfile {
   nomadFeaturedWorks: NomadFeaturedWork[]
 }
 
+// Cookie-free anon client for the public read. `unstable_cache` forbids reading
+// cookies/headers inside its callback, and the public profile is byte-identical
+// for every viewer (only the public-read columns, gated by RLS), so a
+// session-less client is both correct and what makes the result cacheable
+// across requests AND across users.
+function createPublicSupabase() {
+  const env = getEnvSafe()
+  return createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+
+// Cross-request cache layer. `handle` is already normalized + validated by the
+// caller, so it's safe to use as the cache key. The `profile-${handle}` tag is
+// bumped by lib/revalidate.ts on every profile mutation, and the 60s TTL is a
+// backstop for anything that mutates the row without going through our API
+// (e.g. a manual DB edit or the billing webhook touching `plan`).
+function loadProfile(handle: string): Promise<PublicProfile | null> {
+  const cached = unstable_cache(
+    () => fetchPublicProfile(handle),
+    [`public-profile-${handle}`],
+    { tags: [`profile-${handle}`], revalidate: 60 },
+  )
+  return cached()
+}
+
 export const getProfileByHandle = cache(
   async (rawHandle: string): Promise<PublicProfile | null> => {
     // Normalize before validate so "Kenji" and "kenji" share a cache entry
@@ -45,9 +73,12 @@ export const getProfileByHandle = cache(
     const lower = rawHandle.toLowerCase()
     const validation = handleSchema.safeParse(lower)
     if (!validation.success) return null
-    const handle = validation.data
+    return loadProfile(validation.data)
+  },
+)
 
-    const supabase = await createServerSupabase()
+async function fetchPublicProfile(handle: string): Promise<PublicProfile | null> {
+    const supabase = createPublicSupabase()
     const { data: user, error: userError } = await supabase
       .from('users')
       .select(PUBLIC_USER_COLUMNS)
@@ -135,5 +166,4 @@ export const getProfileByHandle = cache(
       nomadBlurbs: (blurbsResult.data ?? []) as NomadBlurb[],
       nomadFeaturedWorks: nomadFeaturedWorks.filter((w) => !unsafe.has(w.url)),
     }
-  },
-)
+}

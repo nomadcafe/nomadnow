@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { createAdminSupabase } from './supabase/admin'
 import type { Plan } from './stripe/server'
 
@@ -68,6 +69,20 @@ export function deriveBillingState(row: BillingRow | null | undefined): BillingS
 // public profile page on the OWNER's subscription) without leaking the
 // raw Stripe identifiers.
 export async function getBillingState(userId: string): Promise<BillingState> {
+  // Cached across requests so the public profile read doesn't hit the admin
+  // client on every view. Billing only changes via the Stripe webhook, which
+  // bumps the `billing-${userId}` tag (see app/api/billing/webhook); the 120s
+  // TTL is a backstop. NB: cache the DERIVED state, not the raw row — the raw
+  // Stripe identifiers must never reach a cache that a public render reads.
+  const cached = unstable_cache(
+    () => fetchBillingState(userId),
+    [`billing-${userId}`],
+    { tags: [`billing-${userId}`], revalidate: 120 },
+  )
+  return cached()
+}
+
+async function fetchBillingState(userId: string): Promise<BillingState> {
   const admin = createAdminSupabase()
   const { data, error } = await admin
     .from('users')
