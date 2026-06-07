@@ -5,7 +5,7 @@ import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { isReservedHandle } from '@/lib/reserved-handles'
-import { bumpProfileCache } from '@/lib/revalidate'
+import { bumpProfileCache, bumpBillingCache } from '@/lib/revalidate'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
 import { safeLinkUrlSchema } from '@/lib/validation'
 import { assertUrlsSafe } from '@/lib/safe-browsing'
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         location: validation.data.location,
         role: validation.data.role || null,
         current_city: validation.data.current_city || null,
-        work_status: validation.data.work_status || 'available',
+        work_status: validation.data.work_status || null,
         timezone: validation.data.timezone || null,
         visited_countries: validation.data.visited_countries || null,
         nomad_since: validation.data.nomad_since || null,
@@ -171,7 +171,12 @@ export async function POST(request: NextRequest) {
     let userRow = data
     try {
       const recovered = await recoverOrphanSubscription(user.id)
-      if (recovered) userRow = recovered as typeof data
+      if (recovered) {
+        userRow = recovered as typeof data
+        // Recovery wrote plan/status onto the row — invalidate the billing
+        // cache so the new card reflects the subscription immediately.
+        bumpBillingCache(user.id)
+      }
     } catch (err) {
       // Don't fail card creation just because Stripe recovery hit a transient
       // error — the user can resubscribe via /pricing and the webhook will

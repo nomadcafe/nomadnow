@@ -117,38 +117,3 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
-
-// Public read — used by /[handle] profile rendering. user_id query param
-// matches the contract of /api/nomad-links GET.
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('user_id')
-    if (!userId) {
-      return NextResponse.json({ error: 'user_id is required' }, { status: 400 })
-    }
-
-    const supabase = await createServerSupabase()
-    const { data, error } = await supabase
-      .from('nomad_stays')
-      .select('*')
-      .eq('user_id', userId)
-      // Most recent first; nulls (currently-here) bubble to the top
-      // because their start_date is usually the latest.
-      .order('start_date', { ascending: false })
-
-    if (error) {
-      logError(error, { operation: 'fetch_stays', userId })
-      throw error
-    }
-
-    return NextResponse.json({ success: true, stays: data || [] })
-  } catch (error) {
-    logError(error, { operation: 'fetch_stays' })
-    const r = formatErrorResponse(error)
-    return NextResponse.json(
-      { error: r.error, code: r.code },
-      { status: r.statusCode },
-    )
-  }
-}

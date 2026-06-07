@@ -32,6 +32,9 @@ async function getNomads(
         'id, handle, display_name, avatar_url, bio, role, current_city, country, timezone, visited_countries, visited_countries_count, created_at',
         { count: 'exact' },
       )
+      // Keep moderated (suspended) cards out of the public directory — their
+      // /[handle] page already 404s, so listing them would link to nowhere.
+      .eq('suspended', false)
 
     if (filters?.search) {
       // Strip characters that have meaning in PostgREST's `or` filter

@@ -82,15 +82,23 @@ export async function getBillingState(userId: string): Promise<BillingState> {
   return cached()
 }
 
+const NO_BILLING: BillingState = { plan: null, status: null, isActive: false, isExpired: false }
+
 async function fetchBillingState(userId: string): Promise<BillingState> {
-  const admin = createAdminSupabase()
-  const { data, error } = await admin
-    .from('users')
-    .select('plan, subscription_status, current_period_end')
-    .eq('id', userId)
-    .maybeSingle()
-  if (error || !data) {
-    return { plan: null, status: null, isActive: false, isExpired: false }
+  try {
+    const admin = createAdminSupabase()
+    const { data, error } = await admin
+      .from('users')
+      .select('plan, subscription_status, current_period_end')
+      .eq('id', userId)
+      .maybeSingle()
+    if (error || !data) return NO_BILLING
+    return deriveBillingState(data as BillingRow)
+  } catch {
+    // createAdminSupabase() throws when SUPABASE_SERVICE_ROLE_KEY is unset.
+    // This runs in the public profile + pricing render path, so degrade to
+    // "no subscription" rather than 500 the page. A missing key is a deploy
+    // misconfig that other paths (checkout/webhook) will surface loudly.
+    return NO_BILLING
   }
-  return deriveBillingState(data as BillingRow)
 }
