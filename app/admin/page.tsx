@@ -9,6 +9,10 @@ import { ModerationList, type ModerationRow } from '@/components/admin/Moderatio
 // Internal moderation console — never indexed, gated to ADMIN_USER_IDS.
 export const metadata: Metadata = { robots: { index: false, follow: false } }
 
+// Always render per-request: it reads live report state via the admin client
+// and must never be statically cached.
+export const dynamic = 'force-dynamic'
+
 interface ReportRow {
   id: string
   reported_handle: string

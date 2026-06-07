@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { ReportReason, ReportStatus } from '@/types/database'
 
 export interface ModerationRow {
@@ -34,6 +35,7 @@ export function ModerationList({ initialRows }: { initialRows: ModerationRow[] }
   )
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   async function toggle(handle: string, next: boolean) {
     setBusy(handle)
@@ -48,7 +50,10 @@ export function ModerationList({ initialRows }: { initialRows: ModerationRow[] }
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error || `Request failed (${res.status})`)
       }
+      // Optimistic update for instant feedback, then refresh so the report
+      // status pills re-render from the server's new actioned/dismissed state.
       setSuspendedByHandle((prev) => ({ ...prev, [handle]: next }))
+      router.refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to update')
     } finally {
