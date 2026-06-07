@@ -8,6 +8,7 @@ import { OptimizedImage } from './OptimizedImage'
 import { Pagination } from './Pagination'
 import { debounce } from '@/lib/debounce'
 import { getCountryFlag } from '@/lib/countries'
+import { isLocalisedRole } from './nomad-card/sections'
 
 interface Nomad {
   id: string
@@ -159,14 +160,10 @@ function NomadCardSummary({ nomad }: { nomad: Nomad }) {
   const localTime = useClientLocalTime(nomad.timezone)
   const initial = (nomad.display_name || nomad.handle).charAt(0).toUpperCase()
   // Localise the role label only if it matches a known slug; otherwise show raw.
+  // Custom roles have no message — calling t() on them raises MISSING_MESSAGE.
   const localisedRole = (raw?: string) => {
     if (!raw) return raw
-    try {
-      const v = tRole(raw)
-      return v === raw ? raw : v
-    } catch {
-      return raw
-    }
+    return isLocalisedRole(raw) ? tRole(raw) : raw
   }
 
   return (

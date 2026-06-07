@@ -180,16 +180,34 @@ export function makeGetLinkLabel(tLinkTypes: Translator) {
   }
 }
 
+// Roles with a translation in the `roles.*` namespace. The form also accepts
+// free-text custom roles (e.g. "Brand Designer"); those have no message and
+// must render verbatim — calling t() on them raises MISSING_MESSAGE.
+const LOCALISED_ROLE_SLUGS = [
+  'Designer',
+  'Product Designer',
+  'Developer',
+  'Writer',
+  'Product Manager',
+  'Marketer',
+  'Consultant',
+  'Entrepreneur',
+  'Photographer',
+  'Content Creator',
+  'Engineer',
+  'Founder',
+  'Other',
+] as const
+
+export function isLocalisedRole(raw: string): boolean {
+  return (LOCALISED_ROLE_SLUGS as readonly string[]).includes(raw)
+}
+
 export function makeLocaliseRole(tRole: Translator) {
   return (raw?: string): string | undefined => {
     if (!raw) return raw
-    try {
-      const v = tRole(raw)
-      // next-intl returns the key itself when missing; treat that as fallback.
-      return v === raw ? raw : v
-    } catch {
-      return raw
-    }
+    // Only translate known preset roles; custom roles render verbatim.
+    return isLocalisedRole(raw) ? tRole(raw) : raw
   }
 }
 
