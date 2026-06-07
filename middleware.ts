@@ -58,6 +58,28 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
+  const isProtected = PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+
+  // Fast path for anonymous visitors. Supabase stores the session in cookies
+  // named `sb-<ref>-auth-token` (chunked as `.0`, `.1`, …). With none present
+  // the visitor is logged out, and calling getUser() would still cost a network
+  // round-trip to the Auth server validating a session that doesn't exist — on
+  // every navigation. Most traffic to public pages (profiles, landing) is
+  // logged-out, so skip it. A protected path with no cookie redirects straight
+  // to /login without consulting Supabase at all.
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'))
+
+  if (!hasAuthCookie) {
+    if (isProtected) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+    return response
+  }
+
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
@@ -75,7 +97,6 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const isProtected = PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))
   if (isProtected && !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)

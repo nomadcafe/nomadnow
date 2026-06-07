@@ -3,6 +3,7 @@ import type Stripe from 'stripe'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { logError } from '@/lib/errors'
+import { bumpBillingCache, bumpProfileCache } from '@/lib/revalidate'
 
 // Stripe webhooks need the raw body bytes to verify the HMAC signature.
 // Next.js defaults to JSON-parsing — opt out via runtime config.
@@ -67,14 +68,26 @@ async function syncSubscription(sub: Stripe.Subscription) {
     updated_at: new Date().toISOString(),
   }
 
-  const { error } = await admin
+  const { data: affected, error } = await admin
     .from('users')
     .update(updates)
     .eq('stripe_customer_id', customerId)
+    .select('id, handle')
+    .maybeSingle()
 
   if (error) {
     logError(error, { operation: 'webhook_sync_subscription', customerId, subId: sub.id })
     throw error
+  }
+
+  // Invalidate both caches the change touches: billing state (gates the card's
+  // expired view) and the public profile (carries `plan` for Pro features), so
+  // a subscription change reflects immediately rather than after the TTL.
+  if (affected) {
+    const id = (affected as { id?: string; handle?: string }).id
+    const handle = (affected as { id?: string; handle?: string }).handle
+    if (id) bumpBillingCache(id)
+    if (handle) bumpProfileCache(handle)
   }
 }
 

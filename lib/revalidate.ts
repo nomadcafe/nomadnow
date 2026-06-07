@@ -12,6 +12,14 @@ export function bumpProfileCache(handle: string) {
   revalidatePath(`/${handle}`)
 }
 
+// Invalidates the cached billing state (lib/billing.ts) for a user. Called from
+// the Stripe webhook so a plan change / cancellation is reflected immediately
+// instead of waiting out the cache TTL.
+export function bumpBillingCache(userId: string) {
+  if (!userId) return
+  revalidateTag(`billing-${userId}`)
+}
+
 // Helper for mutation routes that have a userId but no handle in scope —
 // looks up the handle once so callers don't repeat the boilerplate.
 export async function bumpProfileCacheByUserId(
