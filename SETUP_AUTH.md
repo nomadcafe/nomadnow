@@ -47,6 +47,47 @@ becomes the transport, so there are no code changes; this is pure config.
 Once custom SMTP is on, Supabase's internal rate limit no longer applies; tune
 the per-hour cap under **Authentication → Rate Limits** if needed.
 
+### Email template
+
+Login uses `signInWithOtp`, which renders **two** Supabase templates depending
+on the recipient: **Confirm signup** for a brand-new email, **Magic Link** for
+an existing user. Paste the same copy into both (**Authentication → Emails →
+Templates**) so new and returning users get an identical email. Supabase
+templates are raw HTML with no per-user locale switching, so this is one neutral
+English version matched to the site's tone.
+
+**Subject**
+
+```
+Your Nomad.now sign-in link
+```
+
+**Body**
+
+```html
+<table width="100%" cellpadding="0" cellspacing="0" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #111827;">
+  <tr><td style="padding: 8px 0 24px;">
+    <span style="font-size: 18px; font-weight: 600;">Nomad.now</span>
+  </td></tr>
+  <tr><td>
+    <h1 style="font-size: 22px; font-weight: 600; margin: 0 0 12px;">Sign in.</h1>
+    <p style="font-size: 15px; line-height: 1.5; color: #374151; margin: 0 0 24px;">
+      Click the button below to sign in. The link works once and expires shortly.
+    </p>
+    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #111827; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 28px; border-radius: 9999px;">
+      Sign in
+    </a>
+    <p style="font-size: 13px; line-height: 1.5; color: #6b7280; margin: 24px 0 0;">
+      If the button doesn't work, paste this link into your browser:<br />
+      <a href="{{ .ConfirmationURL }}" style="color: #6b7280; word-break: break-all;">{{ .ConfirmationURL }}</a>
+    </p>
+    <p style="font-size: 13px; line-height: 1.5; color: #9ca3af; margin: 24px 0 0;">
+      Didn't request this? You can safely ignore this email.
+    </p>
+  </td></tr>
+</table>
+```
+
 ## 2. Apply the schema and migrations
 
 In **SQL Editor**:
