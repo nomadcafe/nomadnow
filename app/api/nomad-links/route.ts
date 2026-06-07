@@ -99,36 +99,3 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
-
-// Public read — listing a user's nomad links by ID.
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('user_id')
-
-    if (!userId) {
-      return NextResponse.json({ error: 'user_id is required' }, { status: 400 })
-    }
-
-    const supabase = await createServerSupabase()
-    const { data, error } = await supabase
-      .from('nomad_links')
-      .select('*')
-      .eq('user_id', userId)
-      .order('order_index', { ascending: true })
-
-    if (error) {
-      logError(error, { operation: 'fetch_nomad_links', userId })
-      throw error
-    }
-
-    return NextResponse.json({ success: true, links: data || [] })
-  } catch (error) {
-    logError(error, { operation: 'fetch_nomad_links' })
-    const errorResponse = formatErrorResponse(error)
-    return NextResponse.json(
-      { error: errorResponse.error, code: errorResponse.code, details: errorResponse.details },
-      { status: errorResponse.statusCode }
-    )
-  }
-}

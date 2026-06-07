@@ -95,11 +95,14 @@ export async function GET(
       const lower = handle.toLowerCase()
       const { data: userData } = await supabase
         .from('users')
-        .select('id, handle, display_name, role, current_city, timezone, visited_countries, nomad_since, created_at, bio, verified, plan')
+        .select('id, handle, display_name, role, current_city, timezone, visited_countries, nomad_since, created_at, bio, verified, plan, suspended')
         .eq('handle', lower)
         .maybeSingle()
-      user = (userData as OgUser | null) ?? null
-      if (userData?.id) {
+      // A moderated (suspended) card 404s on its page; don't leak a share
+      // preview for it either. Treat as not-found → placeholder render.
+      const suspended = Boolean((userData as { suspended?: boolean } | null)?.suspended)
+      user = suspended ? null : ((userData as OgUser | null) ?? null)
+      if (userData?.id && !suspended) {
         // Fetch the stay rows we need to derive the headline stats.
         // We do this in parallel with the settings lookup below.
         const [staysRes, settingsRes] = await Promise.all([

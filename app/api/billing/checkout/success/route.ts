@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/supabase/server'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { logError } from '@/lib/errors'
+import { bumpBillingCache, bumpProfileCache } from '@/lib/revalidate'
 
 // Resolves the race between the Stripe Checkout redirect (which the user hits
 // ~3–5s after paying) and the customer.subscription.created webhook (which
@@ -107,6 +108,13 @@ export async function GET(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
+
+      // Invalidate the caches this write touches, or the whole point of this
+      // route — beating the webhook so the just-paid user sees their plan
+      // immediately — is defeated: getBillingState (120s) and the profile's
+      // `plan` (60s) would serve a pre-payment `plan:null` until the TTL.
+      bumpBillingCache(user.id)
+      if (existing?.handle) bumpProfileCache(existing.handle as string)
     }
 
     return NextResponse.redirect(`${baseUrl}${landingPath}`)

@@ -42,6 +42,7 @@ async function getNomadsInCountry(code: string): Promise<Nomad[]> {
     const { data, error } = await supabase
       .from('users')
       .select('id, handle, display_name, avatar_url, bio, role, current_city, country, visited_countries')
+      .eq('suspended', false)
       .contains('visited_countries', [code])
       .order('created_at', { ascending: false })
       .limit(60)

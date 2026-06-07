@@ -97,8 +97,10 @@ async function fetchPublicProfile(handle: string): Promise<PublicProfile | null>
     if (!user) return null
 
     // Suspended (moderated) cards 404 — same outcome as a missing handle, so a
-    // reported phishing/malware card and its links stop rendering the moment a
-    // moderator flips the flag, without exposing that the handle exists.
+    // reported phishing/malware card and its links stop rendering within the
+    // profile cache TTL (≤60s) of a moderator flipping the flag, without
+    // exposing that the handle exists. A manual DB toggle doesn't bump the
+    // cache, so the TTL — not the flag write — bounds the takedown latency.
     if ((user as { suspended?: boolean }).suspended) return null
 
     const [settingsResult, linksResult, staysResult, blurbsResult, featuredWorksResult] =
