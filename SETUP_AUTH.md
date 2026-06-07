@@ -14,6 +14,39 @@ In your Supabase project dashboard:
      - `https://<your-prod-domain>/auth/callback`
 3. (Optional) **Authentication → Email Templates → Magic Link**: customize the email subject/body.
 
+## 1b. Configure Resend as the SMTP sender (required for production)
+
+Supabase's built-in email service is **test-only**: a shared ~2–4 emails/hour
+global cap, sent from a shared domain that lands in spam. Login here is a magic
+link (`signInWithOtp` in `app/login/page.tsx`), so if that email doesn't arrive,
+nobody can sign in. Before any real traffic, point Supabase at a real SMTP
+provider. We use [Resend](https://resend.com).
+
+The app code does **not** send email itself — Supabase Auth does. Resend just
+becomes the transport, so there are no code changes; this is pure config.
+
+1. **Verify a sending domain in Resend**: Resend dashboard → **Domains → Add
+   Domain** (e.g. `mail.<your-prod-domain>` or the apex). Add the SPF and DKIM
+   DNS records it prints to your DNS provider and wait for them to verify. You
+   cannot send from a domain you haven't verified.
+2. **Create an API key**: Resend → **API Keys → Create**, with **Sending
+   access**. Copy it.
+3. **Enable custom SMTP in Supabase**: **Authentication → Emails → SMTP
+   Settings → Enable Custom SMTP**, then fill:
+   - **Host**: `smtp.resend.com`
+   - **Port**: `465`
+   - **Username**: `resend`
+   - **Password**: the Resend API key from step 2
+   - **Sender email**: an address on the domain you verified in step 1
+     (e.g. `auth@mail.<your-prod-domain>`)
+   - **Sender name**: e.g. `NomadNow`
+4. **Save.** Magic-link and other auth emails now flow through Resend. Verify by
+   triggering a login and confirming the email arrives (check Resend's **Logs**
+   tab for delivery status).
+
+Once custom SMTP is on, Supabase's internal rate limit no longer applies; tune
+the per-hour cap under **Authentication → Rate Limits** if needed.
+
 ## 2. Apply the schema and migrations
 
 In **SQL Editor**:
