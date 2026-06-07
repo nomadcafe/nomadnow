@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { isAdminUser } from '@/lib/admin'
-import { bumpProfileCache } from '@/lib/revalidate'
+import { bumpProfileCache, bumpExploreCache } from '@/lib/revalidate'
 import { handleSchema } from '@/lib/validation'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
     // Instant takedown — drop the cached profile now instead of waiting out
     // the TTL. revalidatePath inside also clears the rendered route.
     bumpProfileCache(lower)
+    bumpExploreCache() // remove (or restore) the card from the public directory
 
     return NextResponse.json({ success: true, handle: lower, suspended })
   } catch (error) {

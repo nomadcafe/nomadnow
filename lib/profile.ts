@@ -1,7 +1,6 @@
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
-import { createClient } from '@supabase/supabase-js'
-import { getEnvSafe } from './env'
+import { createPublicSupabase } from './supabase/public'
 import { handleSchema } from './validation'
 import { logError } from './errors'
 import { findUnsafeUrls } from './safe-browsing'
@@ -38,18 +37,6 @@ export interface PublicProfile {
   nomadStays: NomadStay[]
   nomadBlurbs: NomadBlurb[]
   nomadFeaturedWorks: NomadFeaturedWork[]
-}
-
-// Cookie-free anon client for the public read. `unstable_cache` forbids reading
-// cookies/headers inside its callback, and the public profile is byte-identical
-// for every viewer (only the public-read columns, gated by RLS), so a
-// session-less client is both correct and what makes the result cacheable
-// across requests AND across users.
-function createPublicSupabase() {
-  const env = getEnvSafe()
-  return createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
 }
 
 // Cross-request cache layer. `handle` is already normalized + validated by the

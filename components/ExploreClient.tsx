@@ -10,7 +10,7 @@ import { debounce } from '@/lib/debounce'
 import { getCountryFlag } from '@/lib/countries'
 import { isLocalisedRole } from './nomad-card/sections'
 
-interface Nomad {
+export interface Nomad {
   id: string
   handle: string
   display_name?: string
