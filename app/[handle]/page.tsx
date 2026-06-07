@@ -17,8 +17,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { handle } = await params
 
+  // Missing/reserved handles render the "claim this handle" UI at HTTP 200
+  // (intentional — see ProfilePage), so noindex them or Google treats every
+  // /random-string as a thin, indexable soft-404.
   if (isReservedHandle(handle)) {
-    return { title: 'Not found — Nomad.now' }
+    return { title: 'Not found — Nomad.now', robots: { index: false, follow: false } }
   }
 
   const profileData = await getProfileByHandle(handle)
@@ -26,6 +29,7 @@ export async function generateMetadata({
   if (!profileData) {
     return {
       title: 'Profile Not Found - Nomad.now',
+      robots: { index: false, follow: false },
     }
   }
 
