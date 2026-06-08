@@ -56,13 +56,9 @@ export function formatErrorResponse(error: unknown): {
     }
   }
 
-  if (error instanceof Error) {
-    return {
-      error: error.message,
-      statusCode: 500,
-    }
-  }
-
+  // Unexpected error → generic message. Never echo error.message to the client:
+  // a thrown DB/RLS error, or "SUPABASE_SERVICE_ROLE_KEY is not configured",
+  // leaks internals. The real detail is preserved server-side by logError.
   return {
     error: 'Internal server error',
     statusCode: 500,
@@ -73,9 +69,15 @@ export function formatErrorResponse(error: unknown): {
  * Log error with context
  */
 export function logError(error: unknown, context?: Record<string, unknown>) {
-  const errorInfo = formatErrorResponse(error)
+  // Log the real error detail server-side (formatErrorResponse now masks
+  // unexpected errors for the client, so we must not route logging through it
+  // or the message/stack would be lost).
   console.error('Error:', {
-    ...errorInfo,
+    message: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    ...(error instanceof AppError
+      ? { code: error.code, statusCode: error.statusCode }
+      : {}),
     ...context,
     timestamp: new Date().toISOString(),
   })

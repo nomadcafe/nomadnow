@@ -9,6 +9,7 @@ import { getBillingState, isPro } from '@/lib/billing'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { getProfileByHandle } from '@/lib/profile'
 import { buildProfileJsonLd, buildProfileBreadcrumbJsonLd } from '@/lib/seo/profile-jsonld'
+import { serializeJsonLd } from '@/lib/seo/json-ld'
 
 export async function generateMetadata({
   params,
@@ -141,11 +142,11 @@ export default async function ProfilePage({
       {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
 
       {/* Mounted only when the user just landed from /create-card. Gating at
