@@ -7,6 +7,7 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { OptimizedImage } from '@/components/OptimizedImage'
+import { serializeJsonLd } from '@/lib/seo/json-ld'
 import {
   codeForSlug,
   slugForCountry,
@@ -149,7 +150,7 @@ export default async function InCountryPage({
     <div className="min-h-screen bg-white text-gray-900">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur">

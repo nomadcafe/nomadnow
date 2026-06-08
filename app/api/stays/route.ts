@@ -41,11 +41,18 @@ const replaceStaysSchema = z.object({
               .max(2048)
               .refine((value) => {
                 try {
-                  return new URL(value).protocol === 'https:'
+                  const u = new URL(value)
+                  // https + Supabase Storage host only. Stay photos are
+                  // uploaded through /api/stays/photo/upload (Supabase Storage),
+                  // so a non-Supabase URL is either a mistake or an attempt to
+                  // make the image optimizer fetch an arbitrary/internal host
+                  // (SSRF). The optimizer host allow-list (next.config) is the
+                  // primary control; this rejects it at the source too.
+                  return u.protocol === 'https:' && u.hostname.endsWith('.supabase.co')
                 } catch {
                   return false
                 }
-              }, 'Photo URL must use https'),
+              }, 'Photo URL must be an https Supabase Storage URL'),
           )
           .max(6)
           .optional()

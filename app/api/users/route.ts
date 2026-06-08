@@ -43,7 +43,9 @@ const nomadSinceSchema = z
 const createUserSchema = z.object({
   handle: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Handle can only contain letters, numbers, underscores, and hyphens'),
   display_name: z.string().max(100).optional(),
-  avatar_url: z.string().url().optional().or(z.literal('')),
+  // safeLinkUrlSchema (not bare .url()) so a javascript:/data: URL can't be
+  // stored and later fed into an <img src> or the JSON-LD `image` field.
+  avatar_url: safeLinkUrlSchema.optional().or(z.literal('')),
   country: z.string().max(100).optional(),
   bio: z.string().max(500).optional(),
   // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
@@ -69,7 +71,9 @@ const createUserSchema = z.object({
 
 const updateUserSchema = z.object({
   display_name: z.string().max(100).optional(),
-  avatar_url: z.string().url().optional().or(z.literal('')),
+  // safeLinkUrlSchema (not bare .url()) so a javascript:/data: URL can't be
+  // stored and later fed into an <img src> or the JSON-LD `image` field.
+  avatar_url: safeLinkUrlSchema.optional().or(z.literal('')),
   country: z.string().max(100).optional(),
   bio: z.string().max(500).optional(),
   // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
