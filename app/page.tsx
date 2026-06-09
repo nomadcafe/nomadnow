@@ -25,6 +25,13 @@ const HERO_USER: User = {
   display_name: 'Kenji Tanaka',
   avatar_url: 'https://i.pravatar.cc/240?img=12',
   role: 'Product Designer',
+  // The "now" headline + a fresh presence stamp — these render the real
+  // now-layer affordances on the hero card automatically (the one-line
+  // status under the name, and the "Updated today" freshness note under the
+  // location). The hero uses the real NomadCardServer, so the homepage now
+  // demonstrates the feature instead of omitting it.
+  now_text: 'Shipping a design system from a café in Bangkok',
+  presence_confirmed_at: new Date().toISOString(),
   current_city: 'Bangkok',
   timezone: 'Asia/Bangkok',
   work_status: 'freelancing',
@@ -92,6 +99,35 @@ const FEATURE4_USER: User = {
 // → map (visual hook) → links. Bio, stays, status, and the stat strip
 // stay off the hero; they each get their own editorial Feature row.
 const HERO_SECTIONS = ['avatar', 'name', 'location', 'hire', 'meetup', 'map', 'links']
+
+// The "now layer" feature row renders the REAL card (same real-component
+// policy as the hero) trimmed via section data to just the three now-layer
+// signals: the now_text headline (name), the "Updated today" freshness note
+// (location), and the ☕️ open-to-coffee chip (status). A distinct identity +
+// city + no CTAs so it doesn't twin the hero or restate feature4. A recent
+// presence_confirmed_at makes the freshness note read "today"; work_status is
+// blank so the status section shows only the coffee chip, not a status pill.
+const NOW_USER: User = {
+  ...HERO_USER,
+  id: 'now-feature-preview',
+  handle: 'mara',
+  display_name: 'Mara Okafor',
+  avatar_url: 'https://i.pravatar.cc/240?img=32',
+  role: 'Writer',
+  now_text: 'Finishing a travel essay, slow mornings in Lisbon',
+  current_city: 'Lisbon',
+  country: 'PT',
+  timezone: 'Europe/Lisbon',
+  work_status: '', // → status section shows only the coffee chip
+  open_to_coffee: true,
+  presence_confirmed_at: new Date().toISOString(),
+  hire_cta_label: null,
+  hire_cta_url: null,
+  meetup_cta_label: null,
+  meetup_cta_url: null,
+  visited_countries: [],
+}
+const NOW_SECTIONS = ['name', 'location', 'status']
 
 export default async function Home() {
   // Account state resolved server-side so the nav's @handle paints in the
@@ -327,11 +363,38 @@ export default async function Home() {
             }
           />
 
+          {/* The now layer — the "now" in nomad.now made real. Sits in the
+              "live" cluster (right after live-local-time) and uses the real
+              card so the now_text headline + "Updated today" freshness +
+              coffee chip all ship here automatically. */}
+          <FeatureRow
+            label={t('feature5.label')}
+            title={t('feature5.title')}
+            body={t('feature5.body')}
+            accent="text-pink-600"
+            visual={
+              <div className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-10 shadow-sm">
+                <NomadCardServer
+                  user={NOW_USER}
+                  links={[]}
+                  themeKey="classic"
+                  enabledSections={NOW_SECTIONS}
+                  sectionOrder={NOW_SECTIONS}
+                  embedded
+                />
+                <p className="mt-4 text-xs text-gray-500 text-center">
+                  {t('feature5.caption')}
+                </p>
+              </div>
+            }
+          />
+
           <FeatureRow
             label={t('feature3.label')}
             title={t('feature3.title')}
             body={t('feature3.body')}
             accent="text-rose-600"
+            reverse
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-10 shadow-sm flex flex-col items-center gap-3">
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-100">
@@ -366,7 +429,6 @@ export default async function Home() {
             title={t('feature4.title')}
             body={t('feature4.body')}
             accent="text-orange-600"
-            reverse
             visual={
               <div className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-10 shadow-sm">
                 <NomadCardServer

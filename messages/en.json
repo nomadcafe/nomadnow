@@ -78,7 +78,7 @@
     "pricingDescription": "Straightforward pricing for your nomad card. Two plans, no free tier, no ads, no transaction fees."
   },
   "home": {
-    "eyebrow": "The bio link for nomads",
+    "eyebrow": "The bio link that's always now",
     "heroLine1": "Where you are.",
     "heroLine2": "Where you've been.",
     "heroLine3": "The work you carry.",
@@ -115,6 +115,12 @@
       "title": "Land work while you travel.",
       "body": "A solid \"Hire me\" button and a softer \"Grab a coffee\" pair, right under your name. Most freelancers' link-in-bio is a landing page in disguise — your card just says so out loud.",
       "caption": "Pair the primary hire path with a peer-meetup CTA. Either, both, or neither."
+    },
+    "feature5": {
+      "label": "Always now",
+      "title": "A card that knows it's now.",
+      "body": "One line for what you're working on, with a quiet \"updated today\" so people trust it's current. Go quiet and it gently fades — and a fresh card shows up first under Explore's \"active now\". The now in nomad.now, made real.",
+      "caption": "Tap \"I'm still here\" to re-freshen. No upkeep, no stale card."
     },
     "comparison": {
       "title": "Why not just Linktree?",
