@@ -72,9 +72,26 @@ export function useSubmitCard({
       return
     }
 
+    // Validate ALL caps before the first write. The save is a 5-step sequence
+    // (user → links → blurbs → works → stays) and isn't transactional, so a
+    // cap check that ran mid-sequence (blurbs/works used to) could reject only
+    // after user + links had already committed — a partial save. Hoisting every
+    // cap check here means a cap violation aborts before anything is written.
+    // (Network/DB failure mid-sequence is the only remaining partial-save path;
+    // it's rare and self-heals on the next save, which is replace-all.)
     const validLinks = links.filter((link) => link.url.trim())
+    const validBlurbs = blurbs.filter((b) => b.label.trim() && b.value.trim())
+    const validFeaturedWorks = featuredWorks.filter((w) => w.title.trim() && w.url.trim())
     if (validLinks.length > LINK_CAP) {
       showError(t('errorTooManyLinks', { cap: LINK_CAP }))
+      return
+    }
+    if (validBlurbs.length > BLURB_CAP) {
+      showError(t('errorTooManyBlurbs', { cap: BLURB_CAP }))
+      return
+    }
+    if (validFeaturedWorks.length > FEATURED_WORK_CAP) {
+      showError(t('errorTooManyFeaturedWorks', { cap: FEATURED_WORK_CAP }))
       return
     }
 
@@ -162,13 +179,8 @@ export function useSubmitCard({
       }
 
       // Blurbs sync: replace-all in both modes. Skip in create mode when
-      // there's nothing to insert (matches the stays branch below).
-      const validBlurbs = blurbs.filter((b) => b.label.trim() && b.value.trim())
-      if (validBlurbs.length > BLURB_CAP) {
-        showError(t('errorTooManyBlurbs', { cap: BLURB_CAP }))
-        setLoading(false)
-        return
-      }
+      // there's nothing to insert (matches the stays branch below). Cap was
+      // already validated up front, before any write.
       if (isEdit || validBlurbs.length > 0) {
         const blurbsResponse = await fetch('/api/blurbs', {
           method: 'PUT',
@@ -188,15 +200,8 @@ export function useSubmitCard({
 
       // Featured works sync: replace-all. Filter to rows with both title
       // and url; description is optional and stays empty-string -> null on
-      // the server. Same skip-when-empty optimisation as blurbs/stays.
-      const validFeaturedWorks = featuredWorks.filter(
-        (w) => w.title.trim() && w.url.trim(),
-      )
-      if (validFeaturedWorks.length > FEATURED_WORK_CAP) {
-        showError(t('errorTooManyFeaturedWorks', { cap: FEATURED_WORK_CAP }))
-        setLoading(false)
-        return
-      }
+      // the server. Same skip-when-empty optimisation as blurbs/stays. Cap
+      // was already validated up front, before any write.
       if (isEdit || validFeaturedWorks.length > 0) {
         const worksResponse = await fetch('/api/featured-works', {
           method: 'PUT',
