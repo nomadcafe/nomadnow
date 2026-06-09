@@ -12,6 +12,7 @@ import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
 import { getFontClassName } from '@/lib/fonts'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
+import { presenceFreshness, formatPresenceAgo } from '@/lib/presence'
 import {
   createSectionRenderers,
   makeFormatShortDate,
@@ -120,6 +121,16 @@ export async function NomadCardServer({
       : null
   const visitedCount = mergedVisitedCodes(user.visited_countries, visitedStays).size
 
+  // The "now" layer. The freshness affordance only makes sense for the
+  // lightweight current_city signal — an explicit current stay carries its own
+  // dates + "current" badge, so we suppress the line/fade when one exists to
+  // avoid double-signalling (and contradicting) the stays section.
+  const presence = currentStay
+    ? null
+    : presenceFreshness(user.presence_confirmed_at, Date.now())
+  const presenceAgoLabel = presence ? formatPresenceAgo(presence.daysAgo, locale) : undefined
+  const presenceStale = presence?.stale ?? false
+
   const ctx: SectionContext = {
     user,
     links,
@@ -144,6 +155,9 @@ export async function NomadCardServer({
     displayLocation,
     displayCountryFlag,
     visitedCount,
+    presenceAgoLabel,
+    presenceStale,
+    isOwner,
   }
   const sectionRenderers = createSectionRenderers(ctx)
 

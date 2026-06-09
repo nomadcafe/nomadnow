@@ -19,4 +19,4 @@
 // Comma-separated and whitespace-free so Supabase's typed client can
 // parse it into a row type (whitespace falls back to GenericStringError).
 export const SAFE_USER_COLUMNS =
-  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,nomad_since,profile_type,hire_cta_label,hire_cta_url,meetup_cta_label,meetup_cta_url,open_to_coffee,plan,created_at,updated_at' as const
+  'id,handle,display_name,avatar_url,country,bio,website,location,role,current_city,work_status,timezone,visited_countries,nomad_since,profile_type,hire_cta_label,hire_cta_url,meetup_cta_label,meetup_cta_url,open_to_coffee,presence_confirmed_at,plan,created_at,updated_at' as const

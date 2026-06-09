@@ -608,6 +608,11 @@
   "card": {
     "verified": "認証済み",
     "openToCoffee": "{city} でコーヒー誘ってOK",
+    "presence": {
+      "confirmedAgo": "更新: {ago}",
+      "mayBeStale": "情報が古い可能性あり",
+      "stillHere": "まだここにいます"
+    },
     "shareTitle": "このカードをシェア",
     "copyLink": "リンクをコピー",
     "copied": "コピーしました!",
