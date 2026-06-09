@@ -55,7 +55,6 @@ const createUserSchema = z.object({
   // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
   // can't be stored and later rendered as an href. Same allow-list as links.
   website: safeLinkUrlSchema.optional().or(z.literal('')),
-  location: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
   // Free-form string up to 60 chars. Preset slugs (busy, freelancing,
@@ -84,7 +83,6 @@ const updateUserSchema = z.object({
   // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
   // can't be stored and later rendered as an href. Same allow-list as links.
   website: safeLinkUrlSchema.optional().or(z.literal('')),
-  location: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   current_city: z.string().max(100).optional(),
   // Free-form string up to 60 chars. Preset slugs (busy, freelancing,
@@ -136,7 +134,6 @@ export async function POST(request: NextRequest) {
         country: validation.data.country,
         bio: validation.data.bio,
         website: validation.data.website || null,
-        location: validation.data.location,
         role: validation.data.role || null,
         current_city: validation.data.current_city || null,
         work_status: validation.data.work_status || null,

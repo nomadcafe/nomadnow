@@ -125,6 +125,8 @@ export function NomadCard({
   // Anything we count as "visited" excludes future stays — a place I haven't
   // gone to yet shouldn't bump my country count or light up the map.
   const visitedStays = currentStay ? [currentStay, ...pastStays] : pastStays
+  // user.location is a deprecated read-only legacy fallback (migration 0030) —
+  // no longer written; kept for rows that predate current_city.
   const displayLocation = currentStay?.city || user.current_city || user.location
   // Flag for the location row: prefer the country of the current stay
   // (most precise), fall back to user.country (auto-set when current_city

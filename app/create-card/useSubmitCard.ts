@@ -91,7 +91,6 @@ export function useSubmitCard({
         // avatar / timezone impossible to clear once set. '' is valid for every
         // one of these schemas, and create-mode insert coerces '' → null.
         bio: formData.bio,
-        location: formData.current_city,
         avatar_url: formData.avatar_url,
         // ISO α-2 code, only present when the user picked from
         // CityAutocomplete. Manual-typed cities clear country (see the
