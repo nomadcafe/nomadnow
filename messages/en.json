@@ -608,6 +608,11 @@
   "card": {
     "verified": "Verified",
     "openToCoffee": "Open to coffee in {city}",
+    "presence": {
+      "confirmedAgo": "Updated {ago}",
+      "mayBeStale": "may be out of date",
+      "stillHere": "I'm still here"
+    },
     "shareTitle": "Share this card",
     "copyLink": "Copy link",
     "copied": "Copied!",

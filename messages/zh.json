@@ -608,6 +608,11 @@
   "card": {
     "verified": "已认证",
     "openToCoffee": "在 {city} 可以约咖啡",
+    "presence": {
+      "confirmedAgo": "更新于 {ago}",
+      "mayBeStale": "可能已过期",
+      "stillHere": "我还在这儿"
+    },
     "shareTitle": "分享这张卡片",
     "copyLink": "复制链接",
     "copied": "已复制!",

@@ -137,6 +137,10 @@ export async function POST(request: NextRequest) {
         timezone: validation.data.timezone || null,
         visited_countries: validation.data.visited_countries || null,
         nomad_since: validation.data.nomad_since || null,
+        // The "now" layer starts ticking at signup: claiming a handle with a
+        // city is itself a fresh presence assertion. Stamped server-side only
+        // (never from the body) so freshness can't be backdated. See 0028.
+        presence_confirmed_at: new Date().toISOString(),
         // Column is NOT NULL with DEFAULT FALSE — omit when not specified
         // so the DB default wins instead of writing a misleading explicit
         // false (no-op in effect, but makes intent clearer in audit logs).
@@ -277,6 +281,25 @@ export async function PUT(request: NextRequest) {
     // '' → null so users can clear the field from the edit form by emptying
     // the month picker.
     if (cleanData.nomad_since === '') cleanData.nomad_since = null
+
+    // Re-stamp the "now" layer ONLY when the city actually changes — moving
+    // somewhere new is a fresh presence assertion, but saving an unrelated bio
+    // edit is not (that's the whole reason presence_confirmed_at is separate
+    // from updated_at). The edit form submits current_city on every save, so we
+    // diff against the stored value rather than trusting its mere presence. The
+    // explicit one-tap refresh lives at /api/users/confirm-presence.
+    if (cleanData.current_city !== undefined) {
+      const { data: existing } = await supabase
+        .from('users')
+        .select('current_city')
+        .eq('id', user.id)
+        .maybeSingle()
+      const before = (existing?.current_city ?? '').trim().toLowerCase()
+      const after = String(cleanData.current_city ?? '').trim().toLowerCase()
+      if (before !== after) {
+        cleanData.presence_confirmed_at = new Date().toISOString()
+      }
+    }
 
     // Re-scan CTA / website links on edit too (fail-open; see POST).
     await assertUrlsSafe(

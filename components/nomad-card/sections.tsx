@@ -6,6 +6,7 @@ import { stayDayCount, computeTravelStats, formatTimeOnTheRoad } from '@/lib/sta
 import { detectEmbed } from '@/lib/embeds'
 import { WorldMap } from '../WorldMap'
 import { LiveLocalTime } from './LiveLocalTime'
+import { ConfirmPresenceButton } from './ConfirmPresenceButton'
 import { CurrentStayPhotos } from './CurrentStayPhotos'
 import { PastStayThumbnail } from './PastStayThumbnail'
 import { ThemedAvatar } from './ThemedAvatar'
@@ -251,6 +252,16 @@ export interface SectionContext {
   displayLocation: string | undefined
   displayCountryFlag: string | null
   visitedCount: number
+  // The "now" layer. Set by NomadCardServer ONLY when the presence affordance
+  // applies — i.e. the shown location is the lightweight current_city (no
+  // explicit current stay corroborating recency) and there's a confirmed-at
+  // timestamp. undefined → render no freshness line and apply no fade, so the
+  // client editing preview (NomadCard) can omit these entirely.
+  presenceAgoLabel?: string
+  presenceStale?: boolean
+  // True when the viewer owns this card — gates the "I'm still here" confirm
+  // button so visitors never see it.
+  isOwner?: boolean
 }
 
 // Each section renders independently so the order can be reshuffled. Sections
@@ -283,6 +294,9 @@ export function createSectionRenderers(
     displayLocation,
     displayCountryFlag,
     visitedCount,
+    presenceAgoLabel,
+    presenceStale,
+    isOwner,
   } = ctx
 
   return {
@@ -314,13 +328,29 @@ export function createSectionRenderers(
       if (!displayLocation) return null
       return (
         <div key="location" className="text-center mb-2">
-          <p className="text-base sm:text-lg">
+          {/* Fade the live location once the presence claim goes stale — a
+              de-emphasised "Bangkok" reads as "was here", which is the honest
+              state of an un-refreshed card. */}
+          <p className={`text-base sm:text-lg transition-opacity ${presenceStale ? 'opacity-50' : ''}`}>
             <span className="inline-flex items-center gap-1.5">
               <span aria-hidden="true">{displayCountryFlag || '📍'}</span>
               <span className="font-medium">{displayLocation}</span>
               <LiveLocalTime timezone={user.timezone} mutedClass={theme.textMuted} />
             </span>
           </p>
+          {/* The "now" layer: how fresh the presence claim is. Only present
+              when NomadCardServer decided the affordance applies. */}
+          {presenceAgoLabel && (
+            <p className={`mt-1 text-xs ${theme.textMuted}`}>
+              {t('presence.confirmedAgo', { ago: presenceAgoLabel })}
+              {presenceStale && <span> · {t('presence.mayBeStale')}</span>}
+            </p>
+          )}
+          {/* One-tap re-confirm, owner-only, only when stale (no point nudging
+              a fresh card). Refreshes the route to clear the fade in place. */}
+          {presenceAgoLabel && presenceStale && isOwner && (
+            <ConfirmPresenceButton accentHex={theme.accentHex} />
+          )}
           {nextStay && (
             <p className={`mt-1 text-xs sm:text-sm ${theme.textMuted}`}>
               <span aria-hidden>→ </span>
@@ -667,7 +697,7 @@ export function createSectionRenderers(
           )}
           {coffeeCity && (
             <span
-              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${theme.pillNeutral}`}
+              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-opacity ${theme.pillNeutral} ${presenceStale ? 'opacity-50' : ''}`}
             >
               <span aria-hidden="true">☕️</span>
               {t('openToCoffee', { city: coffeeCity })}

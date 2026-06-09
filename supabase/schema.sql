@@ -27,6 +27,11 @@ CREATE TABLE IF NOT EXISTS users (
   -- city) vs hire_cta's freelance-side (client conversions). Added in 0019.
   meetup_cta_label TEXT,
   meetup_cta_url TEXT,
+  -- Presence-freshness timestamp — the "now" layer. Separate from updated_at
+  -- on purpose: drives the "confirmed N days ago" line + staleness fade on the
+  -- public card. Server-stamped only (signup / confirm tap / city change).
+  -- Added in migration 0028.
+  presence_confirmed_at TIMESTAMPTZ,
   -- Stripe billing state (kept on users for 1:1 simplicity — see migration 0003)
   stripe_customer_id TEXT UNIQUE,
   plan TEXT,                     -- 'basic' | 'pro' | NULL (no active subscription)

@@ -39,6 +39,14 @@ export interface User {
   // button on the card so it reads as paired-but-secondary to Hire CTA.
   meetup_cta_label?: string | null
   meetup_cta_url?: string | null
+  // The "now" layer (migration 0028). ISO timestamp of the last time the user
+  // asserted their current presence — stamped on signup, on the one-tap confirm
+  // (/api/users/confirm-presence), and when current_city changes. Deliberately
+  // distinct from updated_at so editing the bio doesn't refresh location
+  // confidence. Drives the "confirmed N days ago" line and the staleness fade
+  // on the public card (see lib/presence.ts). Server-set only — never accepted
+  // from the PUT body.
+  presence_confirmed_at?: string | null
   // Soft availability signal — when TRUE, the public card shows an
   // "☕️ Open to coffee in {current_city}" chip in the status row. Hidden
   // automatically when current_city is empty. Independent from meetup_cta:
