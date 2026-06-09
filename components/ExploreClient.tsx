@@ -3,12 +3,13 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { OptimizedImage } from './OptimizedImage'
 import { Pagination } from './Pagination'
 import { debounce } from '@/lib/debounce'
 import { getCountryFlag } from '@/lib/countries'
 import { isLocalisedRole } from './nomad-card/sections'
+import { presenceFreshness, formatPresenceAgo, type PresenceFreshness } from '@/lib/presence'
 
 export interface Nomad {
   id: string
@@ -26,6 +27,11 @@ export interface Nomad {
   timezone?: string
   visited_countries?: string[]
   created_at?: string
+  // The "now" layer (migrations 0028 / 0024). presence_confirmed_at drives the
+  // freshness dot + "active now" sort; open_to_coffee drives the ☕️ chip + the
+  // coffee filter.
+  presence_confirmed_at?: string | null
+  open_to_coffee?: boolean
 }
 
 interface ExploreClientProps {
@@ -34,6 +40,7 @@ interface ExploreClientProps {
     search?: string
     country?: string
     sortBy?: string
+    coffee?: boolean
   }
   pagination?: {
     currentPage: number
@@ -43,6 +50,7 @@ interface ExploreClientProps {
 }
 
 const SORT_KEYS = [
+  { value: 'active', labelKey: 'sortActive' },
   { value: 'recent', labelKey: 'sortRecent' },
   { value: 'countries', labelKey: 'sortCountries' },
   { value: 'alpha', labelKey: 'sortAlpha' },
@@ -58,6 +66,7 @@ export default function ExploreClient({
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(initialFilters.search || '')
   const [sortBy, setSortBy] = useState(initialFilters.sortBy || 'recent')
+  const coffeeOn = !!initialFilters.coffee
 
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -110,6 +119,21 @@ export default function ExploreClient({
             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 text-sm bg-white"
           />
         </div>
+        {/* Coffee filter — the headline "now" affordance: who's actually
+            around and up for a coffee right now (open_to_coffee + fresh). */}
+        <button
+          type="button"
+          onClick={() => handleFilterChange('coffee', coffeeOn ? '' : '1')}
+          aria-pressed={coffeeOn}
+          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition touch-manipulation ${
+            coffeeOn
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+          }`}
+        >
+          <span aria-hidden>☕️</span>
+          {t('coffeeFilter')}
+        </button>
         <select
           value={sortBy}
           onChange={(e) => {
@@ -155,9 +179,12 @@ export default function ExploreClient({
 
 function NomadCardSummary({ nomad }: { nomad: Nomad }) {
   const tCard = useTranslations('card')
+  const tExplore = useTranslations('explore')
   const tRole = useTranslations('roles')
+  const locale = useLocale()
   const countries = nomad.visited_countries ?? []
   const localTime = useClientLocalTime(nomad.timezone)
+  const freshness = useFreshness(nomad.presence_confirmed_at)
   const initial = (nomad.display_name || nomad.handle).charAt(0).toUpperCase()
   // Localise the role label only if it matches a known slug; otherwise show raw.
   // Custom roles have no message — calling t() on them raises MISSING_MESSAGE.
@@ -197,11 +224,38 @@ function NomadCardSummary({ nomad }: { nomad: Nomad }) {
       </div>
 
       {nomad.current_city && (
-        <div className="text-sm text-gray-700 mb-3 flex items-center gap-1">
+        <div className="text-sm text-gray-700 mb-1.5 flex items-center gap-1">
           <span aria-hidden>{nomad.country ? getCountryFlag(nomad.country) : '📍'}</span>
-          <span className="font-medium">{nomad.current_city}</span>
+          <span className={`font-medium ${freshness?.stale ? 'opacity-50' : ''}`}>
+            {nomad.current_city}
+          </span>
           {localTime && (
             <span className="text-gray-400 font-mono tabular-nums text-xs">· {localTime}</span>
+          )}
+        </div>
+      )}
+
+      {/* "Now" meta row — freshness + coffee availability. Mounted client-side
+          (useFreshness) so the relative time never causes a hydration mismatch
+          against the server-rendered HTML. */}
+      {nomad.current_city && (freshness || nomad.open_to_coffee) && (
+        <div className="flex items-center flex-wrap gap-2 mb-3 text-xs">
+          {freshness && !freshness.stale && (
+            <span className="inline-flex items-center gap-1 text-emerald-600">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+              {tExplore('activeNow')}
+            </span>
+          )}
+          {freshness && freshness.stale && (
+            <span className="text-gray-400">
+              {tCard('presence.confirmedAgo', { ago: formatPresenceAgo(freshness.daysAgo, locale) })}
+            </span>
+          )}
+          {nomad.open_to_coffee && (
+            <span className={`inline-flex items-center gap-1 text-gray-600 ${freshness?.stale ? 'opacity-50' : ''}`}>
+              <span aria-hidden>☕️</span>
+              {tExplore('coffeeChip')}
+            </span>
           )}
         </div>
       )}
@@ -226,6 +280,17 @@ function NomadCardSummary({ nomad }: { nomad: Nomad }) {
       </div>
     </Link>
   )
+}
+
+// Resolves presence freshness on the client only. Returns null on the server
+// and the first client render (matching useClientLocalTime) so the time-based
+// "active now" dot / "updated N ago" label can't desync the hydrated HTML.
+function useFreshness(confirmedAt?: string | null): PresenceFreshness | null {
+  const [fresh, setFresh] = useState<PresenceFreshness | null>(null)
+  useEffect(() => {
+    setFresh(presenceFreshness(confirmedAt, Date.now()))
+  }, [confirmedAt])
+  return fresh
 }
 
 function useClientLocalTime(timezone?: string) {

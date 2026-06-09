@@ -678,9 +678,13 @@
     "subtitle": "今どこにいるか。どこに行ってきたか。何を作っているか。",
     "searchPlaceholder": "名前、ハンドル、自己紹介、都市で検索…",
     "sortPrefix": "並び替え:",
+    "sortActive": "アクティブ順",
     "sortRecent": "新しい順",
     "sortCountries": "訪問国が多い順",
     "sortAlpha": "A → Z",
+    "coffeeFilter": "コーヒーOK",
+    "coffeeChip": "コーヒー",
+    "activeNow": "アクティブ",
     "emptyTitle": "まだノマドがいません",
     "emptyDescription": "最初にカードを確保して地図に登場しよう。",
     "paginationOf": "{from}–{to} / {total} 人のノマド"
