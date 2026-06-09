@@ -627,6 +627,7 @@
   },
   "card": {
     "verified": "認証済み",
+    "currentlyIn": "現在地",
     "openToCoffee": "{city} でコーヒー誘ってOK",
     "presence": {
       "confirmedAgo": "更新: {ago}",

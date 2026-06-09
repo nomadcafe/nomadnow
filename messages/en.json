@@ -627,6 +627,7 @@
   },
   "card": {
     "verified": "Verified",
+    "currentlyIn": "Currently in",
     "openToCoffee": "Open to coffee in {city}",
     "presence": {
       "confirmedAgo": "Updated {ago}",
