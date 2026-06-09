@@ -6,6 +6,11 @@ export interface User {
   country?: string
   bio?: string
   website?: string
+  // DEPRECATED (migration 0030): the original free-text location, superseded by
+  // current_city. No longer written (the write was removed from /api/users and
+  // the INSERT/UPDATE grant revoked); still READ as a legacy fallback
+  // (current_city || location) for rows predating current_city. Don't add new
+  // writes — set current_city instead.
   location?: string
   // Nomad Card fields
   role?: string

@@ -9,6 +9,7 @@ const SITE_ORIGIN = 'https://nomad.now'
 // `additionalProperty: Visited countries` since a place a user hasn't gone
 // to yet shouldn't bump rich-result counts.
 export function buildProfileJsonLd(user: User, stays: NomadStay[]) {
+  // user.location is a deprecated read-only legacy fallback (migration 0030).
   const currentLocation = user.current_city || user.location
   const buckets = splitStays(stays)
   const visitedForSeo = buckets.current
