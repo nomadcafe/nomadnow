@@ -85,21 +85,26 @@ export function useSubmitCard({
       // under both. Only `handle` is omitted in edit mode (it's locked).
       const baseBody = {
         display_name: formData.display_name,
-        bio: formData.bio || undefined,
-        location: formData.current_city || undefined,
-        avatar_url: formData.avatar_url || undefined,
+        // Send the raw value (empty string, NOT undefined) so emptying a field
+        // in edit mode actually clears it. The server's PUT drops undefined keys
+        // from the update, which previously made bio / role / current_city /
+        // avatar / timezone impossible to clear once set. '' is valid for every
+        // one of these schemas, and create-mode insert coerces '' → null.
+        bio: formData.bio,
+        location: formData.current_city,
+        avatar_url: formData.avatar_url,
         // ISO α-2 code, only present when the user picked from
-        // CityAutocomplete. Manual-typed cities have no country derived,
-        // so we send '' which the API treats as "clear".
+        // CityAutocomplete. Manual-typed cities clear country (see the
+        // onCityChange handler), so '' here means "no flag".
         country: formData.country || '',
-        role: formData.role || undefined,
-        current_city: formData.current_city || undefined,
+        role: formData.role,
+        current_city: formData.current_city,
         work_status: formData.work_status,
         // null (not undefined) so clearing the headline actually wipes the
         // column — undefined would be filtered server-side and the old value
         // would persist (same reasoning as the CTA fields below).
         now_text: formData.now_text.trim() || null,
-        timezone: formData.timezone || undefined,
+        timezone: formData.timezone,
         // Form holds YYYY-MM (month picker). Server expects YYYY-MM-DD so
         // append -01. Empty string -> null on the server so the user can
         // clear the field by blanking the picker.

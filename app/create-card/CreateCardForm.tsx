@@ -155,11 +155,15 @@ export default function CreateCardForm({
                   { key: 'role', filled: !!formData.role },
                   { key: 'bio', filled: !!formData.bio.trim() },
                   { key: 'city', filled: !!formData.current_city.trim() },
+                  // The now-line headline — nudged here in place of the old
+                  // 'countries' item. Country-collection is the vanity axis we
+                  // deliberately de-emphasised (CountrySelector cap + dropped
+                  // explore sort), so the meter no longer gamifies it.
+                  { key: 'now', filled: !!formData.now_text.trim() },
                   // nomad_since replaces the previous 'stays' nudge — a
                   // single month picker is a far gentler ask than logging
                   // city stays, and feeds the same "time on the road" stat.
                   { key: 'nomadSince', filled: !!formData.nomad_since },
-                  { key: 'countries', filled: visitedCountries.length > 0 },
                   { key: 'links', filled: links.some((l) => l.url.trim()) },
                 ]}
               />
@@ -231,7 +235,11 @@ export default function CreateCardForm({
                       value={formData.current_city}
                       placeholder={t('currentCityPlaceholder')}
                       onCityChange={(city) =>
-                        setFormData((prev) => ({ ...prev, current_city: city }))
+                        // Manual typing can't be trusted to match the stored
+                        // country code, so clear it — a missing flag beats the
+                        // previous city's wrong flag. onSelect below re-sets
+                        // the correct country when a suggestion is picked.
+                        setFormData((prev) => ({ ...prev, current_city: city, country: '' }))
                       }
                       onSelect={(s) =>
                         setFormData((prev) => ({
