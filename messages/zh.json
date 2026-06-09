@@ -333,7 +333,7 @@
     "namePlaceholder": "田中健二",
     "nowText": "此刻在做",
     "nowTextPlaceholder": "在 Canggu 的咖啡馆赶一个 Next.js 项目",
-    "nowTextHint": "一句话,显示在名字下面。这就是 nomad.now 里的 \"now\"。",
+    "nowTextHint": "一句话,显示在名字下面。",
     "currentCity": "现在位于",
     "currentCityPlaceholder": "曼谷",
     "currentCityHint": "实时显示在你的卡片上。换地方时记得更新。",

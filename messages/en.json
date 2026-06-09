@@ -333,7 +333,7 @@
     "namePlaceholder": "Kenji Tanaka",
     "nowText": "Right now",
     "nowTextPlaceholder": "Shipping a Next.js app from a café in Canggu",
-    "nowTextHint": "One line, shown under your name. The \"now\" in nomad.now.",
+    "nowTextHint": "One line, shown under your name.",
     "currentCity": "Currently in",
     "currentCityPlaceholder": "Bangkok",
     "currentCityHint": "Shown live on your card. Change when you move.",
