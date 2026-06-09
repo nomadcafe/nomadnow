@@ -19,6 +19,10 @@ const hireCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(''
 // Meetup CTA — same shape and validation as hire_cta. Twin field on users.
 const meetupCtaLabelSchema = z.string().max(30).nullable().optional().or(z.literal(''))
 const meetupCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(''))
+// now_text — the one-line "now" headline. 140 chars matches the DB CHECK
+// (migration 0029) and the client maxLength. nullable so the edit form can
+// clear it; '' accepted and coerced to null at write time.
+const nowTextSchema = z.string().max(140).nullable().optional().or(z.literal(''))
 
 // nomad_since: YYYY-MM-DD ISO date. Form is a month picker, so day is
 // always 01. Range matches the DB CHECK constraint in migration 0023 —
@@ -62,6 +66,7 @@ const createUserSchema = z.object({
   visited_countries: z.array(z.string()).optional(),
   nomad_since: nomadSinceSchema,
   open_to_coffee: z.boolean().optional(),
+  now_text: nowTextSchema,
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
@@ -90,6 +95,7 @@ const updateUserSchema = z.object({
   visited_countries: z.array(z.string()).optional(),
   nomad_since: nomadSinceSchema,
   open_to_coffee: z.boolean().optional(),
+  now_text: nowTextSchema,
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
   hire_cta_url: hireCtaUrlSchema,
@@ -147,6 +153,7 @@ export async function POST(request: NextRequest) {
         ...(validation.data.open_to_coffee !== undefined
           ? { open_to_coffee: validation.data.open_to_coffee }
           : {}),
+        now_text: validation.data.now_text || null,
         profile_type: validation.data.profile_type || 'creator',
         // CTAs the form may have submitted on first-time create. Previously
         // dropped here (only PUT applied them), forcing users to save the
@@ -282,21 +289,27 @@ export async function PUT(request: NextRequest) {
     // the month picker.
     if (cleanData.nomad_since === '') cleanData.nomad_since = null
 
-    // Re-stamp the "now" layer ONLY when the city actually changes — moving
-    // somewhere new is a fresh presence assertion, but saving an unrelated bio
-    // edit is not (that's the whole reason presence_confirmed_at is separate
-    // from updated_at). The edit form submits current_city on every save, so we
-    // diff against the stored value rather than trusting its mere presence. The
-    // explicit one-tap refresh lives at /api/users/confirm-presence.
-    if (cleanData.current_city !== undefined) {
+    // Re-stamp the "now" layer ONLY when a presence field actually changes —
+    // moving city or updating the "now" headline is a fresh presence assertion,
+    // but saving an unrelated bio edit is not (that's the whole reason
+    // presence_confirmed_at is separate from updated_at). The edit form submits
+    // these on every save, so we diff against the stored values rather than
+    // trusting their mere presence. The explicit one-tap refresh lives at
+    // /api/users/confirm-presence.
+    if (cleanData.current_city !== undefined || cleanData.now_text !== undefined) {
       const { data: existing } = await supabase
         .from('users')
-        .select('current_city')
+        .select('current_city,now_text')
         .eq('id', user.id)
         .maybeSingle()
-      const before = (existing?.current_city ?? '').trim().toLowerCase()
-      const after = String(cleanData.current_city ?? '').trim().toLowerCase()
-      if (before !== after) {
+      const norm = (v: unknown) => String(v ?? '').trim().toLowerCase()
+      const cityChanged =
+        cleanData.current_city !== undefined &&
+        norm(existing?.current_city) !== norm(cleanData.current_city)
+      const nowChanged =
+        cleanData.now_text !== undefined &&
+        norm(existing?.now_text) !== norm(cleanData.now_text)
+      if (cityChanged || nowChanged) {
         cleanData.presence_confirmed_at = new Date().toISOString()
       }
     }

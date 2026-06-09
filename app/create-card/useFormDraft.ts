@@ -24,6 +24,8 @@ export interface FormData {
   // Free-form string. Preset slugs (busy / freelancing / fulltime) get
   // their localised labels on the card; anything else renders verbatim.
   work_status: string
+  // One-line "now" headline shown under the name on the card. ≤140 chars.
+  now_text: string
   avatar_url: string
   timezone: string
   // YYYY-MM (the <input type="month"> value). Server normalises to
@@ -53,6 +55,7 @@ export interface FormInitial {
   country: string
   avatar_url: string
   work_status: string
+  now_text: string
   timezone: string
   // YYYY-MM. Empty when the user hasn't set a nomad-since date — card
   // falls back to summing stays for "time on the road" in that case.
@@ -134,6 +137,7 @@ export function useFormDraft(
     current_city: initial?.current_city ?? draft?.current_city ?? '',
     country: initial?.country ?? draft?.country ?? '',
     work_status: initial?.work_status ?? draft?.work_status ?? '',
+    now_text: initial?.now_text ?? draft?.now_text ?? '',
     avatar_url: initial?.avatar_url ?? draft?.avatar_url ?? '',
     // Defaults: edit mode → keep saved zone. New card → seed from browser
     // (the post-mount effect below) so the live local-time feature on the

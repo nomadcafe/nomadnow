@@ -193,6 +193,30 @@ export default function CreateCardForm({
                     />
                   </div>
 
+                  {/* The "now" line — one sentence shown as the card's
+                      headline, right under the name. The soul of nomad.now
+                      captured as a single field; editing it re-freshens the
+                      presence signal server-side. */}
+                  <div>
+                    <label htmlFor="now_text" className="block text-sm font-medium text-gray-900 mb-1.5">
+                      {t('nowText')}
+                    </label>
+                    <input
+                      type="text"
+                      id="now_text"
+                      name="now_text"
+                      value={formData.now_text}
+                      onChange={handleChange}
+                      maxLength={140}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+                      placeholder={t('nowTextPlaceholder')}
+                    />
+                    <div className="mt-1 flex items-center justify-between">
+                      <p className="text-xs text-gray-500">{t('nowTextHint')}</p>
+                      <p className="text-xs text-gray-400 tabular-nums">{formData.now_text.length}/140</p>
+                    </div>
+                  </div>
+
                   {/* Current city — autocomplete so picking a suggestion
                       also fills country (ISO α-2). That country code drives
                       the flag emoji in the public card's location row, and

@@ -322,6 +322,21 @@ export function createSectionRenderers(
             {localisedRole(user.role)}
           </p>
         )}
+        {/* The "now" headline — one live sentence, the soul of the card. An
+            accent dot ties it to the "active" language used elsewhere; it
+            fades alongside the location when the presence claim goes stale. */}
+        {user.now_text?.trim() && (
+          <p
+            className={`mt-2.5 inline-flex items-start gap-1.5 text-sm sm:text-base max-w-md text-left transition-opacity ${presenceStale ? 'opacity-50' : ''}`}
+          >
+            <span
+              className="mt-[0.4rem] w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ backgroundColor: theme.accentHex }}
+              aria-hidden
+            />
+            <span>{user.now_text.trim()}</span>
+          </p>
+        )}
       </div>
     ),
     location: () => {

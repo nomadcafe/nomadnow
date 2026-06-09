@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS users (
   -- city) vs hire_cta's freelance-side (client conversions). Added in 0019.
   meetup_cta_label TEXT,
   meetup_cta_url TEXT,
+  -- One-line "now" headline shown under the name on the card — the live
+  -- of-the-moment status (vs bio's durable self-description). ≤140 chars.
+  -- Added in migration 0029.
+  now_text TEXT CHECK (now_text IS NULL OR char_length(now_text) <= 140),
   -- Presence-freshness timestamp — the "now" layer. Separate from updated_at
   -- on purpose: drives the "confirmed N days ago" line + staleness fade on the
   -- public card. Server-stamped only (signup / confirm tap / city change).
