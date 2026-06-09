@@ -678,9 +678,13 @@
     "subtitle": "Where they are. Where they've been. What they're building.",
     "searchPlaceholder": "Search by name, handle, bio, or city…",
     "sortPrefix": "Sort:",
+    "sortActive": "Active now",
     "sortRecent": "Newest",
     "sortCountries": "Most countries",
     "sortAlpha": "A → Z",
+    "coffeeFilter": "Open to coffee",
+    "coffeeChip": "Coffee",
+    "activeNow": "Active now",
     "emptyTitle": "No nomads here yet",
     "emptyDescription": "Be the first to claim a card and show up on the map.",
     "paginationOf": "{from}–{to} of {total} nomads"

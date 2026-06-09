@@ -678,9 +678,13 @@
     "subtitle": "他们在哪。他们去过哪。他们在做什么。",
     "searchPlaceholder": "按姓名、handle、简介或城市搜索…",
     "sortPrefix": "排序:",
+    "sortActive": "最近活跃",
     "sortRecent": "最新",
     "sortCountries": "去过国家最多",
     "sortAlpha": "A → Z",
+    "coffeeFilter": "可约咖啡",
+    "coffeeChip": "咖啡",
+    "activeNow": "活跃中",
     "emptyTitle": "这里还没有游民",
     "emptyDescription": "成为第一个占下卡片、出现在地图上的人。",
     "paginationOf": "{from}–{to} / 共 {total} 位游民"

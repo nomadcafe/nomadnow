@@ -9,7 +9,15 @@ import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import type { Metadata } from 'next'
 
-type SortKey = 'recent' | 'countries' | 'alpha'
+type SortKey = 'recent' | 'countries' | 'alpha' | 'active'
+
+// "Open to coffee" only means something if the presence behind it is fresh —
+// an 8-month-old "open to coffee in Bali" is noise. The coffee filter requires
+// a confirmation within this window so it answers "who's actually around and up
+// for a coffee right now", which is the whole reason the directory beats a
+// static /now-page list. Tighter than lib/presence.STALE_AFTER_DAYS (21d) on
+// purpose: 21d is "don't trust the dot", a week is "they're genuinely here".
+const COFFEE_FRESH_DAYS = 7
 
 type NomadsResult = {
   nomads: Nomad[]
@@ -23,7 +31,7 @@ type NomadsResult = {
 // are high-cardinality (every term a distinct key) and the searcher expects
 // fresh results.
 async function getNomads(
-  filters?: { search?: string; country?: string; sortBy?: SortKey },
+  filters?: { search?: string; country?: string; sortBy?: SortKey; coffee?: boolean },
   page: number = 1,
   pageSize: number = 24
 ): Promise<NomadsResult> {
@@ -32,7 +40,14 @@ async function getNomads(
   }
   const cached = unstable_cache(
     () => fetchNomads(filters, page, pageSize),
-    ['explore', filters?.country ?? '', filters?.sortBy ?? 'recent', String(page), String(pageSize)],
+    [
+      'explore',
+      filters?.country ?? '',
+      filters?.sortBy ?? 'recent',
+      filters?.coffee ? 'coffee' : '',
+      String(page),
+      String(pageSize),
+    ],
     // 120s TTL backstop; the `explore` tag is bumped on signup / profile edit
     // (lib/revalidate.ts) so new and changed cards surface promptly.
     { tags: ['explore'], revalidate: 120 },
@@ -41,7 +56,7 @@ async function getNomads(
 }
 
 async function fetchNomads(
-  filters?: { search?: string; country?: string; sortBy?: SortKey },
+  filters?: { search?: string; country?: string; sortBy?: SortKey; coffee?: boolean },
   page: number = 1,
   pageSize: number = 24
 ): Promise<NomadsResult> {
@@ -59,7 +74,10 @@ async function fetchNomads(
         // the user's current_city (matches the public card's new flag
         // fallback). visited_countries_count is the generated column from
         // migration 0025 — drives the "sort by countries" path below.
-        'id, handle, display_name, avatar_url, bio, role, current_city, country, timezone, visited_countries, visited_countries_count, created_at',
+        // presence_confirmed_at + open_to_coffee added for the "now" layer:
+        // they drive the "active now" sort, the coffee filter, and the
+        // freshness / coffee chips on the summary card (migrations 0028 / 0024).
+        'id, handle, display_name, avatar_url, bio, role, current_city, country, timezone, visited_countries, visited_countries_count, created_at, presence_confirmed_at, open_to_coffee',
         { count: 'exact' },
       )
       // Keep moderated (suspended) cards out of the public directory — their
@@ -84,6 +102,13 @@ async function fetchNomads(
       // visited_countries is TEXT[] in Postgres; cs = contains
       query = query.contains('visited_countries', [filters.country])
     }
+    if (filters?.coffee) {
+      // "Around right now and up for coffee" — opted into coffee AND confirmed
+      // presence within the freshness window. Served by the partial index
+      // idx_users_presence_confirmed_at (WHERE open_to_coffee = TRUE) from 0028.
+      const sinceIso = new Date(Date.now() - COFFEE_FRESH_DAYS * 86_400_000).toISOString()
+      query = query.eq('open_to_coffee', true).gte('presence_confirmed_at', sinceIso)
+    }
 
     // All three sorts are now DB-level. The "countries" sort previously ran
     // client-side post-fetch and only re-ordered the current page's 24
@@ -94,6 +119,13 @@ async function fetchNomads(
       query = query.order('visited_countries_count', { ascending: false, nullsFirst: false })
     } else if (filters?.sortBy === 'alpha') {
       query = query.order('display_name', { ascending: true, nullsFirst: false })
+    } else if (filters?.sortBy === 'active') {
+      // "Active now" — most recently confirmed presence first. nullsFirst:false
+      // pushes legacy rows that never stamped to the bottom. Secondary order by
+      // created_at keeps it deterministic when timestamps tie (e.g. backfilled).
+      query = query
+        .order('presence_confirmed_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
     } else {
       query = query.order('created_at', { ascending: false })
     }
@@ -139,13 +171,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; country?: string; sortBy?: string; page?: string }>
+  searchParams: Promise<{ search?: string; country?: string; sortBy?: string; coffee?: string; page?: string }>
 }) {
   const params = await searchParams
-  const sortBy: SortKey = (['recent', 'countries', 'alpha'] as const).includes(params.sortBy as SortKey)
+  const sortBy: SortKey = (['recent', 'countries', 'alpha', 'active'] as const).includes(params.sortBy as SortKey)
     ? (params.sortBy as SortKey)
     : 'recent'
-  const filters = { search: params.search, country: params.country, sortBy }
+  const coffee = params.coffee === '1'
+  const filters = { search: params.search, country: params.country, sortBy, coffee }
   const page = parseInt(params.page || '1', 10)
 
   const data = await getNomads(filters, page, 24)
