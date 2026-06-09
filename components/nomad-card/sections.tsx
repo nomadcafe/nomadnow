@@ -609,12 +609,14 @@ export function createSectionRenderers(
           : road.unit === 'month'
             ? t('unitMonth')
             : t('unitDay')
-      // The city column is meaningful only when the user has actually
-      // logged stays. Without stays it would always read "0" — visually
-      // identical to "missing data" and giving up valuable strip width
-      // for no signal. Drop it in that case so the strip stays clean
-      // for the 80% of users who only filled nomad_since + countries.
+      // Show only non-zero stats — a "0 days on the road" or "0 countries"
+      // column reads as missing data, not a signal, and (since the road stat
+      // now leads) would otherwise make a countries-only card open on a bare
+      // "0". The top-level guard above already bailed when all three are zero,
+      // so at least one stat always renders.
+      const showRoadStat = totalDays > 0
       const showCityStat = cityCount > 0
+      const showCountryStat = visitedCount > 0
       return (
         <div key="stats" className="my-6">
           {/* Section title disambiguates the strip below — "23 countries"
@@ -633,12 +635,14 @@ export function createSectionRenderers(
                 nomad" signal) and cities, with countries last — the country
                 count is the most vanity-prone stat, so it no longer anchors
                 the strip. */}
-            <Stat
-              value={road.value}
-              label={roadUnitLabel}
-              mutedClass={theme.textMuted}
-              valueClass={theme.statValueClass}
-            />
+            {showRoadStat && (
+              <Stat
+                value={road.value}
+                label={roadUnitLabel}
+                mutedClass={theme.textMuted}
+                valueClass={theme.statValueClass}
+              />
+            )}
             {showCityStat && (
               <Stat
                 value={cityCount}
@@ -647,12 +651,14 @@ export function createSectionRenderers(
                 valueClass={theme.statValueClass}
               />
             )}
-            <Stat
-              value={visitedCount}
-              label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
-              mutedClass={theme.textMuted}
-              valueClass={theme.statValueClass}
-            />
+            {showCountryStat && (
+              <Stat
+                value={visitedCount}
+                label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
+                mutedClass={theme.textMuted}
+                valueClass={theme.statValueClass}
+              />
+            )}
           </div>
         </div>
       )
