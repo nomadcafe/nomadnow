@@ -49,10 +49,14 @@ interface ExploreClientProps {
   }
 }
 
+// "Sort by countries" was intentionally dropped from the dropdown — it's the
+// vanity axis (most passport stamps wins), which pulls against the "now"
+// positioning. The server (app/explore/page.tsx) still honours ?sortBy=countries
+// so /in/[country] deep-links and any saved URLs keep working; it's just no
+// longer offered as a primary choice. "active" (freshness) leads instead.
 const SORT_KEYS = [
   { value: 'active', labelKey: 'sortActive' },
   { value: 'recent', labelKey: 'sortRecent' },
-  { value: 'countries', labelKey: 'sortCountries' },
   { value: 'alpha', labelKey: 'sortAlpha' },
 ] as const
 

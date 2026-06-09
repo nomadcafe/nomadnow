@@ -485,9 +485,15 @@ export default function CreateCardForm({
                           <label className="block text-sm font-medium text-gray-900 mb-1.5">
                             {t('visitedCountries')}
                           </label>
+                          {/* Capped at 30. The uncapped 195-country picker
+                              invited a "wall of flags" vanity metric; a cap
+                              keeps the signal meaningful, and the dated Stays
+                              below already fill the map (mergedVisitedCodes),
+                              so users don't need to collect them all. */}
                           <CountrySelector
                             selectedCountries={visitedCountries}
                             onChange={setVisitedCountries}
+                            maxSelections={30}
                           />
                           <p className="mt-1.5 text-xs text-gray-500">
                             {t('visitedCountriesHint')}
