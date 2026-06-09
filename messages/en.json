@@ -308,6 +308,7 @@
         "role": "add your role",
         "bio": "add a short bio",
         "city": "add your current city",
+        "now": "write your now line",
         "nomadSince": "set when you started nomading",
         "countries": "mark visited countries",
         "links": "add at least one link"
