@@ -286,30 +286,14 @@ export async function PUT(request: NextRequest) {
     // the month picker.
     if (cleanData.nomad_since === '') cleanData.nomad_since = null
 
-    // Re-stamp the "now" layer ONLY when a presence field actually changes —
-    // moving city or updating the "now" headline is a fresh presence assertion,
-    // but saving an unrelated bio edit is not (that's the whole reason
-    // presence_confirmed_at is separate from updated_at). The edit form submits
-    // these on every save, so we diff against the stored values rather than
-    // trusting their mere presence. The explicit one-tap refresh lives at
-    // /api/users/confirm-presence.
-    if (cleanData.current_city !== undefined || cleanData.now_text !== undefined) {
-      const { data: existing } = await supabase
-        .from('users')
-        .select('current_city,now_text')
-        .eq('id', user.id)
-        .maybeSingle()
-      const norm = (v: unknown) => String(v ?? '').trim().toLowerCase()
-      const cityChanged =
-        cleanData.current_city !== undefined &&
-        norm(existing?.current_city) !== norm(cleanData.current_city)
-      const nowChanged =
-        cleanData.now_text !== undefined &&
-        norm(existing?.now_text) !== norm(cleanData.now_text)
-      if (cityChanged || nowChanged) {
-        cleanData.presence_confirmed_at = new Date().toISOString()
-      }
-    }
+    // Any profile save refreshes the "now" layer. Opening the editor and
+    // saving is an active "this card is current" signal, so the freshness note
+    // should read "today" right after — the earlier rule (only re-stamp when
+    // city/now_text changed) surprised users who'd just saved yet saw "13 days
+    // ago". The decay only exists to catch ABANDONED cards; an active save is
+    // the opposite of abandonment. Refreshing without editing still has the
+    // one-tap /api/users/confirm-presence path.
+    cleanData.presence_confirmed_at = new Date().toISOString()
 
     // Re-scan CTA / website links on edit too (fail-open; see POST).
     await assertUrlsSafe(
