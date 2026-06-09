@@ -413,7 +413,7 @@
       "remove": "削除"
     },
     "visitedCountries": "訪れた国",
-    "visitedCountriesHint": "行ったことのある国の旗をタップ — カードの地図が点灯します。",
+    "visitedCountriesHint": "あなたの旅を形づくった場所をタップ — 地図が点灯します。最大30か国。下のStaysでも地図は埋まるので、全部集める必要はありません。",
     "nomadSinceLabel": "ノマド開始",
     "nomadSinceHint": "月だけ選べばOK — カードの「○年間ノマド」表示に使われます。詳しく記録したい場合は下の滞在記録へ。",
     "submit": "カードを確保",

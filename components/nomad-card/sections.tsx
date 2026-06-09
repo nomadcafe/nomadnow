@@ -629,9 +629,13 @@ export function createSectionRenderers(
           <div
             className={`flex items-center justify-center gap-4 sm:gap-10 py-4 border-y ${theme.divider}`}
           >
+            {/* Lead with time on the road (the credible, temporal "real
+                nomad" signal) and cities, with countries last — the country
+                count is the most vanity-prone stat, so it no longer anchors
+                the strip. */}
             <Stat
-              value={visitedCount}
-              label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
+              value={road.value}
+              label={roadUnitLabel}
               mutedClass={theme.textMuted}
               valueClass={theme.statValueClass}
             />
@@ -644,8 +648,8 @@ export function createSectionRenderers(
               />
             )}
             <Stat
-              value={road.value}
-              label={roadUnitLabel}
+              value={visitedCount}
+              label={visitedCount === 1 ? t('countryOne') : t('countryMany')}
               mutedClass={theme.textMuted}
               valueClass={theme.statValueClass}
             />
