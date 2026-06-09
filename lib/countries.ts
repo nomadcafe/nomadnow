@@ -1,5 +1,22 @@
-// Country data with flag emojis and approximate centroid coordinates
-// (lat, lon — used by components/WorldMap.tsx to plot dots).
+// Country data.
+//
+// Two distinct sets, deliberately separate:
+//   1. countryOptions / getCountryName / getCountryFlag — the FULL ISO 3166-1
+//      set (~249). Names come from Intl.DisplayNames and flags are computed
+//      from the 2-letter code, so every country a nomad could actually be in
+//      resolves to a real name + flag. The visited-countries picker, the
+//      current-city flag, the Stays editor, and the explore cards all use this.
+//   2. countries (CENTROIDS) — a curated subset WITH lat/lon centroids, used
+//      only by WorldMap to plot dots and by the /in + /map hotspot pages.
+//      Plotting needs coordinates, which only exist for this hand-picked set.
+//
+// Previously a single hardcoded 48-country array backed everything, so any
+// country outside it couldn't be selected and rendered as "🌍 + raw code"
+// on cards. Splitting the concerns fixes that without inventing centroids for
+// 200 countries the map can't meaningfully place.
+
+// Full set: code + centroid. For WorldMap dots + /in + /map. Coordinates are
+// rough country centroids.
 export interface Country {
   code: string
   name: string
@@ -8,71 +25,116 @@ export interface Country {
   lon: number
 }
 
-// Popular destinations for digital nomads. Coordinates are rough country centroids.
-export const countries: Country[] = [
-  { code: 'TH', name: 'Thailand', flag: '🇹🇭', lat: 13.75, lon: 100.5 },
-  { code: 'JP', name: 'Japan', flag: '🇯🇵', lat: 36.2, lon: 138.25 },
-  { code: 'PT', name: 'Portugal', flag: '🇵🇹', lat: 39.4, lon: -8.2 },
-  { code: 'VN', name: 'Vietnam', flag: '🇻🇳', lat: 14.06, lon: 108.28 },
-  { code: 'MY', name: 'Malaysia', flag: '🇲🇾', lat: 4.21, lon: 101.98 },
-  { code: 'ID', name: 'Indonesia', flag: '🇮🇩', lat: -0.79, lon: 113.92 },
-  { code: 'PH', name: 'Philippines', flag: '🇵🇭', lat: 12.88, lon: 121.77 },
-  { code: 'ES', name: 'Spain', flag: '🇪🇸', lat: 40.46, lon: -3.75 },
-  { code: 'IT', name: 'Italy', flag: '🇮🇹', lat: 41.87, lon: 12.57 },
-  { code: 'GR', name: 'Greece', flag: '🇬🇷', lat: 39.07, lon: 21.82 },
-  { code: 'TR', name: 'Turkey', flag: '🇹🇷', lat: 38.96, lon: 35.24 },
-  { code: 'GE', name: 'Georgia', flag: '🇬🇪', lat: 42.32, lon: 43.36 },
-  { code: 'MX', name: 'Mexico', flag: '🇲🇽', lat: 23.63, lon: -102.55 },
-  { code: 'CO', name: 'Colombia', flag: '🇨🇴', lat: 4.57, lon: -74.3 },
-  { code: 'AR', name: 'Argentina', flag: '🇦🇷', lat: -34.6, lon: -58.4 },
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷', lat: -14.24, lon: -51.93 },
-  { code: 'CL', name: 'Chile', flag: '🇨🇱', lat: -35.68, lon: -71.54 },
-  { code: 'UY', name: 'Uruguay', flag: '🇺🇾', lat: -32.52, lon: -55.77 },
-  { code: 'CR', name: 'Costa Rica', flag: '🇨🇷', lat: 9.75, lon: -83.75 },
-  { code: 'EC', name: 'Ecuador', flag: '🇪🇨', lat: -1.83, lon: -78.18 },
-  { code: 'AE', name: 'UAE', flag: '🇦🇪', lat: 23.42, lon: 53.85 },
-  { code: 'SG', name: 'Singapore', flag: '🇸🇬', lat: 1.35, lon: 103.82 },
-  { code: 'TW', name: 'Taiwan', flag: '🇹🇼', lat: 23.7, lon: 120.96 },
-  { code: 'KR', name: 'South Korea', flag: '🇰🇷', lat: 35.91, lon: 127.77 },
-  { code: 'CN', name: 'China', flag: '🇨🇳', lat: 35.86, lon: 104.2 },
-  { code: 'IN', name: 'India', flag: '🇮🇳', lat: 20.59, lon: 78.96 },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪', lat: 51.17, lon: 10.45 },
-  { code: 'FR', name: 'France', flag: '🇫🇷', lat: 46.23, lon: 2.21 },
-  { code: 'NL', name: 'Netherlands', flag: '🇳🇱', lat: 52.13, lon: 5.29 },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', lat: 55.38, lon: -3.44 },
-  { code: 'IE', name: 'Ireland', flag: '🇮🇪', lat: 53.41, lon: -8.24 },
-  { code: 'PL', name: 'Poland', flag: '🇵🇱', lat: 51.92, lon: 19.13 },
-  { code: 'CZ', name: 'Czech Republic', flag: '🇨🇿', lat: 49.82, lon: 15.47 },
-  { code: 'HU', name: 'Hungary', flag: '🇭🇺', lat: 47.16, lon: 19.5 },
-  { code: 'RO', name: 'Romania', flag: '🇷🇴', lat: 45.94, lon: 24.97 },
-  { code: 'BG', name: 'Bulgaria', flag: '🇧🇬', lat: 42.73, lon: 25.49 },
-  { code: 'RS', name: 'Serbia', flag: '🇷🇸', lat: 44.02, lon: 21.01 },
-  { code: 'HR', name: 'Croatia', flag: '🇭🇷', lat: 45.1, lon: 15.2 },
-  { code: 'ME', name: 'Montenegro', flag: '🇲🇪', lat: 42.71, lon: 19.37 },
-  { code: 'AL', name: 'Albania', flag: '🇦🇱', lat: 41.15, lon: 20.17 },
-  { code: 'MA', name: 'Morocco', flag: '🇲🇦', lat: 31.79, lon: -7.09 },
-  { code: 'EG', name: 'Egypt', flag: '🇪🇬', lat: 26.82, lon: 30.8 },
-  { code: 'ZA', name: 'South Africa', flag: '🇿🇦', lat: -30.56, lon: 22.94 },
-  { code: 'KE', name: 'Kenya', flag: '🇰🇪', lat: -0.02, lon: 37.91 },
-  { code: 'NZ', name: 'New Zealand', flag: '🇳🇿', lat: -40.9, lon: 174.89 },
-  { code: 'AU', name: 'Australia', flag: '🇦🇺', lat: -25.27, lon: 133.78 },
-  { code: 'CA', name: 'Canada', flag: '🇨🇦', lat: 56.13, lon: -106.35 },
-  { code: 'US', name: 'United States', flag: '🇺🇸', lat: 37.09, lon: -95.71 },
-]
-
-export const getCountryByCode = (code: string): Country | undefined => {
-  return countries.find((c) => c.code === code)
+// Lightweight option for pickers / lookups where coordinates don't matter.
+export interface CountryOption {
+  code: string
+  name: string
+  flag: string
 }
 
-export const getCountryFlag = (code: string): string => {
-  const country = getCountryByCode(code)
-  return country?.flag || '🌍'
+// Centroids for the map-plottable set. code → [lat, lon].
+const CENTROIDS: Record<string, [number, number]> = {
+  TH: [13.75, 100.5], JP: [36.2, 138.25], PT: [39.4, -8.2], VN: [14.06, 108.28],
+  MY: [4.21, 101.98], ID: [-0.79, 113.92], PH: [12.88, 121.77], ES: [40.46, -3.75],
+  IT: [41.87, 12.57], GR: [39.07, 21.82], TR: [38.96, 35.24], GE: [42.32, 43.36],
+  MX: [23.63, -102.55], CO: [4.57, -74.3], AR: [-34.6, -58.4], BR: [-14.24, -51.93],
+  CL: [-35.68, -71.54], UY: [-32.52, -55.77], CR: [9.75, -83.75], EC: [-1.83, -78.18],
+  AE: [23.42, 53.85], SG: [1.35, 103.82], TW: [23.7, 120.96], KR: [35.91, 127.77],
+  CN: [35.86, 104.2], IN: [20.59, 78.96], DE: [51.17, 10.45], FR: [46.23, 2.21],
+  NL: [52.13, 5.29], GB: [55.38, -3.44], IE: [53.41, -8.24], PL: [51.92, 19.13],
+  CZ: [49.82, 15.47], HU: [47.16, 19.5], RO: [45.94, 24.97], BG: [42.73, 25.49],
+  RS: [44.02, 21.01], HR: [45.1, 15.2], ME: [42.71, 19.37], AL: [41.15, 20.17],
+  MA: [31.79, -7.09], EG: [26.82, 30.8], ZA: [-30.56, 22.94], KE: [-0.02, 37.91],
+  NZ: [-40.9, 174.89], AU: [-25.27, 133.78], CA: [56.13, -106.35], US: [37.09, -95.71],
+}
+
+// Full ISO 3166-1 alpha-2 list — every code a city autocomplete or a traveller
+// could surface. Names/flags are derived, so this only needs the codes.
+const ALL_CODES: string[] = [
+  'AD','AE','AF','AG','AI','AL','AM','AO','AR','AT','AU','AW','AX','AZ','BA','BB','BD','BE',
+  'BF','BG','BH','BI','BJ','BL','BM','BN','BO','BQ','BR','BS','BT','BW','BY','BZ','CA','CC',
+  'CD','CF','CG','CH','CI','CK','CL','CM','CN','CO','CR','CU','CV','CW','CX','CY','CZ','DE',
+  'DJ','DK','DM','DO','DZ','EC','EE','EG','EH','ER','ES','ET','FI','FJ','FK','FM','FO','FR',
+  'GA','GB','GD','GE','GF','GG','GH','GI','GL','GM','GN','GP','GQ','GR','GT','GU','GW','GY',
+  'HK','HN','HR','HT','HU','ID','IE','IL','IM','IN','IO','IQ','IR','IS','IT','JE','JM','JO',
+  'JP','KE','KG','KH','KI','KM','KN','KP','KR','KW','KY','KZ','LA','LB','LC','LI','LK','LR',
+  'LS','LT','LU','LV','LY','MA','MC','MD','ME','MF','MG','MH','MK','ML','MM','MN','MO','MP',
+  'MQ','MR','MS','MT','MU','MV','MW','MX','MY','MZ','NA','NC','NE','NF','NG','NI','NL','NO',
+  'NP','NR','NU','NZ','OM','PA','PE','PF','PG','PH','PK','PL','PM','PN','PR','PS','PT','PW',
+  'PY','QA','RE','RO','RS','RU','RW','SA','SB','SC','SD','SE','SG','SH','SI','SK','SL','SM',
+  'SN','SO','SR','SS','ST','SV','SX','SY','SZ','TC','TD','TG','TH','TJ','TK','TL','TM','TN',
+  'TO','TR','TT','TV','TW','TZ','UA','UG','US','UY','UZ','VA','VC','VE','VG','VI','VN','VU',
+  'WF','WS','XK','YE','YT','ZA','ZM','ZW',
+]
+
+// Flag emoji from a 2-letter code via regional-indicator symbols — works for
+// any valid ISO code without storing 249 emoji. Invalid input → globe.
+export function flagForCode(code: string): string {
+  if (!code || !/^[A-Za-z]{2}$/.test(code)) return '🌍'
+  const cc = code.toUpperCase()
+  return String.fromCodePoint(
+    0x1f1e6 + cc.charCodeAt(0) - 65,
+    0x1f1e6 + cc.charCodeAt(1) - 65,
+  )
+}
+
+// English region names via Intl.DisplayNames (full ICU, present in all target
+// runtimes). Built once; falls back to the raw code if unavailable.
+type RegionNames = { of: (code: string) => string | undefined }
+const regionNames: RegionNames | null = (() => {
+  try {
+    const DN = (Intl as unknown as { DisplayNames?: new (l: string[], o: object) => RegionNames })
+      .DisplayNames
+    return DN ? new DN(['en'], { type: 'region' }) : null
+  } catch {
+    return null
+  }
+})()
+
+// Keep the names that the old curated list used, where Intl.DisplayNames now
+// returns a different (modern) form. This preserves existing card display AND
+// the /in/{slug} SEO URLs (e.g. /in/turkey, /in/uae) that slugForCountry
+// derives from the name — switching to "Türkiye"/"Czechia"/"United Arab
+// Emirates" would silently 404 the already-indexed hotspot pages.
+const NAME_OVERRIDES: Record<string, string> = {
+  TR: 'Turkey',
+  CZ: 'Czech Republic',
+  AE: 'UAE',
 }
 
 export const getCountryName = (code: string): string => {
-  const country = getCountryByCode(code)
-  return country?.name || code
+  if (!code) return code
+  const cc = code.toUpperCase()
+  if (NAME_OVERRIDES[cc]) return NAME_OVERRIDES[cc]
+  try {
+    return regionNames?.of(cc) || cc
+  } catch {
+    return cc
+  }
 }
+
+export const getCountryFlag = (code: string): string => flagForCode(code)
+
+export const getCountryByCode = (code: string): CountryOption | undefined => {
+  if (!code || !/^[A-Za-z]{2}$/.test(code)) return undefined
+  const cc = code.toUpperCase()
+  return { code: cc, name: getCountryName(cc), flag: flagForCode(cc) }
+}
+
+// Full picker list — every ISO country, name-sorted. Built once at module load.
+export const countryOptions: CountryOption[] = ALL_CODES
+  .map((code) => ({ code, name: getCountryName(code), flag: flagForCode(code) }))
+  .sort((a, b) => a.name.localeCompare(b.name))
+
+// Map-plottable set (centroids). Names/flags single-sourced through the helpers
+// so they stay consistent with the full list.
+export const countries: Country[] = Object.entries(CENTROIDS).map(([code, [lat, lon]]) => ({
+  code,
+  name: getCountryName(code),
+  flag: flagForCode(code),
+  lat,
+  lon,
+}))
 
 // URL slug used by /in/{slug}. "South Korea" → "south-korea".
 // Strips diacritics, lowercases, replaces non-alphanumerics with hyphens.
@@ -87,7 +149,8 @@ export function slugForCountry(code: string): string {
 }
 
 // Reverse lookup for the /in/[country] route. Case- and hyphen-insensitive.
-// Returns undefined when no known country matches.
+// Resolves against the map-plottable set (the curated hotspot pages we
+// pre-generate). Returns undefined when no known country matches.
 export function codeForSlug(slug: string): string | undefined {
   if (!slug) return undefined
   const normalized = slug.toLowerCase().trim()

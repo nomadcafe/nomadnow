@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { countries, getCountryFlag } from '@/lib/countries'
+import { countryOptions, getCountryFlag } from '@/lib/countries'
 import { stayDayCount } from '@/lib/stays'
 import { CityAutocomplete } from './CityAutocomplete'
 
@@ -48,9 +48,10 @@ export function emptyStay(): StayDraft {
   }
 }
 
-// Sorts countries by name for the picker. Sorted once at module load —
-// the country list is static so this is essentially free.
-const SORTED_COUNTRIES = [...countries].sort((a, b) => a.name.localeCompare(b.name))
+// Full ISO country list for the picker, already name-sorted at module load.
+// (Was the curated 48-country set, which meant a stay couldn't be logged in
+// most countries.)
+const SORTED_COUNTRIES = countryOptions
 
 interface StaysEditorProps {
   stays: StayDraft[]
