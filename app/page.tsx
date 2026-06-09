@@ -33,6 +33,7 @@ const HERO_USER: User = {
   now_text: 'Shipping a design system from a café in Bangkok',
   presence_confirmed_at: new Date().toISOString(),
   current_city: 'Bangkok',
+  country: 'TH', // drives the 🇹🇭 flag on the location row (else it falls back to 📍)
   timezone: 'Asia/Bangkok',
   work_status: 'freelancing',
   visited_countries: previewVisited,

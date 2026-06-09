@@ -627,6 +627,7 @@
   },
   "card": {
     "verified": "已认证",
+    "currentlyIn": "现在在",
     "openToCoffee": "在 {city} 可以约咖啡",
     "presence": {
       "confirmedAgo": "更新于 {ago}",

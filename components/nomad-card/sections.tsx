@@ -343,6 +343,12 @@ export function createSectionRenderers(
       if (!displayLocation) return null
       return (
         <div key="location" className="text-center mb-2">
+          {/* Caption so a visitor reads the city as "where they are right now",
+              not a bare pin. Mirrors the editor's "Currently in" field label —
+              without it, "📍 Osaka" doesn't say it's where this nomad is based. */}
+          <p className={`text-[10px] uppercase tracking-wider mb-0.5 ${theme.textMuted}`}>
+            {t('currentlyIn')}
+          </p>
           {/* Fade the live location once the presence claim goes stale — a
               de-emphasised "Bangkok" reads as "was here", which is the honest
               state of an un-refreshed card. */}
