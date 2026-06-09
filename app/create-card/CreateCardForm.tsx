@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useDeferredValue } from 'react'
+import React, { useEffect, useMemo, useState, useDeferredValue } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useToast } from '@/hooks/useToast'
@@ -25,6 +25,75 @@ import {
 import { useHandleCheck } from './useHandleCheck'
 import { useFormDraft, type FormInitial } from './useFormDraft'
 import { useSubmitCard } from './useSubmitCard'
+import { useUnsavedChanges } from './useUnsavedChanges'
+import type { BlurbDraft, FeaturedWorkDraft, NomadLinkDraft } from './form-constants'
+
+// Canonical serialization of everything the form can edit. Built through one
+// function for both the loaded baseline and the live state so key order +
+// shape match exactly — otherwise pristine cards would read as "dirty" (e.g.
+// an undefined label vs ''). Drives the unsaved-changes guard.
+interface EditableState {
+  handle: string
+  display_name: string
+  role: string
+  bio: string
+  current_city: string
+  country: string
+  work_status: string
+  now_text: string
+  avatar_url: string
+  timezone: string
+  nomad_since: string
+  hire_cta_label: string
+  hire_cta_url: string
+  meetup_cta_label: string
+  meetup_cta_url: string
+  open_to_coffee: boolean
+  visitedCountries: string[]
+  links: NomadLinkDraft[]
+  stays: StayDraft[]
+  blurbs: BlurbDraft[]
+  featuredWorks: FeaturedWorkDraft[]
+}
+
+function editableSnapshot(v: EditableState): string {
+  return JSON.stringify({
+    handle: v.handle,
+    display_name: v.display_name,
+    role: v.role,
+    bio: v.bio,
+    current_city: v.current_city,
+    country: v.country,
+    work_status: v.work_status,
+    now_text: v.now_text,
+    avatar_url: v.avatar_url,
+    timezone: v.timezone,
+    nomad_since: v.nomad_since,
+    hire_cta_label: v.hire_cta_label,
+    hire_cta_url: v.hire_cta_url,
+    meetup_cta_label: v.meetup_cta_label,
+    meetup_cta_url: v.meetup_cta_url,
+    open_to_coffee: v.open_to_coffee,
+    visitedCountries: v.visitedCountries,
+    links: v.links.map((l) => ({ type: l.type, label: l.label || '', url: l.url })),
+    stays: v.stays.map((s) => ({
+      city: s.city,
+      country: s.country,
+      start_date: s.start_date,
+      end_date: s.end_date || '',
+      notes: s.notes || '',
+      lat: s.lat ?? null,
+      lon: s.lon ?? null,
+      photo_urls: s.photo_urls || [],
+    })),
+    blurbs: v.blurbs.map((b) => ({ label: b.label, value: b.value })),
+    featuredWorks: v.featuredWorks.map((w) => ({
+      title: w.title,
+      url: w.url,
+      description: w.description || '',
+    })),
+  })
+}
 
 // Server-injected snapshot. When non-null the form switches to edit mode:
 // fields pre-populate, handle becomes read-only, submit hits PUT.
@@ -91,6 +160,50 @@ export default function CreateCardForm({
     clearDraft,
     showError,
   })
+
+  // Unsaved-changes guard — edit mode only (create mode already autosaves a
+  // localStorage draft, so abandoning it loses nothing). Compares live state
+  // against the snapshot the page loaded with; the guard is suppressed while a
+  // save is in flight so the post-save redirect isn't intercepted.
+  const baselineSnapshot = useMemo(
+    () =>
+      initial
+        ? editableSnapshot({
+            handle: initial.handle,
+            display_name: initial.display_name,
+            role: initial.role,
+            bio: initial.bio,
+            current_city: initial.current_city,
+            country: initial.country,
+            work_status: initial.work_status,
+            now_text: initial.now_text,
+            avatar_url: initial.avatar_url,
+            timezone: initial.timezone,
+            nomad_since: initial.nomad_since,
+            hire_cta_label: initial.hire_cta_label,
+            hire_cta_url: initial.hire_cta_url,
+            meetup_cta_label: initial.meetup_cta_label,
+            meetup_cta_url: initial.meetup_cta_url,
+            open_to_coffee: initial.open_to_coffee,
+            visitedCountries: initial.visited_countries,
+            links: initial.links,
+            stays: initial.stays,
+            blurbs: initial.blurbs,
+            featuredWorks: initial.featured_works,
+          })
+        : null,
+    [initial],
+  )
+  const liveSnapshot = editableSnapshot({
+    ...formData,
+    visitedCountries,
+    links,
+    stays,
+    blurbs,
+    featuredWorks,
+  })
+  const isDirty = isEdit && baselineSnapshot !== null && liveSnapshot !== baselineSnapshot
+  useUnsavedChanges(isDirty && !loading, t('unsavedWarning'))
 
   // Every keystroke triggers a full re-render of the embedded NomadCard
   // preview (and its WorldMap SVG). useDeferredValue lets React keep the

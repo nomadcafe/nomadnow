@@ -304,6 +304,7 @@
   },
   "createCard": {
     "navCancel": "Cancel",
+    "unsavedWarning": "You have unsaved changes. Leave without saving?",
     "previewLabel": "Live preview",
     "previewExampleLabel": "Example preview",
     "completion": {

@@ -304,6 +304,7 @@
   },
   "createCard": {
     "navCancel": "取消",
+    "unsavedWarning": "你有未保存的改动,确定要离开吗?",
     "previewLabel": "实时预览",
     "previewExampleLabel": "示例预览",
     "completion": {
