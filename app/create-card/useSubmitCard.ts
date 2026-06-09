@@ -97,6 +97,27 @@ export function useSubmitCard({
 
     setLoading(true)
     try {
+      // Resolve the country code from the city when it's missing — so the card
+      // shows the flag (🇯🇵 Osaka) instead of a bare "📍 Osaka". Country is only
+      // captured when the user PICKS a CityAutocomplete suggestion; a typed
+      // city (or legacy data) has none. One geocode lookup here backfills it
+      // from the city name; anything the geocoder can't place stays flagless
+      // (📍), which is honest. Skipped entirely when a country is already set.
+      let resolvedCountry = formData.country
+      const cityForLookup = formData.current_city.trim()
+      if (cityForLookup && !resolvedCountry) {
+        try {
+          const geo = await fetch(`/api/geocode?q=${encodeURIComponent(cityForLookup)}`)
+          if (geo.ok) {
+            const data = await geo.json()
+            const top = Array.isArray(data.results) ? data.results[0] : null
+            if (top?.country) resolvedCountry = top.country as string
+          }
+        } catch {
+          // Network/geocoder hiccup — fall through with no country (📍).
+        }
+      }
+
       // Same payload shape regardless of mode — the API's create vs update
       // schemas are subsets of one another and the data we send is valid
       // under both. Only `handle` is omitted in edit mode (it's locked).
@@ -109,10 +130,9 @@ export function useSubmitCard({
         // one of these schemas, and create-mode insert coerces '' → null.
         bio: formData.bio,
         avatar_url: formData.avatar_url,
-        // ISO α-2 code, only present when the user picked from
-        // CityAutocomplete. Manual-typed cities clear country (see the
-        // onCityChange handler), so '' here means "no flag".
-        country: formData.country || '',
+        // ISO α-2 code — captured on autocomplete pick, else backfilled from
+        // the city via the geocode lookup above; '' only when truly unknown.
+        country: resolvedCountry || '',
         role: formData.role,
         current_city: formData.current_city,
         work_status: formData.work_status,
