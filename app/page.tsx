@@ -36,6 +36,10 @@ const HERO_USER: User = {
   timezone: 'Asia/Bangkok',
   work_status: 'freelancing',
   visited_countries: previewVisited,
+  // Anchors a real "time on the road" stat so the hero strip leads with
+  // "~3 yrs" instead of a bare "0 days" (the strip hides any zero stat).
+  // Static month so the demo card doesn't drift across renders.
+  nomad_since: '2021-09-01',
   profile_type: 'nomad',
   // Demo both CTAs on the home hero so visitors see the dual conversion
   // shape (primary hire + secondary local meetup) at a glance.
