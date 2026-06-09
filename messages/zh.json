@@ -78,7 +78,7 @@
     "pricingDescription": "简单直接的定价。两个套餐,没有免费档,没有广告,没有抽成。"
   },
   "home": {
-    "eyebrow": "为数字游民设计的 bio 链接",
+    "eyebrow": "永远显示「此刻」的 bio 链接",
     "heroLine1": "你在哪。",
     "heroLine2": "你去过哪。",
     "heroLine3": "随身的作品。",
@@ -115,6 +115,12 @@
       "title": "边旅行边接活。",
       "body": "名字下面就是一个实心的「Hire me」按钮 + 一个软风格的「约咖啡」按钮。大多数 freelancer 的 link-in-bio 其实就是一个变相的 landing page —— 你的卡片直接把这件事讲透。",
       "caption": "主导流的 Hire CTA + 偏休闲的 Meetup CTA。可以两个都填、只填一个,也可以都不填。"
+    },
+    "feature5": {
+      "label": "永远是此刻",
+      "title": "一张知道「现在」的卡片。",
+      "body": "一句话写下你此刻在做什么,配上低调的「今天更新」,别人就信它是当下的。久不更新它会慢慢褪色;新鲜的卡片则排在 Explore「最近活跃」最前面。nomad.now 里的那个 now,真正落地。",
+      "caption": "点「我还在这儿」即可刷新。零维护,不留过期卡片。"
     },
     "comparison": {
       "title": "为什么不直接用 Linktree?",
