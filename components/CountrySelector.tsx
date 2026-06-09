@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
-import { countries, getCountryByCode, type Country } from '@/lib/countries'
+import { countryOptions, getCountryByCode, type CountryOption } from '@/lib/countries'
 
 interface CountrySelectorProps {
   selectedCountries: string[]
@@ -27,15 +27,15 @@ export function CountrySelector({ selectedCountries, onChange, maxSelections }: 
 
   const selectedCountriesData = selectedCountries
     .map((code) => getCountryByCode(code))
-    .filter((c): c is Country => c !== undefined)
+    .filter((c): c is CountryOption => c !== undefined)
 
   // Filter countries based on search term
   const filteredCountries = useMemo(() => {
     if (!searchTerm.trim()) {
-      return countries
+      return countryOptions
     }
     const term = searchTerm.toLowerCase()
-    return countries.filter(
+    return countryOptions.filter(
       (country) =>
         country.name.toLowerCase().includes(term) ||
         country.code.toLowerCase().includes(term)
