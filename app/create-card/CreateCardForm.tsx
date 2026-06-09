@@ -484,35 +484,37 @@ export default function CreateCardForm({
                         </label>
                       </FormSubsection>
 
-                      {/* Travel — countries visited (low-friction tap-flags)
-                          and the optional Stays log. nomad_since is now in
-                          Essentials above; this group is just for past
-                          travel data. */}
+                      {/* Travel — dated Stays lead (the credible, temporal
+                          source that drives the card's time-on-the-road +
+                          cities stats and the map), with the lightweight
+                          country picker tucked into a collapsed disclosure
+                          below. Mirrors the card hierarchy after countries
+                          were de-emphasised as the vanity axis. nomad_since
+                          lives in Essentials above. */}
                       <FormSubsection title={t('moreSection.travel')}>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                            {t('visitedCountries')}
-                          </label>
-                          {/* Capped at 30. The uncapped 195-country picker
-                              invited a "wall of flags" vanity metric; a cap
-                              keeps the signal meaningful, and the dated Stays
-                              below already fill the map (mergedVisitedCodes),
-                              so users don't need to collect them all. */}
-                          <CountrySelector
-                            selectedCountries={visitedCountries}
-                            onChange={setVisitedCountries}
-                            maxSelections={30}
-                          />
-                          <p className="mt-1.5 text-xs text-gray-500">
-                            {t('visitedCountriesHint')}
-                          </p>
-                        </div>
-
                         <CollapsibleStays
                           stays={stays}
                           setStays={setStays}
                           tStays={tStays}
                         />
+
+                        {/* Capped at 30 — the uncapped 195-country picker
+                            invited a "wall of flags" vanity metric. Collapsed
+                            by default (open when the user already has some) so
+                            the heavy flag grid no longer dominates; the dated
+                            Stays above already fill the map (mergedVisitedCodes),
+                            so there's no need to collect them all. */}
+                        <Collapsible
+                          title={t('visitedCountries')}
+                          summary={t('visitedCountriesHint')}
+                          defaultOpen={visitedCountries.length > 0}
+                        >
+                          <CountrySelector
+                            selectedCountries={visitedCountries}
+                            onChange={setVisitedCountries}
+                            maxSelections={30}
+                          />
+                        </Collapsible>
                       </FormSubsection>
 
                       {/* Extras — content/portfolio enrichments. None of

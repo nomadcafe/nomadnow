@@ -293,6 +293,15 @@
     "tryAnother": "別のメールアドレスを試す",
     "errorGeneric": "マジックリンクを送信できませんでした。もう一度お試しください。"
   },
+  "countrySelector": {
+    "search": "国を検索…",
+    "clearSearch": "検索をクリア",
+    "noResults": "国が見つかりません",
+    "noResultsHint": "別のキーワードでお試しください",
+    "remove": "{country} を外す",
+    "add": "{country} を追加",
+    "selected": "選択中"
+  },
   "createCard": {
     "navCancel": "キャンセル",
     "previewLabel": "ライブプレビュー",

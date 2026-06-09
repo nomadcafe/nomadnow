@@ -293,6 +293,15 @@
     "tryAnother": "换一个邮箱",
     "errorGeneric": "无法发送登录链接,请稍后再试。"
   },
+  "countrySelector": {
+    "search": "搜索国家…",
+    "clearSearch": "清除搜索",
+    "noResults": "没有找到国家",
+    "noResultsHint": "换个关键词试试",
+    "remove": "移除 {country}",
+    "add": "添加 {country}",
+    "selected": "已选"
+  },
   "createCard": {
     "navCancel": "取消",
     "previewLabel": "实时预览",
