@@ -304,6 +304,7 @@
   },
   "createCard": {
     "navCancel": "キャンセル",
+    "unsavedWarning": "保存していない変更があります。保存せずに移動しますか？",
     "previewLabel": "ライブプレビュー",
     "previewExampleLabel": "プレビュー例",
     "completion": {
