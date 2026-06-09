@@ -39,6 +39,11 @@ export interface User {
   // button on the card so it reads as paired-but-secondary to Hire CTA.
   meetup_cta_label?: string | null
   meetup_cta_url?: string | null
+  // The "now" layer's headline (migration 0029). One human sentence shown
+  // under the name on the card — the live, of-the-moment status, distinct from
+  // bio (durable) and work_status (preset pill). ≤140 chars. Editing it
+  // re-stamps presence_confirmed_at (it's a fresh "now" assertion).
+  now_text?: string | null
   // The "now" layer (migration 0028). ISO timestamp of the last time the user
   // asserted their current presence — stamped on signup, on the one-tap confirm
   // (/api/users/confirm-presence), and when current_city changes. Deliberately

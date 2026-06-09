@@ -95,6 +95,10 @@ export function useSubmitCard({
         role: formData.role || undefined,
         current_city: formData.current_city || undefined,
         work_status: formData.work_status,
+        // null (not undefined) so clearing the headline actually wipes the
+        // column — undefined would be filtered server-side and the old value
+        // would persist (same reasoning as the CTA fields below).
+        now_text: formData.now_text.trim() || null,
         timezone: formData.timezone || undefined,
         // Form holds YYYY-MM (month picker). Server expects YYYY-MM-DD so
         // append -01. Empty string -> null on the server so the user can

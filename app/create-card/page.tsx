@@ -71,6 +71,7 @@ export default async function CreateCardPage() {
         country: (profile.country as string | null) ?? '',
         avatar_url: (profile.avatar_url as string | null) ?? '',
         work_status: (profile.work_status as string | null) ?? '',
+        now_text: (profile.now_text as string | null) ?? '',
         timezone: (profile.timezone as string | null) ?? '',
         // DB stores YYYY-MM-DD; the form input is <input type="month"> so we
         // slice to YYYY-MM. Empty string when null so the picker reads blank.

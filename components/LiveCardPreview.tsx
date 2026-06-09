@@ -39,6 +39,9 @@ export interface PreviewFormState {
   // Soft availability signal — drives the "Open to coffee in {city}"
   // chip in the status row. False (or missing current_city) hides it.
   open_to_coffee?: boolean
+  // One-line "now" headline shown under the name. Optional so legacy
+  // form-state shapes without it still type-check.
+  now_text?: string
 }
 
 export interface PreviewStay {
@@ -95,6 +98,7 @@ const SAMPLE_FORM: PreviewFormState = {
   handle: 'kenji',
   display_name: 'Kenji Tanaka',
   role: 'Product Designer',
+  now_text: 'Prototyping a travel app from a café in Bangkok',
   bio: 'Designing tools for the new remote.\nBased between Bangkok, Lisbon, and Mexico City.',
   current_city: 'Bangkok',
   avatar_url: '',
@@ -192,6 +196,7 @@ export function LiveCardPreview({
     bio: effectiveForm.bio || undefined,
     role: effectiveForm.role || undefined,
     current_city: effectiveForm.current_city || undefined,
+    now_text: effectiveForm.now_text || undefined,
     country: effectiveForm.country || undefined,
     work_status: effectiveForm.work_status,
     timezone: effectiveForm.timezone || undefined,
