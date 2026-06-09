@@ -293,6 +293,15 @@
     "tryAnother": "Try another email",
     "errorGeneric": "Could not send the magic link. Please try again."
   },
+  "countrySelector": {
+    "search": "Search countries…",
+    "clearSearch": "Clear search",
+    "noResults": "No countries found",
+    "noResultsHint": "Try a different search term",
+    "remove": "Remove {country}",
+    "add": "Add {country}",
+    "selected": "selected"
+  },
   "createCard": {
     "navCancel": "Cancel",
     "previewLabel": "Live preview",
