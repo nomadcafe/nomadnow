@@ -9,10 +9,15 @@ In your Supabase project dashboard:
 1. **Authentication → Providers → Email**: enable.
 2. **Authentication → URL Configuration**:
    - **Site URL**: `https://<your-prod-domain>` (use `http://localhost:3000` for dev).
-   - **Redirect URLs**: add both
+   - **Redirect URLs**: add all four
      - `http://localhost:3000/auth/callback`
      - `https://<your-prod-domain>/auth/callback`
-3. (Optional) **Authentication → Email Templates → Magic Link**: customize the email subject/body.
+     - `http://localhost:3000/auth/confirm`
+     - `https://<your-prod-domain>/auth/confirm`
+3. **Authentication → Email Templates**: must be edited to the token_hash links
+   below — see [Email template](#email-template). This is **required**, not
+   optional: the default `{{ .ConfirmationURL }}` template breaks email login on
+   phones.
 
 ## 1b. Configure Resend as the SMTP sender (required for production)
 
@@ -51,10 +56,25 @@ the per-hour cap under **Authentication → Rate Limits** if needed.
 
 Login uses `signInWithOtp`, which renders **two** Supabase templates depending
 on the recipient: **Confirm signup** for a brand-new email, **Magic Link** for
-an existing user. Paste the same copy into both (**Authentication → Emails →
-Templates**) so new and returning users get an identical email. Supabase
-templates are raw HTML with no per-user locale switching, so this is one neutral
-English version matched to the site's tone.
+an existing user. **Both must be edited** — if you only fix one, either new
+signups or returning logins still break on mobile.
+
+> **Why not the default `{{ .ConfirmationURL }}`?** That link uses the PKCE
+> code flow (`/auth/callback` → `exchangeCodeForSession`), which needs the
+> `code_verifier` cookie from the browser that *requested* the link. On phones
+> the email is usually opened in a different browser (Gmail/Mail in-app webview)
+> than the one that requested it, so the verifier is missing and login silently
+> fails — works on desktop only because the link opens in the same browser. The
+> `token_hash` links below go to `/auth/confirm` → `verifyOtp`, which has no
+> PKCE dependency and succeeds in any browser/device. OAuth still uses
+> `/auth/callback` (same-browser round trip, so PKCE is fine there).
+
+The two templates are **identical except the `type` query param**:
+
+- **Magic Link** template → `type=magiclink`
+- **Confirm signup** template → `type=signup`
+
+(`/auth/confirm` also accepts `email`, `recovery`, `invite`, `email_change`.)
 
 **Subject**
 
@@ -62,7 +82,8 @@ English version matched to the site's tone.
 Your Nomad.now sign-in link
 ```
 
-**Body**
+**Body** (this is the **Magic Link** version — for **Confirm signup**, change
+both `type=magiclink` to `type=signup`)
 
 ```html
 <table width="100%" cellpadding="0" cellspacing="0" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #111827;">
@@ -74,12 +95,12 @@ Your Nomad.now sign-in link
     <p style="font-size: 15px; line-height: 1.5; color: #374151; margin: 0 0 24px;">
       Click the button below to sign in. The link works once and expires shortly.
     </p>
-    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #111827; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 28px; border-radius: 9999px;">
+    <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=magiclink" style="display: inline-block; background: #111827; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 28px; border-radius: 9999px;">
       Sign in
     </a>
     <p style="font-size: 13px; line-height: 1.5; color: #6b7280; margin: 24px 0 0;">
       If the button doesn't work, paste this link into your browser:<br />
-      <a href="{{ .ConfirmationURL }}" style="color: #6b7280; word-break: break-all;">{{ .ConfirmationURL }}</a>
+      <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=magiclink" style="color: #6b7280; word-break: break-all;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=magiclink</a>
     </p>
     <p style="font-size: 13px; line-height: 1.5; color: #9ca3af; margin: 24px 0 0;">
       Didn't request this? You can safely ignore this email.
@@ -87,6 +108,13 @@ Your Nomad.now sign-in link
   </td></tr>
 </table>
 ```
+
+> **Verify on a phone**: request a login link on mobile, then open it from the
+> **Gmail / Mail app** (not by pasting into the same browser) — the exact path
+> that used to fail. You should land signed in.
+
+Routes: `app/auth/confirm/route.ts` (email links, `verifyOtp`) and
+`app/auth/callback/route.ts` (OAuth, `exchangeCodeForSession`).
 
 ## 2. Apply the schema and migrations
 
@@ -199,6 +227,7 @@ get a 404 on both `/admin` and `POST /api/admin/suspend`.
 
 ## What's still TODO (tracked in ROADMAP)
 
-- Google / GitHub OAuth providers (currently magic link only).
+- GitHub OAuth provider (Google OAuth + email magic link are live; enable the
+  Google provider under **Authentication → Providers → Google** for it to work).
 - Handle reservation cooldown / rename mechanic (N3 partial).
 - Optional: emit rate-limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`) on successful responses too — currently only set on 429s.
