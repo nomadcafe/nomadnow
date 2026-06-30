@@ -537,13 +537,23 @@
     },
     "background": {
       "title": "背景",
-      "description": "用纯色或渐变覆盖主题背景。",
+      "description": "用纯色、渐变或你自己的图片覆盖主题背景。",
       "theme": "跟随主题",
       "solid": "纯色",
       "gradient": "渐变",
       "from": "起色",
       "to": "终色",
-      "angle": "角度"
+      "angle": "角度",
+      "image": "图片",
+      "imageProLockHint": "图片背景是 Pro 功能 —— 上传你自己的照片(比如你此刻所在的地方)。",
+      "imageUpload": "上传图片",
+      "imageReplace": "更换图片",
+      "imageRemove": "移除",
+      "imageUploading": "上传中…",
+      "imageHint": "JPG / PNG / WebP,最大 5 MB。铺满显示在卡片背后。",
+      "imageTooLarge": "图片太大(最大 5 MB)。",
+      "imageBadType": "不支持的文件类型。",
+      "imageUploadFailed": "上传失败,请重试。"
     },
     "font": {
       "title": "字体",

@@ -537,13 +537,23 @@
     },
     "background": {
       "title": "Background",
-      "description": "Override the theme background with a solid color or gradient.",
+      "description": "Override the theme background with a solid color, gradient, or your own image.",
       "theme": "Theme default",
       "solid": "Solid",
       "gradient": "Gradient",
       "from": "From",
       "to": "To",
-      "angle": "Angle"
+      "angle": "Angle",
+      "image": "Image",
+      "imageProLockHint": "Image background is a Pro feature — upload your own photo (e.g. where you are right now).",
+      "imageUpload": "Upload image",
+      "imageReplace": "Replace image",
+      "imageRemove": "Remove",
+      "imageUploading": "Uploading…",
+      "imageHint": "JPG / PNG / WebP, up to 5 MB. Shown full-bleed behind your card.",
+      "imageTooLarge": "Image is too large (max 5 MB).",
+      "imageBadType": "Unsupported file type.",
+      "imageUploadFailed": "Upload failed. Please try again."
     },
     "font": {
       "title": "Font",
