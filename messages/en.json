@@ -66,23 +66,23 @@
     "done": "Done"
   },
   "footer": {
-    "tagline": "The bio link for people who don't live in one place.",
+    "tagline": "The bio link for people who work across borders.",
     "copyright": "© 2026 Nomad.now",
     "credit": "Made for nomads, by people who keep moving."
   },
   "metadata": {
-    "title": "Nomad.now — One page for your nomad life",
-    "description": "Where you are. Where you've been. What you're building. One link.",
-    "ogDescription": "Where you are. Where you've been. What you're building.",
+    "title": "Nomad.now — One link for people who work across borders",
+    "description": "Where you are. When you're open. The work you carry. One link for people who work across borders.",
+    "ogDescription": "Where you are. When you're open. The work you carry.",
     "pricingTitle": "Pricing — Nomad.now",
     "pricingDescription": "Straightforward pricing for your nomad card. Two plans, no free tier, no ads, no transaction fees."
   },
   "home": {
     "eyebrow": "The bio link that's always now",
     "heroLine1": "Where you are.",
-    "heroLine2": "Where you've been.",
+    "heroLine2": "When you're open.",
     "heroLine3": "The work you carry.",
-    "heroSub": "One link for your whole nomad life — live local time, every country you've stayed in, what you're working on. At <handle>nomad.now/yourhandle</handle>.",
+    "heroSub": "One link for people who work across borders — your live local time, where you are now, and what you're open to. At <handle>nomad.now/yourhandle</handle>.",
     "heroPriceNote": "From $1.98 / month",
     "heroSetupNote": "1 minute to set up",
     "themeStrip": "7 themes — pick yours",
@@ -124,7 +124,7 @@
     },
     "comparison": {
       "title": "Why not just Linktree?",
-      "subtitle": "Because you don't live in one place.",
+      "subtitle": "Because your work crosses borders.",
       "footnote": "Linktree raised prices 67% in late 2025. We won't.",
       "row1": "Travel map",
       "row2": "Live local time",
@@ -762,6 +762,6 @@
     "invalidBody": "Handles use letters, numbers, hyphens, and underscores only — between 1 and 50 characters.",
     "invalidPick": "Pick a handle",
     "invalidExplore": "Explore nomads",
-    "footer": "© 2026 Nomad.now · The bio link for people who don't live in one place."
+    "footer": "© 2026 Nomad.now · The bio link for people who work across borders."
   }
 }
