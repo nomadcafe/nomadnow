@@ -166,6 +166,25 @@ export function isPreviewEmpty(form: PreviewFormState): boolean {
   return !form.display_name.trim()
 }
 
+// The saved /look settings, so the content-editor preview renders the user's
+// REAL card (theme, buttons, background, font, …) instead of always 'classic'.
+// All fields optional → undefined `look` falls back to the theme default, which
+// is correct for the first-time create flow (no settings row yet).
+export interface CardLook {
+  themeKey?: string | null
+  buttonShape?: string | null
+  buttonStyle?: string | null
+  accentColor?: string | null
+  backgroundMode?: string | null
+  backgroundValue?: unknown
+  fontFamily?: string | null
+  decorationOverride?: string | null
+  avatarStyleOverride?: string | null
+  bioQuoteStyleOverride?: string | null
+  linksLayout?: string | null
+  sectionOrder?: string[] | null
+}
+
 export function LiveCardPreview({
   form,
   links,
@@ -173,7 +192,7 @@ export function LiveCardPreview({
   blurbs,
   featuredWorks,
   visitedCountries,
-  themeKey,
+  look,
 }: {
   form: PreviewFormState
   links: PreviewLink[]
@@ -181,7 +200,7 @@ export function LiveCardPreview({
   blurbs?: PreviewBlurb[]
   featuredWorks?: PreviewFeaturedWork[]
   visitedCountries: string[]
-  themeKey?: string | null
+  look?: CardLook
 }) {
   const empty = isPreviewEmpty(form)
   const effectiveForm = empty ? SAMPLE_FORM : form
@@ -284,7 +303,18 @@ export function LiveCardPreview({
       stays={cardStays}
       blurbs={cardBlurbs}
       featuredWorks={cardFeaturedWorks}
-      themeKey={themeKey}
+      themeKey={look?.themeKey}
+      buttonShape={look?.buttonShape}
+      buttonStyle={look?.buttonStyle}
+      accentColor={look?.accentColor}
+      backgroundMode={look?.backgroundMode}
+      backgroundValue={look?.backgroundValue}
+      fontFamily={look?.fontFamily}
+      decorationOverride={look?.decorationOverride}
+      avatarStyleOverride={look?.avatarStyleOverride}
+      bioQuoteStyleOverride={look?.bioQuoteStyleOverride}
+      linksLayout={look?.linksLayout}
+      sectionOrder={look?.sectionOrder}
       embedded
     />
   )
