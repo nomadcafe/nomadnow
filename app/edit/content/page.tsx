@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
+import { isPro } from '@/lib/billing'
 import CreateCardForm, { type InitialCardData } from '@/app/create-card/CreateCardForm'
+import type { CardLook } from '@/components/LiveCardPreview'
 
 // /edit/content — edit-mode entrypoint for an existing card. Layout already
 // did the auth check, so we only validate "card exists" here: if not, send
@@ -20,9 +22,10 @@ export default async function EditContentPage() {
     redirect('/login?next=/edit/content')
   }
 
-  const [{ data: profile }, { data: links }, { data: stays }, { data: blurbs }, { data: featuredWorks }] =
+  const [{ data: profile }, { data: settings }, { data: links }, { data: stays }, { data: blurbs }, { data: featuredWorks }] =
     await Promise.all([
       supabase.from('users').select(SAFE_USER_COLUMNS).eq('id', user.id).maybeSingle(),
+      supabase.from('profile_settings').select('*').eq('user_id', user.id).maybeSingle(),
       supabase.from('nomad_links').select('*').eq('user_id', user.id).order('order_index'),
       supabase
         .from('nomad_stays')
@@ -94,5 +97,26 @@ export default async function EditContentPage() {
     })),
   }
 
-  return <CreateCardForm initial={initial} embedded />
+  // Saved look settings → the content-editor preview renders the user's REAL
+  // card, not a hardcoded 'classic'. accent_color is Pro-gated exactly like the
+  // public card (app/[handle]) so the preview can't promise an accent a free
+  // plan won't actually render. settings may be null (no row yet) → undefined
+  // fields fall back to the theme default in the preview.
+  const ownerIsPro = isPro((profile as { plan?: string | null }).plan)
+  const look: CardLook = {
+    themeKey: (settings?.theme_color as string | null) ?? null,
+    buttonShape: (settings?.button_shape as string | null) ?? null,
+    buttonStyle: (settings?.button_style as string | null) ?? null,
+    accentColor: ownerIsPro ? ((settings?.accent_color as string | null) ?? null) : null,
+    backgroundMode: (settings?.background_mode as string | null) ?? null,
+    backgroundValue: settings?.background_value ?? null,
+    fontFamily: (settings?.font_family as string | null) ?? null,
+    decorationOverride: (settings?.decoration_override as string | null) ?? null,
+    avatarStyleOverride: (settings?.avatar_style_override as string | null) ?? null,
+    bioQuoteStyleOverride: (settings?.bio_quote_style_override as string | null) ?? null,
+    linksLayout: (settings?.links_layout as string | null) ?? null,
+    sectionOrder: (settings?.section_order as string[] | null) ?? null,
+  }
+
+  return <CreateCardForm initial={initial} look={look} embedded />
 }

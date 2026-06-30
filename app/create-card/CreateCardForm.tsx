@@ -9,7 +9,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { CountrySelector } from '@/components/CountrySelector'
 import { CityAutocomplete } from '@/components/CityAutocomplete'
 import { AvatarUploader } from '@/components/AvatarUploader'
-import { LiveCardPreview, isPreviewEmpty } from '@/components/LiveCardPreview'
+import { LiveCardPreview, isPreviewEmpty, type CardLook } from '@/components/LiveCardPreview'
 import { StaysEditor, type StayDraft } from '@/components/StaysEditor'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
@@ -106,6 +106,7 @@ export default function CreateCardForm({
   initial,
   embedded = false,
   handleSuggestion,
+  look,
 }: {
   initial?: InitialCardData | null
   // When true, the form skips its own top nav + min-h-screen wrapper because
@@ -117,6 +118,10 @@ export default function CreateCardForm({
   // from their auth email so a first-time visitor isn't staring at an
   // empty "pick a permanent URL" field with no starting point.
   handleSuggestion?: string
+  // Saved /look settings, so the live preview renders the user's REAL theme
+  // in edit mode. Undefined in the first-time create flow (no settings yet) →
+  // the preview falls back to the theme default.
+  look?: CardLook
 }) {
   const isEdit = Boolean(initial)
   const t = useTranslations('createCard')
@@ -703,10 +708,11 @@ export default function CreateCardForm({
                   {isPreviewEmpty(deferredFormData) ? t('previewExampleLabel') : t('previewLabel')}
                 </div>
                 <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                  {/* Theme isn't part of this form (lives in /settings as
-                      profile_settings.theme_color), so the preview always
-                      uses the default. Users can switch themes from /settings
-                      and visit /{handle} to see the themed version. */}
+                  {/* Theme/look lives in the Look tab, but we thread the saved
+                      settings in via `look` so this preview renders the user's
+                      REAL card (theme, buttons, background, font) instead of a
+                      misleading 'classic'. Undefined in the create flow (no
+                      settings yet) → falls back to the theme default. */}
                   <LiveCardPreview
                     form={deferredFormData}
                     links={deferredLinks}
@@ -714,7 +720,7 @@ export default function CreateCardForm({
                     blurbs={deferredBlurbs}
                     featuredWorks={deferredFeaturedWorks}
                     visitedCountries={deferredVisitedCountries}
-                    themeKey="classic"
+                    look={look}
                   />
                 </div>
               </div>
