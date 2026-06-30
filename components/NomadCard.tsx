@@ -197,7 +197,7 @@ export function NomadCard({
         style={customBg ? { background: customBg } : undefined}
       >
         <div className={`relative overflow-hidden ${theme.card} ${theme.text} p-5 sm:p-6`}>
-          <ThemeDecoration variant={theme.decoration} />
+          <ThemeDecoration variant={theme.decoration} accentHex={theme.accentHex} />
           <div className="relative">
             {renderedSections}
             <div className={`mt-6 pt-6 border-t ${theme.divider} text-center`}>
@@ -218,7 +218,7 @@ export function NomadCard({
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
         <div className={`relative overflow-hidden ${theme.card} ${theme.text} p-6 sm:p-8 md:p-12`}>
-          <ThemeDecoration variant={theme.decoration} />
+          <ThemeDecoration variant={theme.decoration} accentHex={theme.accentHex} />
           <div className="relative">
             {renderedSections}
 

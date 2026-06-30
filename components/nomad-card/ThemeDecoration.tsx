@@ -9,10 +9,32 @@ import type { ThemeDecoration as Variant } from '@/lib/themes'
 // Keep decorations subtle: they are meant to give each theme a recognizable
 // signature, not to fight for attention with the actual content. Most use
 // blur, low opacity, or alpha-blended gradients.
-export function ThemeDecoration({ variant }: { variant: Variant }) {
+export function ThemeDecoration({
+  variant,
+  accentHex,
+}: {
+  variant: Variant
+  // Only used by 'accent-glow' — the theme's resolved accent (or the user's
+  // accent override). Other variants use their own fixed palette.
+  accentHex?: string
+}) {
   switch (variant) {
     case 'none':
       return null
+
+    case 'accent-glow': {
+      // Soft radial halo above the avatar in the theme's own accent — the
+      // accent-matched cousin of midnight-glow / vivid-halo. `99` ≈ 60% alpha.
+      const glow = accentHex || '#888888'
+      return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute -top-20 left-1/2 -translate-x-1/2 w-[30rem] h-[30rem] rounded-full opacity-30 blur-3xl"
+            style={{ background: `radial-gradient(circle, ${glow}99 0%, transparent 70%)` }}
+          />
+        </div>
+      )
+    }
 
     case 'midnight-glow':
       // Soft cyan radial halo centered above the avatar — picks up the

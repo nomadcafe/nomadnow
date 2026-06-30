@@ -12,6 +12,9 @@ export type ThemeKey =
   | 'vivid'
   | 'forest'
   | 'cream'
+  | 'sand'
+  | 'aurora'
+  | 'noir'
 
 // Button shape preset — orthogonal to theme color so users can pair any
 // theme with any shape. Stored in profile_settings.button_shape.
@@ -163,6 +166,11 @@ export type ThemeDecoration =
   | 'vivid-halo'
   | 'forest-leaves'
   | 'cream-paper'
+  // Generic radial halo in the theme's OWN accent (vs the fixed-color glows
+  // above). Lets a theme get an ambient glow that matches whatever accent it
+  // (or the user's accent override) resolves to. Theme-internal — not exposed
+  // in DECORATION_KEYS as a manual override.
+  | 'accent-glow'
 
 // Avatar frame variant. Rendered by components/nomad-card/ThemedAvatar.tsx.
 // soft-ring = default gradient halo around a round image. Other variants
@@ -486,6 +494,116 @@ export const THEMES: Record<ThemeKey, Theme> = {
       pillBorder: '#fcd34d',
       brandFg: '#451a03',
       fontFamily: 'Georgia, "Times New Roman", serif',
+    },
+  },
+  sand: {
+    key: 'sand',
+    label: 'Sand',
+    accentHex: '#c2683f', // terracotta
+    page: 'bg-stone-100',
+    card: 'bg-[#fbf6ee] border border-stone-200/80 rounded-3xl shadow-md shadow-stone-300/40',
+    text: 'text-stone-800',
+    textMuted: 'text-stone-500',
+    bioQuote: 'text-stone-700',
+    pillVerified: 'bg-orange-100 text-orange-800 border border-orange-200',
+    pillNeutral: 'bg-stone-200/70 text-stone-700 border border-stone-300',
+    linkRow: 'bg-[#fbf6ee] hover:bg-orange-50 border border-stone-200 text-stone-800',
+    // Journal-quiet hover: gentle lift + a soft warm clay shadow.
+    linkHover: 'motion-safe:hover:-translate-y-0.5 hover:shadow-sm hover:shadow-orange-300/40',
+    linkArrow: 'text-stone-400 group-hover:text-orange-600',
+    divider: 'border-stone-200',
+    font: '',
+    nameClass: 'text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-1 sm:mb-2',
+    roleClass: '',
+    // Warm paper grain (same texture as cream) — desert/journal feel. Pairs
+    // especially well with the Caveat (handwritten) font option.
+    decoration: 'cream-paper',
+    avatarStyle: 'polaroid',
+    bioQuoteStyle: 'classic',
+    statValueClass: '',
+    blurb: 'Warm desert tones — a travel journal. Great with the Caveat font.',
+    og: {
+      bg: '#f5efe6',
+      fg: '#292524',
+      muted: '#78716c',
+      divider: '#e7e2d8',
+      pillBg: '#ffedd5',
+      pillFg: '#9a3412',
+      pillBorder: '#fed7aa',
+      brandFg: '#292524',
+    },
+  },
+  aurora: {
+    key: 'aurora',
+    label: 'Aurora',
+    accentHex: '#8b5cf6', // violet
+    page: 'bg-gradient-to-br from-teal-100 via-violet-100 to-orange-100',
+    card: 'bg-white/60 backdrop-blur-xl border border-white/70 rounded-3xl shadow-xl shadow-violet-300/30',
+    text: 'text-slate-800',
+    textMuted: 'text-slate-500',
+    bioQuote: 'text-slate-700',
+    pillVerified: 'bg-violet-100 text-violet-700 border border-violet-200',
+    pillNeutral: 'bg-white/70 text-slate-700 border border-white/80',
+    linkRow: 'bg-white/55 hover:bg-white/85 backdrop-blur border border-white/70 text-slate-800',
+    // Dreamy hover: lift + a soft violet glow.
+    linkHover: 'motion-safe:hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-300/40',
+    linkArrow: 'text-slate-400 group-hover:text-violet-500',
+    divider: 'border-white/60',
+    font: '',
+    nameClass: 'text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-1 sm:mb-2',
+    roleClass: '',
+    // Halo in the theme's own accent (violet) — soft, light-mode glassmorphism.
+    decoration: 'accent-glow',
+    avatarStyle: 'big-halo',
+    bioQuoteStyle: 'classic',
+    statValueClass: '',
+    blurb: 'Soft pastel glass — light and dreamy.',
+    og: {
+      bg: 'linear-gradient(135deg, #ccfbf1 0%, #ede9fe 50%, #ffedd5 100%)',
+      fg: '#1e293b',
+      muted: '#64748b',
+      divider: 'rgba(255,255,255,0.6)',
+      pillBg: '#ede9fe',
+      pillFg: '#6d28d9',
+      pillBorder: '#ddd6fe',
+      brandFg: '#1e293b',
+    },
+  },
+  noir: {
+    key: 'noir',
+    label: 'Neon Noir',
+    accentHex: '#fb2576', // hot magenta
+    page: 'bg-black',
+    card: 'bg-neutral-950 border border-neutral-800 rounded-2xl shadow-2xl shadow-black/60',
+    text: 'text-neutral-50',
+    textMuted: 'text-neutral-500',
+    bioQuote: 'text-neutral-300',
+    pillVerified: 'bg-pink-950/50 text-pink-300 border border-pink-900',
+    pillNeutral: 'bg-neutral-900 text-neutral-300 border border-neutral-800',
+    linkRow: 'bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-50',
+    // Club hover: lift + a hot magenta glow that picks up the accent.
+    linkHover: 'motion-safe:hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/25',
+    linkArrow: 'text-neutral-600 group-hover:text-pink-400',
+    divider: 'border-neutral-800',
+    font: '',
+    // Oversized bold name + small uppercase role — the punchy, club-poster voice.
+    nameClass: 'text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter leading-none mb-1 sm:mb-2',
+    roleClass: 'uppercase tracking-widest text-xs sm:text-sm',
+    // Halo in the theme's own accent (magenta) — neon glow on near-black.
+    decoration: 'accent-glow',
+    avatarStyle: 'soft-ring',
+    bioQuoteStyle: 'classic',
+    statValueClass: 'text-3xl sm:text-5xl font-bold tabular-nums',
+    blurb: 'Near-black with a hot neon accent.',
+    og: {
+      bg: 'linear-gradient(135deg, #000000 0%, #171717 100%)',
+      fg: '#fafafa',
+      muted: '#737373',
+      divider: '#262626',
+      pillBg: 'rgba(236,72,153,0.18)',
+      pillFg: '#f9a8d4',
+      pillBorder: 'rgba(236,72,153,0.4)',
+      brandFg: '#fafafa',
     },
   },
 }
