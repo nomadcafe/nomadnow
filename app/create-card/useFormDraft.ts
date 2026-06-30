@@ -41,6 +41,10 @@ export interface FormData {
   // Soft availability toggle — "☕️ Open to coffee in {current_city}" chip
   // on the public card. Hidden automatically when current_city is empty.
   open_to_coffee: boolean
+  // Commercial availability: '' (not showing) | 'open' | 'booked'. Drives the
+  // "Open for client work" / "Booked" chip and the explore "Open for work"
+  // filter. Distinct from work_status (employment type) and open_to_coffee.
+  availability: string
 }
 
 // Initial-state snapshot the server hands down in edit mode. In create mode
@@ -70,6 +74,7 @@ export interface FormInitial {
   meetup_cta_label: string
   meetup_cta_url: string
   open_to_coffee: boolean
+  availability: string
 }
 
 interface UseFormDraftResult {
@@ -151,6 +156,7 @@ export function useFormDraft(
     meetup_cta_label: initial?.meetup_cta_label ?? draft?.meetup_cta_label ?? '',
     meetup_cta_url: initial?.meetup_cta_url ?? draft?.meetup_cta_url ?? '',
     open_to_coffee: initial?.open_to_coffee ?? draft?.open_to_coffee ?? false,
+    availability: initial?.availability ?? draft?.availability ?? '',
   })
   const [visitedCountries, setVisitedCountries] = useState<string[]>(
     initial?.visited_countries ?? draft?.visitedCountries ?? [],

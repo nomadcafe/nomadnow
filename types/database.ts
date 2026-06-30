@@ -62,6 +62,13 @@ export interface User {
   // automatically when current_city is empty. Independent from meetup_cta:
   // this is a stance, meetup_cta is the channel.
   open_to_coffee?: boolean
+  // Commercial availability signal (migration 0031) — "am I taking paid work
+  // right now". 'open' → green "Open for client work" chip; 'booked' → neutral
+  // "Booked" chip; null/undefined → no chip. Orthogonal to work_status (the
+  // employment TYPE pill) and open_to_coffee (a social stance). Fades on the
+  // card alongside the other now-layer signals once presence goes stale, and
+  // drives the explore "Open for work" filter.
+  availability?: 'open' | 'booked' | null
   // Moderation kill switch (migration 0026). When TRUE the public read path
   // (lib/profile.ts) treats the card as a 404, hiding a reported card and its
   // links without deleting the row. Admin-toggled only.

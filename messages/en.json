@@ -394,6 +394,13 @@
       "urlPlaceholder": "https://cal.com/you/coffee or mailto:…",
       "urlHint": "Calendar link works best. Email (mailto:…) and Telegram (tg://…) also accepted."
     },
+    "availability": {
+      "label": "Availability for work",
+      "unset": "Not showing",
+      "open": "Open for client work",
+      "booked": "Booked / not taking work",
+      "hint": "Shows a status chip on your card. It fades automatically if your card goes stale, so it never misleads."
+    },
     "openToCoffee": {
       "label": "I'm open to coffee with strangers",
       "hintWithCity": "A ☕️ chip on your card will say “Open to coffee in {city}”. Soft signal — visitors can reach out via your links or Meetup CTA.",
@@ -629,6 +636,8 @@
     "verified": "Verified",
     "currentlyIn": "Currently in",
     "openToCoffee": "Open to coffee in {city}",
+    "availabilityOpen": "Open for client work",
+    "availabilityBooked": "Booked",
     "presence": {
       "confirmedAgo": "Updated {ago}",
       "mayBeStale": "may be out of date",
@@ -705,6 +714,8 @@
     "sortAlpha": "A → Z",
     "coffeeFilter": "Open to coffee",
     "coffeeChip": "Coffee",
+    "workFilter": "Open for work",
+    "workChip": "Open for work",
     "activeNow": "Active now",
     "emptyTitle": "No nomads here yet",
     "emptyDescription": "Be the first to claim a card and show up on the map.",

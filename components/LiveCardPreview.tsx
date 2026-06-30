@@ -39,6 +39,9 @@ export interface PreviewFormState {
   // Soft availability signal — drives the "Open to coffee in {city}"
   // chip in the status row. False (or missing current_city) hides it.
   open_to_coffee?: boolean
+  // Commercial availability: '' | 'open' | 'booked'. Drives the "Open for
+  // client work" / "Booked" chip in the status row. Empty hides it.
+  availability?: string
   // One-line "now" headline shown under the name. Optional so legacy
   // form-state shapes without it still type-check.
   now_text?: string
@@ -211,6 +214,10 @@ export function LiveCardPreview({
     meetup_cta_label: effectiveForm.meetup_cta_label || null,
     meetup_cta_url: effectiveForm.meetup_cta_url || null,
     open_to_coffee: effectiveForm.open_to_coffee === true,
+    availability:
+      effectiveForm.availability === 'open' || effectiveForm.availability === 'booked'
+        ? effectiveForm.availability
+        : null,
     created_at: NOW_ISO,
     updated_at: NOW_ISO,
   }

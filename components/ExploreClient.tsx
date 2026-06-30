@@ -32,6 +32,9 @@ export interface Nomad {
   // coffee filter.
   presence_confirmed_at?: string | null
   open_to_coffee?: boolean
+  // Commercial availability (migration 0031) — drives the ✅ "Open for work"
+  // chip on the summary card and the "Open for work" filter.
+  availability?: 'open' | 'booked' | null
 }
 
 interface ExploreClientProps {
@@ -41,6 +44,7 @@ interface ExploreClientProps {
     country?: string
     sortBy?: string
     coffee?: boolean
+    work?: boolean
   }
   pagination?: {
     currentPage: number
@@ -71,6 +75,7 @@ export default function ExploreClient({
   const [search, setSearch] = useState(initialFilters.search || '')
   const [sortBy, setSortBy] = useState(initialFilters.sortBy || 'recent')
   const coffeeOn = !!initialFilters.coffee
+  const workOn = !!initialFilters.work
 
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -137,6 +142,22 @@ export default function ExploreClient({
         >
           <span aria-hidden>☕️</span>
           {t('coffeeFilter')}
+        </button>
+        {/* "Open for work" filter — the hireable counterpart to the coffee
+            filter: who's taking client work right now (availability = open +
+            fresh presence). The freelancer-wedge discovery path. */}
+        <button
+          type="button"
+          onClick={() => handleFilterChange('work', workOn ? '' : '1')}
+          aria-pressed={workOn}
+          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition touch-manipulation ${
+            workOn
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+          }`}
+        >
+          <span aria-hidden>✅</span>
+          {t('workFilter')}
         </button>
         <select
           value={sortBy}
@@ -242,8 +263,14 @@ function NomadCardSummary({ nomad }: { nomad: Nomad }) {
       {/* "Now" meta row — freshness + coffee availability. Mounted client-side
           (useFreshness) so the relative time never causes a hydration mismatch
           against the server-rendered HTML. */}
-      {nomad.current_city && (freshness || nomad.open_to_coffee) && (
+      {nomad.current_city && (freshness || nomad.open_to_coffee || nomad.availability === 'open') && (
         <div className="flex items-center flex-wrap gap-2 mb-3 text-xs">
+          {nomad.availability === 'open' && (
+            <span className={`inline-flex items-center gap-1 text-emerald-700 font-medium ${freshness?.stale ? 'opacity-50' : ''}`}>
+              <span aria-hidden>✅</span>
+              {tExplore('workChip')}
+            </span>
+          )}
           {freshness && !freshness.stale && (
             <span className="inline-flex items-center gap-1 text-emerald-600">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden />

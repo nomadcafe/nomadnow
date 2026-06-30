@@ -700,9 +700,28 @@ export function createSectionRenderers(
         user.open_to_coffee === true && user.current_city?.trim()
           ? user.current_city.trim()
           : null
-      if (!showVerified && !showWorkStatus && !coffeeCity) return null
+      // Commercial availability chip — the hireable signal. Unlike coffee it
+      // needs no city ("open for work" is location-independent).
+      const availability =
+        user.availability === 'open' || user.availability === 'booked'
+          ? user.availability
+          : null
+      if (!showVerified && !showWorkStatus && !coffeeCity && !availability) return null
       return (
         <div key="status" className="flex items-center justify-center flex-wrap gap-2 mb-8">
+          {/* Availability leads — it's the conversion signal the freelancer
+              wedge (and the "When you're open" headline) is built around.
+              'open' uses the verified/positive pill treatment, 'booked' the
+              neutral one; both fade with the rest of the now-layer when the
+              presence claim goes stale. */}
+          {availability && (
+            <span
+              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-opacity ${availability === 'open' ? theme.pillVerified : theme.pillNeutral} ${presenceStale ? 'opacity-50' : ''}`}
+            >
+              <span aria-hidden="true">{availability === 'open' ? '✅' : '🗓'}</span>
+              {t(availability === 'open' ? 'availabilityOpen' : 'availabilityBooked')}
+            </span>
+          )}
           {showVerified && (
             <span
               className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${theme.pillVerified}`}

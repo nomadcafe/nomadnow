@@ -155,6 +155,10 @@ export function useSubmitCard({
         meetup_cta_label: formData.meetup_cta_label.trim() || null,
         meetup_cta_url: formData.meetup_cta_url.trim() || null,
         open_to_coffee: formData.open_to_coffee,
+        // null (not undefined) so clearing the select to "Not showing" wipes
+        // the column — undefined would be filtered out server-side and the old
+        // value would persist (same reasoning as the CTA fields above).
+        availability: formData.availability || null,
       }
 
       const response = await fetch('/api/users', {
