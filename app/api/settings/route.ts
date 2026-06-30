@@ -57,7 +57,7 @@ const updateSettingsSchema = z.object({
   background_value: backgroundValueSchema,
   // Font override key. 'theme' is equivalent to NULL (use the theme's
   // font). See lib/fonts.ts for the curated list.
-  font_family: z.enum(['theme', 'inter', 'jakarta', 'fraunces', 'mono']).nullable().optional(),
+  font_family: z.enum(['theme', 'inter', 'jakarta', 'fraunces', 'mono', 'space', 'dmserif', 'caveat']).nullable().optional(),
   // Hex accent override (e.g. #FF6B35). Null clears the override and falls
   // back to the theme preset's accentHex. Same HEX shape as background_value.
   accent_color: z.string().regex(HEX, 'Invalid hex color').nullable().optional(),
