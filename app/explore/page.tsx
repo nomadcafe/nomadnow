@@ -4,6 +4,7 @@ import { unstable_cache } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { createPublicSupabase } from '@/lib/supabase/public'
 import ExploreClient, { type Nomad } from '@/components/ExploreClient'
+import { STALE_AFTER_DAYS } from '@/lib/presence'
 import { EmptyState } from '@/components/EmptyState'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
@@ -19,6 +20,15 @@ type SortKey = 'recent' | 'countries' | 'alpha' | 'active'
 // purpose: 21d is "don't trust the dot", a week is "they're genuinely here".
 const COFFEE_FRESH_DAYS = 7
 
+// The "open for work" filter requires a presence claim that hasn't gone stale —
+// matching the card's own fade threshold (lib/presence.STALE_AFTER_DAYS). An
+// "open for work" set two months ago and never refreshed is exactly the
+// abandoned-card case the now-layer decay exists to hide, so it shouldn't
+// surface in a "who's hireable right now" filter either. Looser than the
+// coffee window (7d) on purpose: being available for remote work is a
+// longer-lived claim than being around for a coffee this week.
+const WORK_FRESH_DAYS = STALE_AFTER_DAYS
+
 type NomadsResult = {
   nomads: Nomad[]
   totalPages: number
@@ -31,7 +41,7 @@ type NomadsResult = {
 // are high-cardinality (every term a distinct key) and the searcher expects
 // fresh results.
 async function getNomads(
-  filters?: { search?: string; country?: string; sortBy?: SortKey; coffee?: boolean },
+  filters?: { search?: string; country?: string; sortBy?: SortKey; coffee?: boolean; work?: boolean },
   page: number = 1,
   pageSize: number = 24
 ): Promise<NomadsResult> {
@@ -45,6 +55,7 @@ async function getNomads(
       filters?.country ?? '',
       filters?.sortBy ?? 'recent',
       filters?.coffee ? 'coffee' : '',
+      filters?.work ? 'work' : '',
       String(page),
       String(pageSize),
     ],
@@ -56,7 +67,7 @@ async function getNomads(
 }
 
 async function fetchNomads(
-  filters?: { search?: string; country?: string; sortBy?: SortKey; coffee?: boolean },
+  filters?: { search?: string; country?: string; sortBy?: SortKey; coffee?: boolean; work?: boolean },
   page: number = 1,
   pageSize: number = 24
 ): Promise<NomadsResult> {
@@ -77,7 +88,7 @@ async function fetchNomads(
         // presence_confirmed_at + open_to_coffee added for the "now" layer:
         // they drive the "active now" sort, the coffee filter, and the
         // freshness / coffee chips on the summary card (migrations 0028 / 0024).
-        'id, handle, display_name, avatar_url, bio, role, current_city, country, timezone, visited_countries, visited_countries_count, created_at, presence_confirmed_at, open_to_coffee',
+        'id, handle, display_name, avatar_url, bio, role, current_city, country, timezone, visited_countries, visited_countries_count, created_at, presence_confirmed_at, open_to_coffee, availability',
         { count: 'exact' },
       )
       // Keep moderated (suspended) cards out of the public directory — their
@@ -108,6 +119,13 @@ async function fetchNomads(
       // idx_users_presence_confirmed_at (WHERE open_to_coffee = TRUE) from 0028.
       const sinceIso = new Date(Date.now() - COFFEE_FRESH_DAYS * 86_400_000).toISOString()
       query = query.eq('open_to_coffee', true).gte('presence_confirmed_at', sinceIso)
+    }
+    if (filters?.work) {
+      // "Open for client work, right now" — availability = 'open' AND a fresh
+      // presence claim. Served by the partial index idx_users_availability_open
+      // (WHERE availability = 'open') from migration 0031.
+      const sinceIso = new Date(Date.now() - WORK_FRESH_DAYS * 86_400_000).toISOString()
+      query = query.eq('availability', 'open').gte('presence_confirmed_at', sinceIso)
     }
 
     // All three sorts are now DB-level. The "countries" sort previously ran
@@ -171,14 +189,15 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; country?: string; sortBy?: string; coffee?: string; page?: string }>
+  searchParams: Promise<{ search?: string; country?: string; sortBy?: string; coffee?: string; work?: string; page?: string }>
 }) {
   const params = await searchParams
   const sortBy: SortKey = (['recent', 'countries', 'alpha', 'active'] as const).includes(params.sortBy as SortKey)
     ? (params.sortBy as SortKey)
     : 'recent'
   const coffee = params.coffee === '1'
-  const filters = { search: params.search, country: params.country, sortBy, coffee }
+  const work = params.work === '1'
+  const filters = { search: params.search, country: params.country, sortBy, coffee, work }
   const page = parseInt(params.page || '1', 10)
 
   const data = await getNomads(filters, page, 24)

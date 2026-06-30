@@ -49,6 +49,7 @@ interface EditableState {
   meetup_cta_label: string
   meetup_cta_url: string
   open_to_coffee: boolean
+  availability: string
   visitedCountries: string[]
   links: NomadLinkDraft[]
   stays: StayDraft[]
@@ -74,6 +75,7 @@ function editableSnapshot(v: EditableState): string {
     meetup_cta_label: v.meetup_cta_label,
     meetup_cta_url: v.meetup_cta_url,
     open_to_coffee: v.open_to_coffee,
+    availability: v.availability,
     visitedCountries: v.visitedCountries,
     links: v.links.map((l) => ({ type: l.type, label: l.label || '', url: l.url })),
     stays: v.stays.map((s) => ({
@@ -185,6 +187,7 @@ export default function CreateCardForm({
             meetup_cta_label: initial.meetup_cta_label,
             meetup_cta_url: initial.meetup_cta_url,
             open_to_coffee: initial.open_to_coffee,
+            availability: initial.availability,
             visitedCountries: initial.visited_countries,
             links: initial.links,
             stays: initial.stays,
@@ -310,6 +313,19 @@ export default function CreateCardForm({
                     />
                   </div>
 
+                  {/* Avatar — the card's face. Promoted into the spine: a
+                      profile with no photo is weak, so it shouldn't hide
+                      behind "Customize more" the way it used to. */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                      {t('avatar.label')}
+                    </label>
+                    <AvatarUploader
+                      value={formData.avatar_url}
+                      onChange={(url) => setFormData((prev) => ({ ...prev, avatar_url: url }))}
+                    />
+                  </div>
+
                   {/* The "now" line — one sentence shown as the card's
                       headline, right under the name. The soul of nomad.now
                       captured as a single field; editing it re-freshens the
@@ -365,50 +381,13 @@ export default function CreateCardForm({
                     <p className="mt-1.5 text-xs text-gray-500">{t('currentCityHint')}</p>
                   </div>
 
-                  {/* Timezone — drives the live clock on the public card.
-                      Defaults to the browser's detected zone so most users
-                      never have to touch this; remains overrideable for
-                      travelers who want their card to keep showing their
-                      "home" timezone. */}
-                  <div>
-                    <label htmlFor="timezone" className="block text-sm font-medium text-gray-900 mb-1.5">
-                      {t('timezone')}
-                    </label>
-                    <select
-                      id="timezone"
-                      name="timezone"
-                      value={formData.timezone}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
-                    >
-                      {TIMEZONE_LIST.map((tz) => (
-                        <option key={tz} value={tz}>{tz}</option>
-                      ))}
-                    </select>
-                    <p className="mt-1.5 text-xs text-gray-500">{t('timezoneHint')}</p>
-                  </div>
-
-                  {/* Nomading since — single month picker. Drives the "X
-                      years on the road" stat on the card. Lives next to
-                      current_city / timezone because it's the same kind of
-                      signal ("where I am / since when"). Skipping it falls
-                      back to summing logged stays. */}
-                  <div>
-                    <label htmlFor="nomad_since" className="block text-sm font-medium text-gray-900 mb-1.5">
-                      {t('nomadSinceLabel')}
-                    </label>
-                    <input
-                      type="month"
-                      id="nomad_since"
-                      name="nomad_since"
-                      value={formData.nomad_since}
-                      onChange={handleChange}
-                      min="2000-01"
-                      max={new Date().toISOString().slice(0, 7)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
-                    />
-                    <p className="mt-1.5 text-xs text-gray-500">{t('nomadSinceHint')}</p>
-                  </div>
+                  {/* Links — the core of a bio-link page, so they live in the
+                      always-visible spine rather than buried under "Customize
+                      more" → Extras (where they used to sit, below blurbs and
+                      featured works). timezone (auto-detected) and nomad_since
+                      moved down into "Customize more" — they're refinements,
+                      not the spine. */}
+                  <LinksField links={links} onChange={setLinks} />
                 </div>
 
                 {/* Customize more — collapsible */}
@@ -434,20 +413,12 @@ export default function CreateCardForm({
 
                   {showMore && (
                     <div id="more-fields" className="mt-5 space-y-8 border-t border-gray-100 pt-6">
-                      {/* About — avatar/bio/role/status. Card-rendering side
-                          of the user's identity, distinct from the time-and-
-                          place essentials above. */}
+                      {/* About — bio/role/status/timezone. Card-rendering side
+                          of the user's identity. Avatar moved up into the
+                          always-visible spine (a card with no face is weak),
+                          and timezone moved down here from Essentials — it
+                          auto-detects, so it's a refinement, not a spine field. */}
                       <FormSubsection title={t('moreSection.about')}>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                            {t('avatar.label')}
-                          </label>
-                          <AvatarUploader
-                            value={formData.avatar_url}
-                            onChange={(url) => setFormData((prev) => ({ ...prev, avatar_url: url }))}
-                          />
-                        </div>
-
                         <div>
                           <label htmlFor="bio" className="block text-sm font-medium text-gray-900 mb-1.5">
                             {t('bio')}
@@ -488,6 +459,28 @@ export default function CreateCardForm({
                             onChange={(next) => setFormData((prev) => ({ ...prev, work_status: next }))}
                           />
                         </div>
+
+                        {/* Timezone — drives the live clock on the public card.
+                            Auto-detected from the browser on first load, so most
+                            users never touch it; kept here (not in the spine) as
+                            an override for travelers who want their "home" zone. */}
+                        <div>
+                          <label htmlFor="timezone" className="block text-sm font-medium text-gray-900 mb-1.5">
+                            {t('timezone')}
+                          </label>
+                          <select
+                            id="timezone"
+                            name="timezone"
+                            value={formData.timezone}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
+                          >
+                            {TIMEZONE_LIST.map((tz) => (
+                              <option key={tz} value={tz}>{tz}</option>
+                            ))}
+                          </select>
+                          <p className="mt-1.5 text-xs text-gray-500">{t('timezoneHint')}</p>
+                        </div>
                       </FormSubsection>
 
                       {/* Conversion — the freelancer wedge's headline:
@@ -497,6 +490,28 @@ export default function CreateCardForm({
                           when empty so an unfilled card doesn't waste 200px
                           of edit space; auto-expand when there's content. */}
                       <FormSubsection title={t('moreSection.conversion')}>
+                        {/* Availability — the hireable "now" signal that leads
+                            the conversion section (and pairs with the Hire
+                            CTA below). Free of any city requirement; '' hides
+                            the chip entirely. */}
+                        <div>
+                          <label htmlFor="availability" className="block text-sm font-medium text-gray-900 mb-1.5">
+                            {t('availability.label')}
+                          </label>
+                          <select
+                            id="availability"
+                            name="availability"
+                            value={formData.availability}
+                            onChange={handleChange}
+                            className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
+                          >
+                            <option value="">{t('availability.unset')}</option>
+                            <option value="open">{t('availability.open')}</option>
+                            <option value="booked">{t('availability.booked')}</option>
+                          </select>
+                          <p className="mt-1.5 text-xs text-gray-500">{t('availability.hint')}</p>
+                        </div>
+
                         <Collapsible
                           title={t('hireCta.title')}
                           summary={t('hireCta.description')}
@@ -597,14 +612,34 @@ export default function CreateCardForm({
                         </label>
                       </FormSubsection>
 
-                      {/* Travel — dated Stays lead (the credible, temporal
-                          source that drives the card's time-on-the-road +
-                          cities stats and the map), with the lightweight
-                          country picker tucked into a collapsed disclosure
-                          below. Mirrors the card hierarchy after countries
-                          were de-emphasised as the vanity axis. nomad_since
-                          lives in Essentials above. */}
+                      {/* Travel — nomad_since (the one-field "time on the road"
+                          driver) leads, then dated Stays (the credible temporal
+                          source for the map + stats), with the lightweight
+                          country picker in a collapsed disclosure below. Mirrors
+                          the card hierarchy after countries were de-emphasised
+                          as the vanity axis. */}
                       <FormSubsection title={t('moreSection.travel')}>
+                        {/* Nomading since — single month picker. Drives the
+                            "X years on the road" stat. Moved here from
+                            Essentials: it's a travel refinement, and skipping
+                            it falls back to summing logged stays. */}
+                        <div>
+                          <label htmlFor="nomad_since" className="block text-sm font-medium text-gray-900 mb-1.5">
+                            {t('nomadSinceLabel')}
+                          </label>
+                          <input
+                            type="month"
+                            id="nomad_since"
+                            name="nomad_since"
+                            value={formData.nomad_since}
+                            onChange={handleChange}
+                            min="2000-01"
+                            max={new Date().toISOString().slice(0, 7)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base bg-white"
+                          />
+                          <p className="mt-1.5 text-xs text-gray-500">{t('nomadSinceHint')}</p>
+                        </div>
+
                         <CollapsibleStays
                           stays={stays}
                           setStays={setStays}
@@ -636,7 +671,6 @@ export default function CreateCardForm({
                       <FormSubsection title={t('moreSection.extras')}>
                         <BlurbsField blurbs={blurbs} onChange={setBlurbs} />
                         <FeaturedWorksField works={featuredWorks} onChange={setFeaturedWorks} />
-                        <LinksField links={links} onChange={setLinks} />
                       </FormSubsection>
                     </div>
                   )}

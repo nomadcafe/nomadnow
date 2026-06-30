@@ -24,6 +24,11 @@ const meetupCtaUrlSchema = safeLinkUrlSchema.nullable().optional().or(z.literal(
 // clear it; '' accepted and coerced to null at write time.
 const nowTextSchema = z.string().max(140).nullable().optional().or(z.literal(''))
 
+// Commercial availability (migration 0031). Enum mirrors the DB CHECK; ''
+// accepted from the edit form's "Not showing" option and coerced to null at
+// write time (so clearing the select wipes the column, like nomad_since).
+const availabilitySchema = z.enum(['open', 'booked']).nullable().optional().or(z.literal(''))
+
 // nomad_since: YYYY-MM-DD ISO date. Form is a month picker, so day is
 // always 01. Range matches the DB CHECK constraint in migration 0023 —
 // anything before 2000 or in the future is a typo, not a real value.
@@ -65,6 +70,7 @@ const createUserSchema = z.object({
   visited_countries: z.array(z.string()).optional(),
   nomad_since: nomadSinceSchema,
   open_to_coffee: z.boolean().optional(),
+  availability: availabilitySchema,
   now_text: nowTextSchema,
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
@@ -93,6 +99,7 @@ const updateUserSchema = z.object({
   visited_countries: z.array(z.string()).optional(),
   nomad_since: nomadSinceSchema,
   open_to_coffee: z.boolean().optional(),
+  availability: availabilitySchema,
   now_text: nowTextSchema,
   profile_type: z.enum(['creator', 'nomad', 'both']).optional(),
   hire_cta_label: hireCtaLabelSchema,
@@ -150,6 +157,9 @@ export async function POST(request: NextRequest) {
         ...(validation.data.open_to_coffee !== undefined
           ? { open_to_coffee: validation.data.open_to_coffee }
           : {}),
+        // '' / undefined → null so a card created without an availability
+        // pick leaves the column NULL (no chip) rather than a bogus value.
+        availability: validation.data.availability || null,
         now_text: validation.data.now_text || null,
         profile_type: validation.data.profile_type || 'creator',
         // CTAs the form may have submitted on first-time create. Previously
@@ -285,6 +295,9 @@ export async function PUT(request: NextRequest) {
     // '' → null so users can clear the field from the edit form by emptying
     // the month picker.
     if (cleanData.nomad_since === '') cleanData.nomad_since = null
+    // availability is an enum/null column — '' (the form's "Not showing"
+    // option) would fail the CHECK, so coerce it to null to clear the chip.
+    if (cleanData.availability === '') cleanData.availability = null
 
     // Any profile save refreshes the "now" layer. Opening the editor and
     // saving is an active "this card is current" signal, so the freshness note

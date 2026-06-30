@@ -21,8 +21,9 @@ const previewUser: User = {
   // ~3 years on the road — exercises the "years nomading" stat in the
   // preview/QA route without needing any stays logged.
   nomad_since: '2022-04-01',
-  // Show the chip in the QA preview so the status row variant gets exercised.
+  // Show the chips in the QA preview so the status row variants get exercised.
   open_to_coffee: true,
+  availability: 'open',
   profile_type: 'nomad',
   location: 'Bangkok',
   country: 'TH',

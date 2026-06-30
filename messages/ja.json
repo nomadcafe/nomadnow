@@ -394,6 +394,13 @@
       "urlPlaceholder": "https://cal.com/you/coffee または mailto:…",
       "urlHint": "カレンダーリンクが最適。メール(mailto:…)や Telegram(tg://…)も使えます。"
     },
+    "availability": {
+      "label": "仕事の受付状況",
+      "unset": "表示しない",
+      "open": "お仕事受付中",
+      "booked": "満席 / 受付停止中",
+      "hint": "カードに状態チップを表示します。カードが古くなると自動的に薄く表示されるので、誤解を与えません。"
+    },
     "openToCoffee": {
       "label": "知らない人とのコーヒーも歓迎",
       "hintWithCity": "カードに「☕️ {city} でコーヒー誘ってOK」と小さく表示されます。やわらかい合図 — リンクや Meetup CTA から声をかけてもらえます。",
@@ -629,6 +636,8 @@
     "verified": "認証済み",
     "currentlyIn": "現在地",
     "openToCoffee": "{city} でコーヒー誘ってOK",
+    "availabilityOpen": "お仕事受付中",
+    "availabilityBooked": "現在は満席",
     "presence": {
       "confirmedAgo": "更新: {ago}",
       "mayBeStale": "情報が古い可能性あり",
@@ -705,6 +714,8 @@
     "sortAlpha": "A → Z",
     "coffeeFilter": "コーヒーOK",
     "coffeeChip": "コーヒー",
+    "workFilter": "お仕事受付中",
+    "workChip": "受付中",
     "activeNow": "アクティブ",
     "emptyTitle": "まだノマドがいません",
     "emptyDescription": "最初にカードを確保して地図に登場しよう。",
