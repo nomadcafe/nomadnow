@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -35,15 +35,44 @@ export function AccountMenu({
 }) {
   const tNav = useTranslations('nav')
   const router = useRouter()
-  const [state, setState] = useState<State>(initial ?? { status: 'loading' })
+  // `initial` (server-resolved) is the source of truth for first paint.
+  // clientState overrides it only when the client knows better: a no-initial
+  // page that fetched its own state, an explicit sign-out, or — see below —
+  // nothing, because the stale-signed-out case self-heals via router.refresh()
+  // rather than a local override.
+  const [clientState, setClientState] = useState<State | null>(null)
+  const refreshedRef = useRef(false)
+  const state: State = clientState ?? initial ?? { status: 'loading' }
 
   useEffect(() => {
-    // Server already resolved the auth state and passed it as `initial` —
-    // skip the client-side fetch entirely. Saves two sequential round-trips
-    // (auth.getUser + users.select handle) per page load and removes the
-    // "username appears last" flash.
-    if (initial) return
+    if (initial) {
+      // Server already resolved the auth state — trust it for first paint (no
+      // flash, no client round-trip). But self-heal the ONE case it can be
+      // wrong: a stale "signed out" render served right after login, when the
+      // just-set session cookie hadn't propagated to that render (or it came
+      // from a cached/raced render). The public card reads fine elsewhere, so
+      // the nav looking logged-out is the visible symptom. If the server said
+      // signed-out yet the browser actually holds a Supabase session, re-run
+      // the server components once so the nav (and the rest of the page) pick
+      // up the real session. getSession() reads local cookie storage only — no
+      // network — and refreshedRef makes it fire at most once (a genuinely
+      // invalid session re-renders to signed-out and simply stops, no loop).
+      if (initial.status === 'signedOut' && !refreshedRef.current) {
+        void (async () => {
+          const supabase = createBrowserSupabase()
+          const {
+            data: { session },
+          } = await supabase.auth.getSession()
+          if (session && !refreshedRef.current) {
+            refreshedRef.current = true
+            router.refresh()
+          }
+        })()
+      }
+      return
+    }
 
+    // No server-resolved state (pages that don't pass `initial`): fetch it.
     let mounted = true
     async function load() {
       const supabase = createBrowserSupabase()
@@ -52,7 +81,7 @@ export function AccountMenu({
       } = await supabase.auth.getUser()
       if (!mounted) return
       if (!user) {
-        setState({ status: 'signedOut' })
+        setClientState({ status: 'signedOut' })
         return
       }
       const { data: profile } = await supabase
@@ -61,13 +90,13 @@ export function AccountMenu({
         .eq('id', user.id)
         .maybeSingle()
       if (!mounted) return
-      setState({ status: 'signedIn', handle: (profile?.handle as string | null) ?? null })
+      setClientState({ status: 'signedIn', handle: (profile?.handle as string | null) ?? null })
     }
     load()
     return () => {
       mounted = false
     }
-  }, [initial])
+  }, [initial, router])
 
   if (state.status === 'loading') {
     // Reserve roughly the same width as the signed-in label to avoid the
@@ -91,7 +120,7 @@ export function AccountMenu({
   async function signOut() {
     const supabase = createBrowserSupabase()
     await supabase.auth.signOut()
-    setState({ status: 'signedOut' })
+    setClientState({ status: 'signedOut' })
     router.refresh()
   }
 
