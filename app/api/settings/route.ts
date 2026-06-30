@@ -44,7 +44,7 @@ const backgroundValueSchema = z
 
 const updateSettingsSchema = z.object({
   // theme_color stores the preset key (legacy column name). See lib/themes.ts.
-  theme_color: z.enum(['classic', 'midnight', 'sunset', 'mono', 'vivid', 'forest', 'cream']).optional(),
+  theme_color: z.enum(['classic', 'midnight', 'sunset', 'mono', 'vivid', 'forest', 'cream', 'sand', 'aurora', 'noir']).optional(),
   // Corner-radius preset for link buttons. Defaults to 'rounded' at the DB level.
   button_shape: z.enum(['pill', 'rounded', 'square']).optional(),
   // Button style preset (fill/border/elevation) — orthogonal to button_shape.
