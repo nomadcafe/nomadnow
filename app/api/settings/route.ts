@@ -47,6 +47,9 @@ const updateSettingsSchema = z.object({
   theme_color: z.enum(['classic', 'midnight', 'sunset', 'mono', 'vivid', 'forest', 'cream']).optional(),
   // Corner-radius preset for link buttons. Defaults to 'rounded' at the DB level.
   button_shape: z.enum(['pill', 'rounded', 'square']).optional(),
+  // Button style preset (fill/border/elevation) — orthogonal to button_shape.
+  // 'theme' (default) keeps the theme's own button styling. See lib/themes.ts.
+  button_style: z.enum(['theme', 'fill', 'outline', 'soft', 'hard']).optional(),
   // Custom outer-card background. See lib/card-background.ts for the
   // rendering rules. background_value's shape varies with mode; the
   // resolver gracefully degrades to the theme default on mismatch.
@@ -182,6 +185,7 @@ export async function GET() {
           user_id: user.id,
           theme_color: 'classic',
           button_shape: 'rounded',
+          button_style: 'theme',
           background_mode: 'theme',
           background_value: null,
           font_family: 'theme',

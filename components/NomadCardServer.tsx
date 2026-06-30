@@ -8,7 +8,7 @@ import { EditCardCTA } from './EditCardCTA'
 import { CardCopyLink } from './nomad-card/CardCopyLink'
 import { ReportLink } from './nomad-card/ReportLink'
 import { ThemeDecoration } from './nomad-card/ThemeDecoration'
-import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
+import { getTheme, getButtonShape, getButtonStyle, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
 import { getFontClassName } from '@/lib/fonts'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
@@ -29,6 +29,7 @@ interface NomadCardServerProps {
   featuredWorks?: NomadFeaturedWork[]
   themeKey?: ThemeKey | string | null
   buttonShape?: string | null
+  buttonStyle?: string | null
   backgroundMode?: string | null
   backgroundValue?: unknown
   fontFamily?: string | null
@@ -71,6 +72,7 @@ export async function NomadCardServer({
   featuredWorks = [],
   themeKey,
   buttonShape,
+  buttonStyle,
   backgroundMode,
   backgroundValue,
   fontFamily,
@@ -102,6 +104,7 @@ export async function NomadCardServer({
     bioQuoteStyle: bioQuoteStyleOverride,
   })
   const shape = getButtonShape(buttonShape)
+  const buttonStyleClasses = getButtonStyle(buttonStyle, theme.accentHex)
   const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
   const customFontClass = getFontClassName(fontFamily)
 
@@ -141,6 +144,7 @@ export async function NomadCardServer({
     featuredWorks,
     theme,
     shape,
+    buttonStyle: buttonStyleClasses,
     linksLayout: linksLayout === 'rows' ? 'rows' : 'icons',
     t,
     tStays,

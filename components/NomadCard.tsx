@@ -9,7 +9,7 @@ import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { CardCopyLink } from './nomad-card/CardCopyLink'
 import { ThemeDecoration } from './nomad-card/ThemeDecoration'
-import { getTheme, getButtonShape, type ThemeKey } from '@/lib/themes'
+import { getTheme, getButtonShape, getButtonStyle, type ThemeKey } from '@/lib/themes'
 import { resolveBackgroundCss } from '@/lib/card-background'
 import { getFontClassName } from '@/lib/fonts'
 import { reconcileSectionOrder, reconcileEnabledSections } from '@/lib/sections'
@@ -31,6 +31,9 @@ interface NomadCardProps {
   // Corner-radius preset for link buttons — see lib/themes.ts. Orthogonal
   // to theme color so any theme works with any shape.
   buttonShape?: string | null
+  // Button style preset (fill/outline/soft/hard) — orthogonal to shape. See
+  // getButtonStyle. null/'theme' keeps the theme's own button styling.
+  buttonStyle?: string | null
   // Optional override for the outer page background. When set, replaces
   // the theme's bg class with a CSS color or linear-gradient. Resolved
   // through lib/card-background.ts; invalid values fall through to the
@@ -78,6 +81,7 @@ export function NomadCard({
   links,
   themeKey,
   buttonShape,
+  buttonStyle,
   backgroundMode,
   backgroundValue,
   fontFamily,
@@ -110,6 +114,7 @@ export function NomadCard({
     bioQuoteStyle: bioQuoteStyleOverride,
   })
   const shape = getButtonShape(buttonShape)
+  const buttonStyleClasses = getButtonStyle(buttonStyle, theme.accentHex)
   const customBg = resolveBackgroundCss(backgroundMode, backgroundValue)
   // Empty string for theme-default; otherwise the next/font className wins
   // over theme.font because it applies font-family directly via inline CSS.
@@ -151,6 +156,7 @@ export function NomadCard({
     featuredWorks,
     theme,
     shape,
+    buttonStyle: buttonStyleClasses,
     linksLayout: linksLayout === 'rows' ? 'rows' : 'icons',
     t,
     tStays,

@@ -38,6 +38,99 @@ export function getButtonShape(shape?: string | null): ButtonShapeClasses {
   return BUTTON_SHAPE_CLASS_MAP.rounded
 }
 
+// Button STYLE preset — orthogonal to button_shape (radius) and to the theme.
+// Controls the link rows' fill/border/elevation. Deliberately accent-DRIVEN
+// (computed from the resolved accentHex, not fixed colors) so a single set of
+// styles reads correctly on every theme — light or dark. 'theme' defers to the
+// theme's own linkRow/linkHover (the prior behaviour, the default).
+export type ButtonStyle = 'theme' | 'fill' | 'outline' | 'soft' | 'hard'
+export const BUTTON_STYLE_KEYS = ['theme', 'fill', 'outline', 'soft', 'hard'] as const
+
+export interface ButtonStyleClasses {
+  // Replaces theme.linkRow (bg/border/weight). Dynamic colors come via `style`.
+  row: string
+  // Replaces theme.linkHover.
+  hover: string
+  // Inline style carrying the accent-derived colors (can't be Tailwind classes).
+  style: { backgroundColor?: string; borderColor?: string; color?: string; boxShadow?: string }
+  // Class for the row's trailing arrow — filled styles want it to inherit the
+  // button's foreground rather than the theme's muted gray.
+  arrow: string
+}
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  let h = hex.replace('#', '')
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
+  if (h.length !== 6) return null
+  const n = parseInt(h, 16)
+  if (Number.isNaN(n)) return null
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+// Black or white, whichever reads on a filled accent button. Perceptual-ish
+// luminance so a pale accent (e.g. Vivid's yellow) gets dark text.
+function readableOn(hex: string): string {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return '#ffffff'
+  const [r, g, b] = rgb
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return lum > 0.6 ? '#111111' : '#ffffff'
+}
+
+function darken(hex: string, factor: number): string {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return hex
+  const [r, g, b] = rgb.map((c) => Math.round(c * factor))
+  return `#${[r, g, b].map((c) => c.toString(16).padStart(2, '0')).join('')}`
+}
+
+// Resolves a button-style preset to the classes/inline-style the renderer
+// applies to each link row. Returns null for 'theme'/unknown so the caller
+// falls back to the theme's own link styling.
+export function getButtonStyle(
+  style: string | null | undefined,
+  accentHex: string,
+): ButtonStyleClasses | null {
+  const fg = readableOn(accentHex)
+  switch (style) {
+    case 'fill':
+      return {
+        row: 'border-0 font-semibold',
+        hover: 'motion-safe:hover:-translate-y-0.5 hover:brightness-110 hover:shadow-lg',
+        style: { backgroundColor: accentHex, color: fg },
+        arrow: 'text-current opacity-70',
+      }
+    case 'soft':
+      return {
+        row: 'border-0 font-semibold',
+        hover: 'motion-safe:hover:-translate-y-0.5 hover:brightness-105',
+        style: { backgroundColor: accentHex, color: fg, boxShadow: `0 12px 24px -8px ${accentHex}80` },
+        arrow: 'text-current opacity-70',
+      }
+    case 'hard':
+      return {
+        row: 'border-2 font-semibold',
+        hover: 'motion-safe:hover:-translate-x-0.5 motion-safe:hover:-translate-y-0.5',
+        style: {
+          backgroundColor: accentHex,
+          color: fg,
+          borderColor: darken(accentHex, 0.55),
+          boxShadow: `4px 4px 0 0 ${darken(accentHex, 0.55)}`,
+        },
+        arrow: 'text-current opacity-80',
+      }
+    case 'outline':
+      return {
+        row: 'bg-transparent border-2 font-semibold',
+        hover: 'motion-safe:hover:-translate-y-0.5',
+        style: { borderColor: accentHex, color: accentHex },
+        arrow: 'text-current opacity-70',
+      }
+    default:
+      return null
+  }
+}
+
 // CSS values applied via inline style by app/og/[handle]/route.tsx.
 // satori cannot use Tailwind classes, so each theme needs raw CSS too.
 export interface ThemeOg {

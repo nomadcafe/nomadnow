@@ -66,11 +66,12 @@ const previewLinks: NomadLink[] = [
 export default async function PreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ theme?: string; order?: string; disable?: string; shape?: string; font?: string; linksLayout?: string }>
+  searchParams: Promise<{ theme?: string; order?: string; disable?: string; shape?: string; style?: string; font?: string; linksLayout?: string }>
 }) {
   const params = await searchParams
   const themeKey = (params.theme as ThemeKey | undefined) ?? 'classic'
   const buttonShape = params.shape ?? 'rounded'
+  const buttonStyle = params.style ?? 'theme'
   const fontFamily = params.font ?? 'theme'
   const linksLayout = params.linksLayout === 'rows' ? 'rows' : 'icons'
   // ?order=name,location,bio,stats,map,avatar,status,links — for design QA.
@@ -111,6 +112,7 @@ export default async function PreviewPage({
         links={previewLinks}
         themeKey={themeKey}
         buttonShape={buttonShape}
+        buttonStyle={buttonStyle}
         fontFamily={fontFamily}
         linksLayout={linksLayout}
         sectionOrder={customOrder}

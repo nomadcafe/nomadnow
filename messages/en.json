@@ -529,6 +529,15 @@
       "rounded": "Rounded",
       "square": "Square"
     },
+    "buttonStyle": {
+      "title": "Button style",
+      "description": "Fill, outline, or shadow for link rows — tinted with your accent color.",
+      "theme": "Theme",
+      "fill": "Fill",
+      "outline": "Outline",
+      "soft": "Soft shadow",
+      "hard": "Hard shadow"
+    },
     "linksLayout": {
       "title": "Links layout",
       "description": "Full-width labelled rows, or a compact icon strip. Custom links and embeds always stay as rows.",

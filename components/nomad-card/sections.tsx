@@ -1,6 +1,6 @@
 import React from 'react'
 import type { User, NomadLink, NomadStay, NomadBlurb, NomadFeaturedWork } from '@/types/database'
-import type { Theme, ButtonShapeClasses } from '@/lib/themes'
+import type { Theme, ButtonShapeClasses, ButtonStyleClasses } from '@/lib/themes'
 import { getCountryFlag, getCountryName } from '@/lib/countries'
 import { stayDayCount, computeTravelStats, formatTimeOnTheRoad } from '@/lib/stays'
 import { detectEmbed } from '@/lib/embeds'
@@ -233,6 +233,9 @@ export interface SectionContext {
   featuredWorks: NomadFeaturedWork[]
   theme: Theme
   shape: ButtonShapeClasses
+  // Accent-driven link-row style override (fill/outline/soft/hard). null when
+  // the user keeps the theme's own button styling ('theme', the default).
+  buttonStyle?: ButtonStyleClasses | null
   // 'icons' renders preset-brand links as a compact icon strip; anything
   // else (including null/undefined) falls back to the labelled full-row
   // layout. 'other' links and embeddable URLs always stay full-row.
@@ -278,6 +281,7 @@ export function createSectionRenderers(
     featuredWorks,
     theme,
     shape,
+    buttonStyle,
     linksLayout,
     t,
     tStays,
@@ -874,7 +878,14 @@ export function createSectionRenderers(
 
       const renderRow = (link: NomadLink, key: React.Key) => {
         const brandColor = LINK_BRAND_COLORS[link.type]
-        const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} font-medium group touch-manipulation transition-all duration-200 ${theme.linkHover} ${theme.linkRow}`
+        // Button style override (fill/outline/soft/hard) replaces the theme's
+        // own linkRow/linkHover with accent-driven classes + inline colors;
+        // null falls back to the theme styling.
+        const baseClass = `flex items-center justify-center gap-3 w-full px-4 sm:px-6 py-3 sm:py-4 ${shape.row} group touch-manipulation transition-all duration-200 ${
+          buttonStyle
+            ? `${buttonStyle.hover} ${buttonStyle.row}`
+            : `font-medium ${theme.linkHover} ${theme.linkRow}`
+        }`
         return (
           <a
             key={key}
@@ -882,6 +893,7 @@ export function createSectionRenderers(
             target="_blank"
             rel="noopener noreferrer ugc nofollow"
             className={baseClass}
+            style={buttonStyle?.style}
           >
             <span
               className={`inline-flex items-center justify-center w-9 h-9 ${shape.chip} shrink-0 transition group-hover:scale-105`}
@@ -893,7 +905,7 @@ export function createSectionRenderers(
             </span>
             <span className="flex-1 text-left">{getLinkLabel(link.type, link.label)}</span>
             <svg
-              className={`w-5 h-5 transition ${theme.linkArrow}`}
+              className={`w-5 h-5 transition ${buttonStyle ? buttonStyle.arrow : theme.linkArrow}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
