@@ -8,6 +8,7 @@ import {
   FEATURED_WORK_CAP,
   LINK_CAP,
   LINK_TYPE_SLUGS,
+  ROLES,
   WORK_STATUS_PRESETS,
   type BlurbDraft,
   type FeaturedWorkDraft,
@@ -160,6 +161,73 @@ export function WorkStatusField({
           onChange={(e) => onChange(e.target.value)}
           maxLength={60}
           placeholder={t('statusCustomPlaceholder')}
+          className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
+        />
+      )}
+    </div>
+  )
+}
+
+// Role picker. Preset roles come from ROLES (localised via the `roles`
+// namespace); "Custom…" reveals a free-form input so users can enter a role
+// the presets don't cover (e.g. "Brand Designer"). The public card already
+// renders custom roles verbatim — this just lets the form set them, instead
+// of the old preset-only <select> that the card's capability outran.
+export function RoleField({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (next: string) => void
+}) {
+  const t = useTranslations('createCard')
+  const tRole = useTranslations('roles')
+  const [customMode, setCustomMode] = useState<boolean>(
+    Boolean(value) && !(ROLES as readonly string[]).includes(value),
+  )
+
+  return (
+    <div>
+      <label htmlFor="role_select" className="block text-sm font-medium text-gray-900 mb-1.5">
+        {t('role')}
+      </label>
+      <select
+        id="role_select"
+        value={
+          customMode
+            ? 'custom'
+            : (ROLES as readonly string[]).includes(value)
+            ? value
+            : ''
+        }
+        onChange={(e) => {
+          const v = e.target.value
+          if (v === 'custom') {
+            setCustomMode(true)
+            // Clear any preset value so the text input starts empty.
+            if ((ROLES as readonly string[]).includes(value)) onChange('')
+          } else {
+            setCustomMode(false)
+            onChange(v)
+          }
+        }}
+        className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
+      >
+        <option value="">{t('statusNone')}</option>
+        {ROLES.map((role) => (
+          <option key={role} value={role}>{tRole(role)}</option>
+        ))}
+        <option value="custom">{t('roleCustom')}</option>
+      </select>
+      {customMode && (
+        <input
+          type="text"
+          id="role"
+          name="role"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          maxLength={100}
+          placeholder={t('roleCustomPlaceholder')}
           className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition text-base"
         />
       )}
