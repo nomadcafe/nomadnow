@@ -353,6 +353,8 @@
     "expand": "更多自定义(可选)",
     "collapse": "收起",
     "role": "职业",
+    "roleCustom": "自定义…",
+    "roleCustomPlaceholder": "例如:品牌设计师",
     "status": "状态",
     "statusNone": "—",
     "statusCustom": "自定义…",

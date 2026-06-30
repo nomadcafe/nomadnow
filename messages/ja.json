@@ -353,6 +353,8 @@
     "expand": "詳細設定(任意)",
     "collapse": "詳細を隠す",
     "role": "職種",
+    "roleCustom": "カスタム…",
+    "roleCustomPlaceholder": "例:ブランドデザイナー",
     "status": "ステータス",
     "statusNone": "—",
     "statusCustom": "カスタム…",

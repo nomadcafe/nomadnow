@@ -13,7 +13,7 @@ import { LiveCardPreview, isPreviewEmpty } from '@/components/LiveCardPreview'
 import { StaysEditor, type StayDraft } from '@/components/StaysEditor'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { ROLES, TIMEZONE_LIST } from './form-constants'
+import { TIMEZONE_LIST } from './form-constants'
 import {
   BlurbsField,
   CompletionMeter,
@@ -21,6 +21,7 @@ import {
   HandleField,
   LinksField,
   WorkStatusField,
+  RoleField,
 } from './form-sections'
 import { useHandleCheck } from './useHandleCheck'
 import { useFormDraft, type FormInitial } from './useFormDraft'
@@ -120,7 +121,6 @@ export default function CreateCardForm({
   const isEdit = Boolean(initial)
   const t = useTranslations('createCard')
   const tStays = useTranslations('stays')
-  const tRole = useTranslations('roles')
   const { toasts, showError, removeToast } = useToast()
 
   const {
@@ -437,23 +437,10 @@ export default function CreateCardForm({
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label htmlFor="role" className="block text-sm font-medium text-gray-900 mb-1.5">
-                              {t('role')}
-                            </label>
-                            <select
-                              id="role"
-                              name="role"
-                              value={formData.role}
-                              onChange={handleChange}
-                              className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/15 focus:border-gray-900 transition bg-white text-base"
-                            >
-                              <option value="">—</option>
-                              {ROLES.map((role) => (
-                                <option key={role} value={role}>{tRole(role)}</option>
-                              ))}
-                            </select>
-                          </div>
+                          <RoleField
+                            value={formData.role}
+                            onChange={(next) => setFormData((prev) => ({ ...prev, role: next }))}
+                          />
                           <WorkStatusField
                             value={formData.work_status}
                             onChange={(next) => setFormData((prev) => ({ ...prev, work_status: next }))}

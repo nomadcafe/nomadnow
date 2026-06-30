@@ -353,6 +353,8 @@
     "expand": "Customize more (optional)",
     "collapse": "Hide extras",
     "role": "Role",
+    "roleCustom": "Custom…",
+    "roleCustomPlaceholder": "e.g. Brand Designer",
     "status": "Status",
     "statusNone": "—",
     "statusCustom": "Custom…",
