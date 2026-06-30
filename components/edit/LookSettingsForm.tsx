@@ -17,11 +17,14 @@ import {
   THEMES,
   THEME_KEYS,
   BUTTON_SHAPE_KEYS,
+  BUTTON_STYLE_KEYS,
+  getButtonStyle,
   DECORATION_KEYS,
   AVATAR_STYLE_KEYS,
   BIO_QUOTE_STYLE_KEYS,
   type ThemeKey,
   type ButtonShape,
+  type ButtonStyle,
 } from '@/lib/themes'
 import {
   BACKGROUND_MODE_KEYS,
@@ -50,6 +53,7 @@ interface ProfileSettings {
   // theme_color stores the preset key (legacy column). See lib/themes.ts.
   theme_color?: ThemeKey
   button_shape?: ButtonShape
+  button_style?: ButtonStyle
   background_mode?: BackgroundMode
   background_value?:
     | { color: string }
@@ -97,6 +101,7 @@ export function LookSettingsForm() {
   const DEFAULT_SETTINGS: ProfileSettings = {
     theme_color: 'classic',
     button_shape: 'rounded',
+    button_style: 'theme',
     background_mode: 'theme',
     background_value: null,
     font_family: 'theme',
@@ -164,6 +169,11 @@ export function LookSettingsForm() {
             rawShape && (BUTTON_SHAPE_KEYS as readonly string[]).includes(rawShape)
               ? (rawShape as ButtonShape)
               : 'rounded'
+          const rawStyle = data.settings.button_style as string | null | undefined
+          const button_style: ButtonStyle =
+            rawStyle && (BUTTON_STYLE_KEYS as readonly string[]).includes(rawStyle)
+              ? (rawStyle as ButtonStyle)
+              : 'theme'
           const rawBgMode = data.settings.background_mode as string | null | undefined
           const background_mode: BackgroundMode =
             rawBgMode && (BACKGROUND_MODE_KEYS as readonly string[]).includes(rawBgMode)
@@ -193,6 +203,7 @@ export function LookSettingsForm() {
           const loaded: ProfileSettings = {
             theme_color: normalizeTheme(data.settings.theme_color),
             button_shape,
+            button_style,
             background_mode,
             background_value: data.settings.background_value ?? null,
             font_family,
@@ -676,6 +687,46 @@ export function LookSettingsForm() {
               </div>
             </Section>
 
+            {/* Button style — fill / outline / soft / hard, orthogonal to
+                shape. Each swatch is a real mini button rendered through the
+                same getButtonStyle resolver the card uses, tinted with the
+                current accent, so the preview is exact. */}
+            <Section
+              title={t('buttonStyle.title')}
+              description={t('buttonStyle.description')}
+            >
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 max-w-xl">
+                {BUTTON_STYLE_KEYS.map((key) => {
+                  const active = (settings.button_style ?? 'theme') === key
+                  const previewAccent =
+                    (ownerIsPro && settings.accent_color) ||
+                    THEMES[settings.theme_color ?? 'classic'].accentHex
+                  const bs = getButtonStyle(key, previewAccent)
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSettings((prev) => ({ ...prev, button_style: key }))}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition ${
+                        active
+                          ? 'border-gray-900 bg-gray-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div
+                        className={`w-full h-7 rounded-lg ${bs ? bs.row : 'bg-gray-200 border border-gray-300'}`}
+                        style={bs?.style}
+                        aria-hidden
+                      />
+                      <span className="text-xs font-medium text-gray-700">
+                        {t(`buttonStyle.${key}`)}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </Section>
+
             {/* Links layout — full-width labelled rows vs compact icon
                 strip. Each option's tile previews its own shape so the
                 picker doubles as a mini preview. Custom 'other' links
@@ -994,6 +1045,7 @@ export function LookSettingsForm() {
                     blurbs={previewData.blurbs}
                     themeKey={deferredSettings.theme_color}
                     buttonShape={deferredSettings.button_shape}
+                    buttonStyle={deferredSettings.button_style}
                     backgroundMode={deferredSettings.background_mode}
                     backgroundValue={deferredSettings.background_value}
                     fontFamily={deferredSettings.font_family}

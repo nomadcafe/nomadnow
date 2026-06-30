@@ -115,6 +115,7 @@ export interface ProfileSettings {
   // lib/themes.ts for the className map. Defaults to 'rounded' so existing
   // cards render unchanged.
   button_shape?: 'pill' | 'rounded' | 'square'
+  button_style?: 'theme' | 'fill' | 'outline' | 'soft' | 'hard'
   // Optional custom outer background — see lib/card-background.ts. Mode
   // 'theme' (default) uses the theme.page Tailwind class; 'solid' and
   // 'gradient' read the structured value.

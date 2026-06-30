@@ -161,6 +161,7 @@ export default async function ProfilePage({
         featuredWorks={nomadFeaturedWorks || []}
         themeKey={settings?.theme_color}
         buttonShape={settings?.button_shape}
+        buttonStyle={settings?.button_style}
         backgroundMode={settings?.background_mode}
         backgroundValue={settings?.background_value}
         fontFamily={settings?.font_family}

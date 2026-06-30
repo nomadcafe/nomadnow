@@ -529,6 +529,15 @@
       "rounded": "圆角",
       "square": "直角"
     },
+    "buttonStyle": {
+      "title": "按钮样式",
+      "description": "链接按钮的填充、描边或阴影 —— 用你的强调色着色。",
+      "theme": "跟随主题",
+      "fill": "填充",
+      "outline": "描边",
+      "soft": "柔阴影",
+      "hard": "硬阴影"
+    },
     "linksLayout": {
       "title": "链接布局",
       "description": "整行带标签按钮，或紧凑的图标排。自定义链接和内嵌内容始终保持整行。",
