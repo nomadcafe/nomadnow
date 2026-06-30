@@ -30,6 +30,7 @@ import {
   type BackgroundMode,
 } from '@/lib/card-background'
 import { FONT_OPTIONS, FONT_KEYS, type FontKey } from '@/lib/fonts'
+import { BackgroundUploader } from './BackgroundUploader'
 import {
   NOMAD_SECTIONS,
   NOMAD_DEFAULT_ORDER,
@@ -53,6 +54,7 @@ interface ProfileSettings {
   background_value?:
     | { color: string }
     | { from: string; to: string; angle: number }
+    | { url: string }
     | null
   font_family?: FontKey
   // Hex accent override (#RRGGBB). null = inherit theme preset's accentHex.
@@ -469,6 +471,7 @@ export function LookSettingsForm() {
                     ? bgValue
                     : { from: '#667eea', to: '#764ba2', angle: 135 }
                 const solidColor = bgValue && 'color' in bgValue ? bgValue.color : '#1a1a1a'
+                const imageUrl = bgValue && 'url' in bgValue ? bgValue.url : ''
                 return (
                   <div className="space-y-4">
                     <div
@@ -490,7 +493,14 @@ export function LookSettingsForm() {
                                   ? null
                                   : key === 'solid'
                                     ? { color: solidColor }
-                                    : gradient,
+                                    : key === 'gradient'
+                                      ? gradient
+                                      : // image: keep any already-uploaded URL,
+                                        // else null until one is uploaded (an
+                                        // empty {url:''} would fail the save schema)
+                                        imageUrl
+                                        ? { url: imageUrl }
+                                        : null,
                             }))
                           }}
                           className={`px-3 py-2 rounded-lg border text-sm font-medium transition ${
@@ -593,6 +603,32 @@ export function LookSettingsForm() {
                           </label>
                         </div>
                       </div>
+                    )}
+
+                    {mode === 'image' && (
+                      ownerIsPro ? (
+                        <BackgroundUploader
+                          value={imageUrl}
+                          onChange={(url) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              background_value: url ? { url } : null,
+                            }))
+                          }
+                        />
+                      ) : (
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 flex items-center gap-3 flex-wrap">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-gray-700">{t('background.imageProLockHint')}</p>
+                          </div>
+                          <Link
+                            href="/pricing"
+                            className="text-sm font-medium px-4 py-2 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition"
+                          >
+                            {t('accent.upgradeCta')}
+                          </Link>
+                        </div>
+                      )
                     )}
                   </div>
                 )

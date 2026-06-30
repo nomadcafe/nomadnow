@@ -5,6 +5,8 @@ import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 import { DECORATION_KEYS, AVATAR_STYLE_KEYS, BIO_QUOTE_STYLE_KEYS } from '@/lib/themes'
 import { NOMAD_DEFAULT_ORDER } from '@/lib/sections'
+import { isPro } from '@/lib/billing'
+import { getEnvSafe } from '@/lib/env'
 
 // Settings the user can actually change today. Dropped fields (visibility,
 // delay_days, layout_template, enabled_sections) had UI but were never read
@@ -15,6 +17,18 @@ import { NOMAD_DEFAULT_ORDER } from '@/lib/sections'
 // pastes one in manually.
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
 
+// Image backgrounds must point at our own Supabase Storage public URL — the
+// only place the background uploader writes. This blocks arbitrary external
+// URLs (tracking pixels, CSS-breakout attempts) from being stored; the
+// renderer (lib/card-background.ts) re-validates the URL shape as a backstop.
+const backgroundImageUrlSchema = z
+  .string()
+  .url()
+  .refine(
+    (u) => u.startsWith(`${getEnvSafe().NEXT_PUBLIC_SUPABASE_URL}/storage/`),
+    'Background image must be an uploaded image',
+  )
+
 const backgroundValueSchema = z
   .union([
     z.object({ color: z.string().regex(HEX, 'Invalid hex color') }),
@@ -23,6 +37,7 @@ const backgroundValueSchema = z
       to: z.string().regex(HEX, 'Invalid hex color'),
       angle: z.number().min(0).max(360),
     }),
+    z.object({ url: backgroundImageUrlSchema }),
     z.null(),
   ])
   .optional()
@@ -35,7 +50,7 @@ const updateSettingsSchema = z.object({
   // Custom outer-card background. See lib/card-background.ts for the
   // rendering rules. background_value's shape varies with mode; the
   // resolver gracefully degrades to the theme default on mismatch.
-  background_mode: z.enum(['theme', 'solid', 'gradient']).optional(),
+  background_mode: z.enum(['theme', 'solid', 'gradient', 'image']).optional(),
   background_value: backgroundValueSchema,
   // Font override key. 'theme' is equivalent to NULL (use the theme's
   // font). See lib/fonts.ts for the curated list.
@@ -72,6 +87,23 @@ export async function PUT(request: NextRequest) {
     const cleanData = Object.fromEntries(
       Object.entries(validation.data).filter(([, v]) => v !== undefined)
     )
+
+    // Image backgrounds are a Pro feature (they carry a storage cost and are a
+    // flagship visual). Enforce server-side, not just in the Look UI, so a
+    // direct PATCH can't set one for free. Only pay for the plan lookup when
+    // the request actually tries to switch into image mode.
+    if (cleanData.background_mode === 'image') {
+      const { data: planRow } = await supabase
+        .from('users')
+        .select('plan')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (!isPro((planRow as { plan?: string | null } | null)?.plan)) {
+        throw new ValidationError('Image backgrounds are a Pro feature', {
+          background_mode: 'Upgrade to Pro to use an image background',
+        })
+      }
+    }
 
     const { data: existingSettings } = await supabase
       .from('profile_settings')

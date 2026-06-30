@@ -118,7 +118,7 @@ export interface ProfileSettings {
   // Optional custom outer background — see lib/card-background.ts. Mode
   // 'theme' (default) uses the theme.page Tailwind class; 'solid' and
   // 'gradient' read the structured value.
-  background_mode?: 'theme' | 'solid' | 'gradient'
+  background_mode?: 'theme' | 'solid' | 'gradient' | 'image'
   background_value?: unknown
   // Font override key (null / 'theme' = inherit theme.font).
   // See lib/fonts.ts for the curated list.

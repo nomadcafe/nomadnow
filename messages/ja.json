@@ -537,13 +537,23 @@
     },
     "background": {
       "title": "背景",
-      "description": "テーマの背景を単色またはグラデーションで上書き。",
+      "description": "テーマの背景を単色・グラデーション・自分の画像で上書き。",
       "theme": "テーマのまま",
       "solid": "単色",
       "gradient": "グラデーション",
       "from": "開始色",
       "to": "終了色",
-      "angle": "角度"
+      "angle": "角度",
+      "image": "画像",
+      "imageProLockHint": "画像背景は Pro 機能です — 自分の写真(今いる場所など)をアップロードできます。",
+      "imageUpload": "画像をアップロード",
+      "imageReplace": "画像を変更",
+      "imageRemove": "削除",
+      "imageUploading": "アップロード中…",
+      "imageHint": "JPG / PNG / WebP、最大 5 MB。カードの背面に全面表示されます。",
+      "imageTooLarge": "画像が大きすぎます(最大 5 MB)。",
+      "imageBadType": "対応していないファイル形式です。",
+      "imageUploadFailed": "アップロードに失敗しました。もう一度お試しください。"
     },
     "font": {
       "title": "フォント",

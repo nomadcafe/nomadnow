@@ -8,8 +8,8 @@
 // the theme default rather than throwing — keeps a corrupted row from
 // breaking the public card render.
 
-export type BackgroundMode = 'theme' | 'solid' | 'gradient'
-export const BACKGROUND_MODE_KEYS = ['theme', 'solid', 'gradient'] as const
+export type BackgroundMode = 'theme' | 'solid' | 'gradient' | 'image'
+export const BACKGROUND_MODE_KEYS = ['theme', 'solid', 'gradient', 'image'] as const
 
 export interface BackgroundSolid {
   color: string
@@ -19,8 +19,19 @@ export interface BackgroundGradient {
   to: string
   angle: number
 }
+export interface BackgroundImage {
+  // A public URL on our own Supabase Storage (set by the background uploader).
+  // The card paints it cover/center behind the (opaque) card surface.
+  url: string
+}
 
-export type BackgroundValue = BackgroundSolid | BackgroundGradient | null
+export type BackgroundValue = BackgroundSolid | BackgroundGradient | BackgroundImage | null
+
+// A Storage image URL safe to drop into a CSS url(): https only and free of
+// the quote/paren/whitespace characters that could break out of the
+// `url("…")` token. Pairs with the write-time host check in the settings API —
+// this is the render-time backstop so a hand-crafted DB row can't inject CSS.
+const SAFE_IMAGE_URL_RE = /^https:\/\/[^\s"')]+$/
 
 // Six picks meant to look polished out of the box — sunsets, jungles,
 // graphite. Users who want something specific can edit the two-color
@@ -65,6 +76,15 @@ export function resolveBackgroundCss(
     if (v && isValidHex(v.from) && isValidHex(v.to)) {
       const angle = clampAngle(v.angle)
       return `linear-gradient(${angle}deg, ${v.from}, ${v.to})`
+    }
+    return null
+  }
+  if (mode === 'image') {
+    const v = value as Partial<BackgroundImage> | null
+    if (v && typeof v.url === 'string' && SAFE_IMAGE_URL_RE.test(v.url)) {
+      // cover/center so any aspect ratio fills the page; no-repeat so a small
+      // image doesn't tile. The card surface sits on top and keeps text legible.
+      return `url("${v.url}") center / cover no-repeat`
     }
     return null
   }
