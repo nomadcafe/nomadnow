@@ -66,23 +66,23 @@
     "done": "完了"
   },
   "footer": {
-    "tagline": "一箇所に住まない人のための bio リンク。",
+    "tagline": "国境を越えて働く人のための bio リンク。",
     "copyright": "© 2026 Nomad.now",
     "credit": "動き続ける人たちのために、動き続ける人たちが作った。"
   },
   "metadata": {
-    "title": "Nomad.now — ノマドライフをひとつのリンクに",
-    "description": "今いる場所、行ってきた場所、作っているもの。ひとつのリンクで。",
-    "ogDescription": "今いる場所、行ってきた場所、作っているもの。",
+    "title": "Nomad.now — 国境を越えて働く人のためのひとつのリンク",
+    "description": "今いる場所、空いている時間、持ち歩く仕事。国境を越えて働く人のための、ひとつのリンク。",
+    "ogDescription": "今いる場所、空いている時間、持ち歩く仕事。",
     "pricingTitle": "料金 — Nomad.now",
     "pricingDescription": "わかりやすい料金。2 つのプラン、無料プランなし、広告なし、手数料なし。"
   },
   "home": {
     "eyebrow": "つねに「いま」を映す bio リンク",
     "heroLine1": "今いる場所。",
-    "heroLine2": "行ってきた場所。",
+    "heroLine2": "空いている時間。",
     "heroLine3": "持ち歩く仕事。",
-    "heroSub": "ノマドライフのすべてを、ひとつのリンクに — 現地時間、滞在した国、進行中のプロジェクト。すべて <handle>nomad.now/yourhandle</handle> で。",
+    "heroSub": "国境を越えて働く人のための、ひとつのリンク — 現地時間、今いる場所、そして今オープンにしている仕事。すべて <handle>nomad.now/yourhandle</handle> で。",
     "heroPriceNote": "月額 $1.98 から",
     "heroSetupNote": "1 分でセットアップ",
     "themeStrip": "7 つのテーマ — 好きなのを選ぶ",
@@ -124,7 +124,7 @@
     },
     "comparison": {
       "title": "Linktree じゃダメ?",
-      "subtitle": "あなたは一箇所に住んでいないから。",
+      "subtitle": "あなたの仕事は国境を越えるから。",
       "footnote": "Linktree は 2025 年末に料金を 67% 値上げしました。私たちはしません。",
       "row1": "旅の地図",
       "row2": "現地時間表示",
@@ -762,6 +762,6 @@
     "invalidBody": "ハンドルは英数字、ハイフン、アンダースコアのみ — 1〜50 文字です。",
     "invalidPick": "ハンドルを選ぶ",
     "invalidExplore": "ノマドを見つける",
-    "footer": "© 2026 Nomad.now · 一箇所に住まない人のための bio リンク。"
+    "footer": "© 2026 Nomad.now · 国境を越えて働く人のための bio リンク。"
   }
 }

@@ -66,23 +66,23 @@
     "done": "完成"
   },
   "footer": {
-    "tagline": "为不在一处定居的人准备的 bio 链接。",
+    "tagline": "为跨境工作的人准备的 bio 链接。",
     "copyright": "© 2026 Nomad.now",
     "credit": "由一直在路上的人,为一直在路上的人打造。"
   },
   "metadata": {
-    "title": "Nomad.now — 你的数字游民人生,一个链接装得下",
-    "description": "你在哪、你去过哪、你在做什么。一条链接。",
-    "ogDescription": "你在哪、你去过哪、你在做什么。",
+    "title": "Nomad.now — 为跨境工作的人准备的一个链接",
+    "description": "你在哪、何时有空、随身的作品。为跨境工作的人准备的一个链接。",
+    "ogDescription": "你在哪、何时有空、随身的作品。",
     "pricingTitle": "价格 — Nomad.now",
     "pricingDescription": "简单直接的定价。两个套餐,没有免费档,没有广告,没有抽成。"
   },
   "home": {
     "eyebrow": "永远显示「此刻」的 bio 链接",
     "heroLine1": "你在哪。",
-    "heroLine2": "你去过哪。",
+    "heroLine2": "何时有空。",
     "heroLine3": "随身的作品。",
-    "heroSub": "一个链接装下整个数字游民人生 —— 当地实时时间、你停留过的每个国家、你正在做的事。全都在 <handle>nomad.now/yourhandle</handle>。",
+    "heroSub": "一个链接,为跨境工作的人 —— 当地实时时间、你此刻在哪、以及你正开放的合作。全都在 <handle>nomad.now/yourhandle</handle>。",
     "heroPriceNote": "每月 $1.98 起",
     "heroSetupNote": "1 分钟即可上线",
     "themeStrip": "7 套主题，挑你喜欢的",
@@ -124,7 +124,7 @@
     },
     "comparison": {
       "title": "为什么不直接用 Linktree?",
-      "subtitle": "因为你不只住一个地方。",
+      "subtitle": "因为你的工作跨越国界。",
       "footnote": "Linktree 在 2025 年底涨价 67%。我们不会。",
       "row1": "旅行地图",
       "row2": "实时当地时间",
@@ -762,6 +762,6 @@
     "invalidBody": "Handle 只能使用字母、数字、连字符和下划线 —— 1 到 50 个字符。",
     "invalidPick": "选个 handle",
     "invalidExplore": "发现游民",
-    "footer": "© 2026 Nomad.now · 为不在一处定居的人准备的 bio 链接。"
+    "footer": "© 2026 Nomad.now · 为跨境工作的人准备的 bio 链接。"
   }
 }
