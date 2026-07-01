@@ -8,6 +8,7 @@ import { AccountMenu } from '@/components/AccountMenu'
 import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { getBillingState } from '@/lib/billing'
+import { isYearlyBillingConfigured } from '@/lib/stripe/server'
 import { getAccountInitial } from '@/lib/account'
 import { PricingPlans } from './PricingPlans'
 
@@ -254,7 +255,7 @@ export default async function PricingPage({
 
       {/* Pricing cards */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-        <PricingPlans currentPlan={currentPlan} />
+        <PricingPlans currentPlan={currentPlan} yearlyAvailable={isYearlyBillingConfigured()} />
       </section>
 
       {/* Feature comparison table */}
