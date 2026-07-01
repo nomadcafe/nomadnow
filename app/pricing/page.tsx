@@ -79,6 +79,10 @@ const FEATURE_ROWS: { sectionKey: string; items: Feature[] }[] = [
     sectionKey: 'insights',
     items: [
       { key: 'viewsClicks', basic: true, pro: true },
+      // Live Pro depth today (app/api/stats): daily trend, unique visitors,
+      // per-target click breakdown. Distinct from the still-roadmap geo +
+      // referrers row below, which stays `soon`.
+      { key: 'proAnalytics', basic: false, pro: true },
       { key: 'visitorAnalytics', basic: false, pro: true, soon: true },
       { key: 'funnel', basic: false, pro: true, soon: true },
     ],

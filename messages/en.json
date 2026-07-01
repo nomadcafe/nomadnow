@@ -165,7 +165,6 @@
       "yearly": "Yearly",
       "save": "Save up to 32%"
     },
-    "yearlyComingSoon": "Annual billing — coming soon",
     "basic": {
       "label": "Basic",
       "tagline": "Get on the map. Everything you need for a public nomad card.",
@@ -173,7 +172,7 @@
     },
     "pro": {
       "label": "Pro",
-      "tagline": "Own your nomad brand. Custom domain, verified badge, advanced analytics.",
+      "tagline": "Own your nomad brand. Custom accent color, verified badge, deeper analytics.",
       "cta": "Go Pro"
     },
     "footnote": "Prices in USD. Cancel any time — your card stays live to the end of the current period.",
@@ -215,6 +214,7 @@
       "embed": "Embed widget on your site",
       "customDomain": "Custom domain (yourdomain.com)",
       "viewsClicks": "Page views + link clicks",
+      "proAnalytics": "Daily trend, unique visitors & per-link breakdown",
       "visitorAnalytics": "Visitor geography + referrers",
       "funnel": "Click-through funnel",
       "drafts": "Multiple draft cards",
@@ -239,6 +239,7 @@
       "everythingInBasic": "Everything in Basic",
       "accentCustom": "Custom accent color (any hex)",
       "verifiedBadge": "Verified badge",
+      "proAnalytics": "Deeper analytics — daily trend, unique visitors, per-link clicks",
       "handles": "Up to 5 handles on one account",
       "customDomain": "Custom domain",
       "featured": "Featured on /map and /in/{country}",
@@ -260,7 +261,7 @@
       },
       "data": {
         "q": "What happens to my data if I cancel?",
-        "a": "Export everything (profile, links, visited countries) as JSON from settings before cancelling. We keep your data for 90 days after cancellation in case you resubscribe."
+        "a": "Export everything (profile, links, visited countries) as JSON from your account tab before cancelling. We keep your data for 90 days after cancellation in case you resubscribe."
       },
       "switch": {
         "q": "Can I switch between Basic and Pro?",

@@ -37,6 +37,10 @@ const PRO_BULLET_KEYS: { key: string; soon?: boolean }[] = [
   { key: 'everythingInBasic' },
   { key: 'accentCustom' },
   { key: 'verifiedBadge' },
+  // Live Pro analytics depth (daily trend / unique visitors / per-link
+  // breakdown). Separate from the `analytics` bullet below, which is the
+  // still-roadmap geo + referrers layer and keeps its `soon` pill.
+  { key: 'proAnalytics' },
   { key: 'handles', soon: true },
   { key: 'customDomain', soon: true },
   { key: 'featured', soon: true },
