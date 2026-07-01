@@ -4,9 +4,13 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 type Plan = 'basic' | 'pro'
+type BillingInterval = 'monthly' | 'yearly'
 
 interface PlanCheckoutButtonProps {
   plan: Plan
+  // Billing cadence this button checks out with. Defaults to monthly so
+  // existing call sites (e.g. the final CTA) don't have to pass it.
+  interval?: BillingInterval
   // Server-passed: what plan the viewer is currently subscribed to (or null).
   // Drives whether this button starts a Checkout, opens the Customer Portal,
   // or just shows a "Current plan" badge.
@@ -25,6 +29,7 @@ interface PlanCheckoutButtonProps {
 //     second subscription on the same customer
 export function PlanCheckoutButton({
   plan,
+  interval = 'monthly',
   currentPlan,
   className,
   children,
@@ -44,7 +49,7 @@ export function PlanCheckoutButton({
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, interval }),
       })
       if (res.status === 401) {
         window.location.href = `/login?next=${encodeURIComponent('/pricing')}`

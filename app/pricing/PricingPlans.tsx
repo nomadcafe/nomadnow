@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { PlanCheckoutButton } from '@/components/PlanCheckoutButton'
 
@@ -8,6 +9,11 @@ type Billing = 'monthly' | 'yearly'
 
 interface Props {
   currentPlan: Plan | null
+  // True when the deployment has yearly Stripe price IDs wired (server checks
+  // isYearlyBillingConfigured). When false we hide the toggle entirely and
+  // only offer monthly, rather than dangling an annual option that can't
+  // actually be paid.
+  yearlyAvailable: boolean
 }
 
 const BASIC_BULLET_KEYS = [
@@ -65,22 +71,53 @@ function SoonPill({ label }: { label: string }) {
   )
 }
 
-export function PricingPlans({ currentPlan }: Props) {
+export function PricingPlans({ currentPlan, yearlyAvailable }: Props) {
   const t = useTranslations('pricing')
   const tCommon = useTranslations('common')
   const soonLabel = tCommon('soon').toUpperCase()
-  // Monthly/yearly toggle is hidden until yearly Stripe price IDs are wired
-  // and the checkout path supports the yearly interval. The previous UI
-  // showed a yearly tab that flipped the prices but disabled the checkout
-  // button — a dead-end funnel where users committed to a price and then
-  // discovered they couldn't actually pay it. Better to not offer the
-  // option until it actually works. The yearly branch and PRICES.yearly
-  // entries are kept so re-enabling is just restoring the toggle here.
-  const isYearly: boolean = false
-  const unit = t('perMonth')
+  // The monthly/yearly toggle only renders when yearly prices are wired
+  // (yearlyAvailable). Default to monthly; when yearly is off entirely the
+  // state is pinned to monthly since the toggle isn't shown.
+  const [billing, setBilling] = useState<Billing>('monthly')
+  const isYearly = yearlyAvailable && billing === 'yearly'
+  const interval: Billing = isYearly ? 'yearly' : 'monthly'
+  const unit = isYearly ? t('perYear') : t('perMonth')
 
   return (
     <>
+      {yearlyAvailable && (
+        <div className="flex justify-center mb-8">
+          <div
+            role="group"
+            aria-label={t('billing.aria')}
+            className="inline-flex items-center rounded-full bg-gray-100 p-1 text-sm font-medium"
+          >
+            <button
+              type="button"
+              aria-pressed={!isYearly}
+              onClick={() => setBilling('monthly')}
+              className={`px-4 py-1.5 rounded-full transition ${
+                !isYearly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              {t('billing.monthly')}
+            </button>
+            <button
+              type="button"
+              aria-pressed={isYearly}
+              onClick={() => setBilling('yearly')}
+              className={`px-4 py-1.5 rounded-full transition inline-flex items-center gap-1.5 ${
+                isYearly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              {t('billing.yearly')}
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-emerald-100 text-emerald-700">
+                {t('billing.save')}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
       <div className="grid md:grid-cols-2 gap-6 items-stretch">
         {/* Basic — featured. */}
         <div className="relative rounded-2xl border-2 border-gray-900 bg-gray-900 text-white p-7 sm:p-8 flex flex-col shadow-xl shadow-gray-900/20">
@@ -104,22 +141,14 @@ export function PricingPlans({ currentPlan }: Props) {
             ))}
           </ul>
           <p className="mt-4 mb-8 text-xs text-gray-400 italic">{t('comingMore')}</p>
-          {isYearly ? (
-            <div
-              className="w-full block text-center text-sm font-medium bg-white/15 text-white/70 px-5 py-3 rounded-full cursor-not-allowed"
-              aria-disabled="true"
-            >
-              {t('yearlyComingSoon')}
-            </div>
-          ) : (
-            <PlanCheckoutButton
-              plan="basic"
-              currentPlan={currentPlan}
-              className="w-full block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
-            >
-              {t('basic.cta')}
-            </PlanCheckoutButton>
-          )}
+          <PlanCheckoutButton
+            plan="basic"
+            interval={interval}
+            currentPlan={currentPlan}
+            className="w-full block text-center text-sm font-medium bg-white text-gray-900 hover:bg-gray-100 px-5 py-3 rounded-full transition"
+          >
+            {t('basic.cta')}
+          </PlanCheckoutButton>
         </div>
 
         {/* Pro */}
@@ -144,22 +173,14 @@ export function PricingPlans({ currentPlan }: Props) {
             ))}
           </ul>
           <p className="mt-4 mb-8 text-xs text-gray-500 italic">{t('comingMore')}</p>
-          {isYearly ? (
-            <div
-              className="w-full block text-center text-sm font-medium border border-gray-200 text-gray-400 px-5 py-3 rounded-full cursor-not-allowed"
-              aria-disabled="true"
-            >
-              {t('yearlyComingSoon')}
-            </div>
-          ) : (
-            <PlanCheckoutButton
-              plan="pro"
-              currentPlan={currentPlan}
-              className="w-full block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
-            >
-              {t('pro.cta')}
-            </PlanCheckoutButton>
-          )}
+          <PlanCheckoutButton
+            plan="pro"
+            interval={interval}
+            currentPlan={currentPlan}
+            className="w-full block text-center text-sm font-medium border border-gray-300 hover:border-gray-900 px-5 py-3 rounded-full transition"
+          >
+            {t('pro.cta')}
+          </PlanCheckoutButton>
         </div>
       </div>
       <p className="text-center text-xs text-gray-500 mt-5">

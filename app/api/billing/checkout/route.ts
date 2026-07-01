@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
 import { createAdminSupabase } from '@/lib/supabase/admin'
-import { getStripe, isStripeConfigured, priceIdForPlan } from '@/lib/stripe/server'
+import { getStripe, isStripeConfigured, isYearlyBillingConfigured, priceIdForPlan } from '@/lib/stripe/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 
 const bodySchema = z.object({
   plan: z.enum(['basic', 'pro']),
+  // Optional so old clients (and the monthly-only default) keep working.
+  interval: z.enum(['monthly', 'yearly']).default('monthly'),
 })
 
 // Returns the absolute URL of the running deployment. Stripe Checkout needs
@@ -32,6 +34,15 @@ export async function POST(request: Request) {
     const parsed = bodySchema.safeParse(body)
     if (!parsed.success) {
       throw new ValidationError('Invalid checkout payload', parsed.error.errors)
+    }
+
+    // Reject a yearly request on a deployment that hasn't wired the annual
+    // price IDs — otherwise priceIdForPlan would throw a 500 deep in the SDK.
+    if (parsed.data.interval === 'yearly' && !isYearlyBillingConfigured()) {
+      return NextResponse.json(
+        { error: 'Annual billing is not available on this deployment' },
+        { status: 503 },
+      )
     }
 
     // Look up an existing Stripe customer ID on the user. Admin client because
@@ -66,13 +77,13 @@ export async function POST(request: Request) {
       // Tag the session so the webhook can correlate it back to our user even
       // if metadata on the subscription is missing for any reason.
       client_reference_id: user.id,
-      metadata: { user_id: user.id, plan: parsed.data.plan },
+      metadata: { user_id: user.id, plan: parsed.data.plan, interval: parsed.data.interval },
       subscription_data: {
-        metadata: { user_id: user.id, plan: parsed.data.plan },
+        metadata: { user_id: user.id, plan: parsed.data.plan, interval: parsed.data.interval },
       },
       line_items: [
         {
-          price: priceIdForPlan(parsed.data.plan),
+          price: priceIdForPlan(parsed.data.plan, parsed.data.interval),
           quantity: 1,
         },
       ],
