@@ -449,9 +449,60 @@
   },
   "edit": {
     "tabs": {
+      "overview": "概览",
       "content": "内容",
       "look": "外观",
       "account": "账号"
+    },
+    "overview": {
+      "subtitle": "你的卡片已上线。分享出去，看看数据表现。",
+      "live": "已上线",
+      "lastUpdated": "更新于 {date}",
+      "editContent": "编辑卡片",
+      "shareTitle": "分享你的卡片",
+      "yourLink": "你的公开链接",
+      "copy": "复制",
+      "copied": "已复制",
+      "qrAlt": "卡片二维码",
+      "downloadQr": "下载二维码",
+      "statsTitle": "数据统计",
+      "views": "卡片浏览量",
+      "clicks": "链接点击量",
+      "unique": "独立访客 (近7天)",
+      "ctr": "点击率",
+      "inLast7": "近7天 {count} 次",
+      "trend": "浏览量 · 近14天",
+      "breakdown": "点击最多",
+      "statsEmpty": "还没有访问——把上方链接分享出去，就能看到浏览数据了。",
+      "statsError": "统计数据加载失败，请稍后重试。",
+      "target": {
+        "link": "链接",
+        "hire_cta": "合作",
+        "meetup_cta": "见面",
+        "featured_work": "作品"
+      },
+      "proTitle": "升级 Pro 看更多",
+      "proBody": "每日浏览趋势、独立访客，以及按链接拆分的点击排行。",
+      "proCta": "升级到 Pro"
+    },
+    "account": {
+      "handleLabel": "用户名",
+      "handleLocked": "用户名是永久的，无法更改。",
+      "dataTitle": "你的数据",
+      "dataDescription": "下载你添加到卡片上的全部内容。",
+      "exportTitle": "导出我的数据",
+      "exportHint": "包含你的资料、链接、停留和设置的 JSON 文件。",
+      "exportButton": "导出",
+      "exportError": "导出数据失败，请稍后重试。",
+      "dangerTitle": "危险操作",
+      "dangerDescription": "不可撤销的操作，请谨慎。",
+      "deleteTitle": "删除账号",
+      "deleteHint": "永久删除你的卡片、链接和所有数据，此操作无法撤销。",
+      "deleteButton": "删除账号",
+      "deleteConfirmPrompt": "输入 <strong>{handle}</strong> 以确认永久删除此账号。",
+      "deleteConfirmPromptNoHandle": "这将永久删除你的账号和所有数据，且无法撤销。",
+      "deleteConfirmButton": "永久删除",
+      "deleteError": "删除账号失败，请稍后重试。"
     }
   },
   "settings": {

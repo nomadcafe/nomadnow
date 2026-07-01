@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 
-// /edit lands on Content by default — that's the most-edited surface area
-// and matches users' expectation of "edit my card".
+// /edit lands on the Overview dashboard — the "here's your card, here's your
+// link, here's how it's doing" home. Content editing is one tab over.
 export default function EditIndex() {
-  redirect('/edit/content')
+  redirect('/edit/overview')
 }

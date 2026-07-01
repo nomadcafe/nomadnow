@@ -11,5 +11,17 @@ export default async function EditAccountPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  return <AccountSection email={user?.email ?? null} />
+
+  // Handle is shown read-only (it has no rename path — INSERT-only since
+  // migration 0027) so the user can see their permanent public identity.
+  const { data: profile } = user
+    ? await supabase.from('users').select('handle').eq('id', user.id).maybeSingle()
+    : { data: null }
+
+  return (
+    <AccountSection
+      email={user?.email ?? null}
+      handle={(profile?.handle as string | null) ?? null}
+    />
+  )
 }
