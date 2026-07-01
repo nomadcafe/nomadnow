@@ -165,7 +165,6 @@
       "yearly": "按年",
       "save": "最高省 32%"
     },
-    "yearlyComingSoon": "年付即将上线",
     "basic": {
       "label": "Basic",
       "tagline": "登上地图。一张公开游民卡片所需的一切。",
@@ -173,7 +172,7 @@
     },
     "pro": {
       "label": "Pro",
-      "tagline": "拥有你的游民品牌。自定义域名、认证徽章、高级分析。",
+      "tagline": "拥有你的游民品牌。自定义主题色、认证徽章、更深入的分析。",
       "cta": "升级 Pro"
     },
     "footnote": "美元价格。随时可取消 — 卡片在当期结束前保持在线。",
@@ -215,6 +214,7 @@
       "embed": "嵌入到你的站点",
       "customDomain": "自定义域名(yourdomain.com)",
       "viewsClicks": "页面访问 + 链接点击",
+      "proAnalytics": "每日趋势、独立访客、按链接的点击拆分",
       "visitorAnalytics": "访客地理 + 来源",
       "funnel": "点击漏斗",
       "drafts": "多张草稿卡片",
@@ -239,6 +239,7 @@
       "everythingInBasic": "包含 Basic 全部内容",
       "accentCustom": "自定义强调色(任意 HEX)",
       "verifiedBadge": "认证徽章",
+      "proAnalytics": "更深入的分析——每日趋势、独立访客、每个链接的点击",
       "handles": "一个账户最多 5 个 handle",
       "customDomain": "自定义域名",
       "featured": "在 /map 和 /in/{country} 优先展示",
@@ -260,7 +261,7 @@
       },
       "data": {
         "q": "取消后我的数据怎么办?",
-        "a": "取消前可以在设置里把所有内容(主页、链接、去过国家)导出为 JSON。取消后我们保留数据 90 天,以备你重新订阅。"
+        "a": "取消前可以在账户标签页里把所有内容(主页、链接、去过国家)导出为 JSON。取消后我们保留数据 90 天,以备你重新订阅。"
       },
       "switch": {
         "q": "Basic 和 Pro 之间可以切换吗?",
