@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireActivePlan } from '@/lib/billing'
+import { requireActivePlan } from '@/lib/billing-guard'
 import { formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCache } from '@/lib/revalidate'
 

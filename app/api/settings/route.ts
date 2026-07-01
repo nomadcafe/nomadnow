@@ -5,7 +5,8 @@ import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 import { DECORATION_KEYS, AVATAR_STYLE_KEYS, BIO_QUOTE_STYLE_KEYS } from '@/lib/themes'
 import { NOMAD_DEFAULT_ORDER } from '@/lib/sections'
-import { isPro, requireActivePlan } from '@/lib/billing'
+import { isPro } from '@/lib/billing'
+import { requireActivePlan } from '@/lib/billing-guard'
 import { getEnvSafe } from '@/lib/env'
 
 // Settings the user can actually change today. Dropped fields (visibility,
