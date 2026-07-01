@@ -1,5 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import { createAdminSupabase } from './supabase/admin'
+import { requireUser } from './supabase/server'
+import { ForbiddenError } from './errors'
 import type { Plan } from './stripe/server'
 
 // Pro-tier feature gate. Called at render paths that ship Pro-only output
@@ -68,6 +70,27 @@ export function deriveBillingState(row: BillingRow | null | undefined): BillingS
 // caller, so it's safe to call on behalf of any visitor (e.g. to gate a
 // public profile page on the OWNER's subscription) without leaking the
 // raw Stripe identifiers.
+// Route-handler guard for the paid-only model: the caller must be signed in
+// AND have an active paid plan (basic or pro, within the paid period). Use this
+// on edit/write endpoints so a direct API call can't mutate a card that the
+// user hasn't paid to keep live. Throws UnauthorizedError (via requireUser) or
+// ForbiddenError.
+//
+// NB: do NOT put this on the create-card onboarding writes. A brand-new user
+// claims a handle and seeds their card BEFORE paying (see useSubmitCard +
+// app/create-card) — gating those would break the funnel. Onboarding-shared
+// endpoints (POST /api/users, PUT /api/nomad-links, /api/blurbs,
+// /api/featured-works, /api/stays, avatar upload) stay open; the public render
+// path and the /edit shell are what actually hide/lock an unpaid card.
+export async function requireActivePlan() {
+  const { supabase, user } = await requireUser()
+  const billing = await getBillingState(user.id)
+  if (!billing.isActive) {
+    throw new ForbiddenError('An active subscription is required')
+  }
+  return { supabase, user, billing }
+}
+
 export async function getBillingState(userId: string): Promise<BillingState> {
   // Cached across requests so the public profile read doesn't hit the admin
   // client on every view. Billing only changes via the Stripe webhook, which

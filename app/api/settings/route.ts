@@ -5,7 +5,7 @@ import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 import { DECORATION_KEYS, AVATAR_STYLE_KEYS, BIO_QUOTE_STYLE_KEYS } from '@/lib/themes'
 import { NOMAD_DEFAULT_ORDER } from '@/lib/sections'
-import { isPro } from '@/lib/billing'
+import { isPro, requireActivePlan } from '@/lib/billing'
 import { getEnvSafe } from '@/lib/env'
 
 // Settings the user can actually change today. Dropped fields (visibility,
@@ -79,7 +79,10 @@ const updateSettingsSchema = z.object({
 
 export async function PUT(request: NextRequest) {
   try {
-    const { supabase, user } = await requireUser()
+    // Paid-only model: saving look settings requires an active plan. Onboarding
+    // never touches /api/settings (see useSubmitCard), so gating here can't
+    // block first-time card creation.
+    const { supabase, user } = await requireActivePlan()
     const body = await request.json()
     const validation = updateSettingsSchema.safeParse(body)
 
@@ -104,6 +107,24 @@ export async function PUT(request: NextRequest) {
       if (!isPro((planRow as { plan?: string | null } | null)?.plan)) {
         throw new ValidationError('Image backgrounds are a Pro feature', {
           background_mode: 'Upgrade to Pro to use an image background',
+        })
+      }
+    }
+
+    // Custom accent color is a Pro feature. Enforce server-side so a direct
+    // PATCH can't set one for free (the render path already ignores it for
+    // non-Pro accounts, but keep authorization at the save boundary too).
+    // Clearing to null is always allowed. Only pay for the plan lookup when a
+    // non-null accent is being set.
+    if (cleanData.accent_color != null) {
+      const { data: planRow } = await supabase
+        .from('users')
+        .select('plan')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (!isPro((planRow as { plan?: string | null } | null)?.plan)) {
+        throw new ValidationError('Custom accent color is a Pro feature', {
+          accent_color: 'Upgrade to Pro to use a custom accent color',
         })
       }
     }

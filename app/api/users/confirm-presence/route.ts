@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireUser } from '@/lib/supabase/server'
+import { requireActivePlan } from '@/lib/billing'
 import { formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCache } from '@/lib/revalidate'
 
@@ -12,7 +12,7 @@ import { bumpProfileCache } from '@/lib/revalidate'
 // profile form, and so the value is unambiguously server-set.
 export async function POST() {
   try {
-    const { supabase, user } = await requireUser()
+    const { supabase, user } = await requireActivePlan()
     const now = new Date().toISOString()
 
     // updated_at intentionally left untouched — confirming you're still in town
