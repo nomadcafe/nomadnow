@@ -97,13 +97,15 @@ const FEATURE4_USER: User = {
   meetup_cta_label: 'Grab a coffee',
   meetup_cta_url: 'https://cal.com/sofia/coffee',
 }
-// Hero card layout — kept compact (stays under 700px to keep the CTA
-// above the fold on shorter viewports) but now surfaces the dual
-// conversion buttons that drive the freelancer wedge. Order matters:
-// identity → location → CTAs (the conversion path the page is pitching)
-// → map (visual hook) → links. Bio, stays, status, and the stat strip
-// stay off the hero; they each get their own editorial Feature row.
-const HERO_SECTIONS = ['avatar', 'name', 'location', 'hire', 'meetup', 'map', 'links']
+// Hero card layout — kept compact so the CTA stays above the fold on shorter
+// viewports, and leads with the dual conversion buttons that drive the
+// freelancer wedge. Order matters: identity → location → CTAs (the conversion
+// path the page is pitching) → links. The world map is deliberately NOT on the
+// hero card — it's the tallest section and feature1 already shows a full
+// WorldMap below, so repeating it here only stretched the card. Bio, stays,
+// status, and the stat strip likewise stay off the hero; they each get their
+// own editorial Feature row.
+const HERO_SECTIONS = ['avatar', 'name', 'location', 'hire', 'meetup', 'links']
 
 // The "now layer" feature row renders the REAL card (same real-component
 // policy as the hero) trimmed via section data to just the three now-layer
@@ -200,9 +202,9 @@ export default async function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 lg:pt-20 pb-20 sm:pb-28">
           {/* items-start so the left column anchors to the top of the hero
               instead of vertically centering against the taller right
-              column (the real NomadCard preview is ~650px). The left
-              column carries its own bottom content (theme swatches) so
-              the visual weight stays balanced even without center-align. */}
+              column (the real NomadCard preview). The left column carries
+              its own bottom content (theme swatches) so the visual weight
+              stays balanced even without center-align. */}
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-start">
             {/* Left: copy */}
             <div className="lg:col-span-7">
