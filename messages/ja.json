@@ -449,9 +449,60 @@
   },
   "edit": {
     "tabs": {
+      "overview": "概要",
       "content": "内容",
       "look": "見た目",
       "account": "アカウント"
+    },
+    "overview": {
+      "subtitle": "カードは公開中です。シェアして反応を確認しましょう。",
+      "live": "公開中",
+      "lastUpdated": "更新: {date}",
+      "editContent": "カードを編集",
+      "shareTitle": "カードをシェア",
+      "yourLink": "公開リンク",
+      "copy": "コピー",
+      "copied": "コピー済み",
+      "qrAlt": "カードのQRコード",
+      "downloadQr": "QRを保存",
+      "statsTitle": "アクセス解析",
+      "views": "プロフィール閲覧数",
+      "clicks": "リンククリック数",
+      "unique": "ユニーク訪問者 (7日間)",
+      "ctr": "クリック率",
+      "inLast7": "直近7日間で{count}件",
+      "trend": "閲覧数 · 直近14日間",
+      "breakdown": "クリックの多い順",
+      "statsEmpty": "まだアクセスがありません。上のリンクをシェアして閲覧を集めましょう。",
+      "statsError": "解析データを読み込めませんでした。しばらくして再度お試しください。",
+      "target": {
+        "link": "リンク",
+        "hire_cta": "依頼",
+        "meetup_cta": "ミートアップ",
+        "featured_work": "作品"
+      },
+      "proTitle": "Proでさらに詳しく",
+      "proBody": "日別の閲覧推移、ユニーク訪問者、リンク別クリック内訳。",
+      "proCta": "Proにアップグレード"
+    },
+    "account": {
+      "handleLabel": "ハンドル",
+      "handleLocked": "ハンドルは変更できません（固定です）。",
+      "dataTitle": "あなたのデータ",
+      "dataDescription": "カードに追加した内容をすべてダウンロードできます。",
+      "exportTitle": "データをエクスポート",
+      "exportHint": "プロフィール・リンク・滞在・設定を含むJSONファイル。",
+      "exportButton": "エクスポート",
+      "exportError": "データをエクスポートできませんでした。しばらくして再度お試しください。",
+      "dangerTitle": "危険な操作",
+      "dangerDescription": "取り消せない操作です。慎重に進めてください。",
+      "deleteTitle": "アカウントを削除",
+      "deleteHint": "カード・リンク・すべてのデータを完全に削除します。元に戻せません。",
+      "deleteButton": "アカウントを削除",
+      "deleteConfirmPrompt": "完全に削除するには <strong>{handle}</strong> と入力してください。",
+      "deleteConfirmPromptNoHandle": "アカウントとすべてのデータを完全に削除します。元に戻せません。",
+      "deleteConfirmButton": "完全に削除",
+      "deleteError": "アカウントを削除できませんでした。しばらくして再度お試しください。"
     }
   },
   "settings": {

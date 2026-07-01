@@ -6,6 +6,7 @@ import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { MakeYoursCTA } from './MakeYoursCTA'
 import { EditCardCTA } from './EditCardCTA'
 import { CardCopyLink } from './nomad-card/CardCopyLink'
+import { CardEventTracker } from './nomad-card/CardEventTracker'
 import { ReportLink } from './nomad-card/ReportLink'
 import { ThemeDecoration } from './nomad-card/ThemeDecoration'
 import { getTheme, getButtonShape, getButtonStyle, type ThemeKey } from '@/lib/themes'
@@ -198,6 +199,9 @@ export async function NomadCardServer({
       style={customBg ? { background: customBg } : undefined}
     >
       {isOwner ? <EditCardCTA /> : !hideMakeYoursCTA && <MakeYoursCTA />}
+      {/* First-party analytics beacon. Skips the owner's own visits/clicks
+          (isOwner) so the dashboard reflects real traffic. */}
+      <CardEventTracker handle={user.handle} isOwner={isOwner} />
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
         <div className={`relative overflow-hidden ${theme.card} ${theme.text} p-6 sm:p-8 md:p-12`}>

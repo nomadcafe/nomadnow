@@ -233,6 +233,31 @@ CREATE TABLE IF NOT EXISTS nomad_featured_works (
 
 CREATE INDEX idx_nomad_featured_works_user_id ON nomad_featured_works(user_id);
 
+-- First-party card analytics (migration 0033). Locked down like reports: RLS on
+-- with no policies, all access via the service-role client. visitor_hash is a
+-- daily-salted sha256 of ip+ua — never a raw IP.
+CREATE TABLE IF NOT EXISTS card_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  handle TEXT NOT NULL CHECK (length(handle) > 0 AND length(handle) <= 50),
+  visitor_hash TEXT,
+  referrer TEXT CHECK (referrer IS NULL OR length(referrer) <= 500),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_card_views_user_created ON card_views (user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS card_clicks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  handle TEXT NOT NULL CHECK (length(handle) > 0 AND length(handle) <= 50),
+  target_type TEXT NOT NULL
+    CHECK (target_type IN ('link', 'hire_cta', 'meetup_cta', 'featured_work')),
+  target_url TEXT CHECK (target_url IS NULL OR length(target_url) <= 2048),
+  visitor_hash TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_card_clicks_user_created ON card_clicks (user_id, created_at DESC);
+
 -- Enable Row Level Security (RLS) - public read, owner-only write via auth.uid()
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
@@ -245,6 +270,11 @@ ALTER TABLE nomad_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_stays ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_blurbs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nomad_featured_works ENABLE ROW LEVEL SECURITY;
+-- Analytics tables are RLS-on with NO policies (service-role-only access).
+ALTER TABLE card_views ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON card_views FROM anon, authenticated;
+ALTER TABLE card_clicks ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON card_clicks FROM anon, authenticated;
 
 -- Ownership model:
 --   users.id MUST equal auth.uid() at insert time. Enforced by RLS, not FK,

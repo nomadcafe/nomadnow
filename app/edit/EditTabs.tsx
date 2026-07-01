@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 // only rerenders the inner page. usePathname picks the active tab so each
 // tab's URL is a real deep link (/edit/look bookmarks land on Look).
 const TABS = [
+  { id: 'overview', href: '/edit/overview' },
   { id: 'content', href: '/edit/content' },
   { id: 'look', href: '/edit/look' },
   { id: 'account', href: '/edit/account' },

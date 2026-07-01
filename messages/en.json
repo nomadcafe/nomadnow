@@ -449,9 +449,60 @@
   },
   "edit": {
     "tabs": {
+      "overview": "Overview",
       "content": "Content",
       "look": "Look",
       "account": "Account"
+    },
+    "overview": {
+      "subtitle": "Your card is live. Share it and watch how it's doing.",
+      "live": "Live",
+      "lastUpdated": "Updated {date}",
+      "editContent": "Edit card",
+      "shareTitle": "Share your card",
+      "yourLink": "Your public link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "qrAlt": "QR code for your card",
+      "downloadQr": "Download QR",
+      "statsTitle": "Analytics",
+      "views": "Profile views",
+      "clicks": "Link clicks",
+      "unique": "Unique visitors (7d)",
+      "ctr": "Click rate",
+      "inLast7": "{count} in the last 7 days",
+      "trend": "Views · last 14 days",
+      "breakdown": "Top clicked",
+      "statsEmpty": "No visits yet — share your link above to start seeing views.",
+      "statsError": "Couldn't load your analytics. Try again in a moment.",
+      "target": {
+        "link": "Link",
+        "hire_cta": "Hire",
+        "meetup_cta": "Meetup",
+        "featured_work": "Work"
+      },
+      "proTitle": "Go deeper with Pro",
+      "proBody": "Daily view trends, unique visitors, and per-link click breakdown.",
+      "proCta": "Upgrade to Pro"
+    },
+    "account": {
+      "handleLabel": "Handle",
+      "handleLocked": "Your handle is permanent and can't be changed.",
+      "dataTitle": "Your data",
+      "dataDescription": "Download everything you've added to your card.",
+      "exportTitle": "Export my data",
+      "exportHint": "A JSON file with your profile, links, stays, and settings.",
+      "exportButton": "Export",
+      "exportError": "Couldn't export your data. Try again in a moment.",
+      "dangerTitle": "Danger zone",
+      "dangerDescription": "Irreversible actions. Proceed with care.",
+      "deleteTitle": "Delete account",
+      "deleteHint": "Permanently deletes your card, links, and all data. This can't be undone.",
+      "deleteButton": "Delete account",
+      "deleteConfirmPrompt": "Type <strong>{handle}</strong> to confirm you want to permanently delete this account.",
+      "deleteConfirmPromptNoHandle": "This permanently deletes your account and all data. This can't be undone.",
+      "deleteConfirmButton": "Permanently delete",
+      "deleteError": "Couldn't delete your account. Try again in a moment."
     }
   },
   "settings": {

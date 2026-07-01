@@ -460,6 +460,8 @@ export function createSectionRenderers(
                   href={work.url}
                   target="_blank"
                   rel="noopener noreferrer ugc nofollow"
+                  data-track-type="featured_work"
+                  data-track-url={work.url}
                   className={`group flex items-start gap-3 ${shape.row} border ${theme.divider} px-4 py-3 transition-all duration-200 ${theme.linkHover}`}
                 >
                   <div className="flex-1 min-w-0">
@@ -773,6 +775,8 @@ export function createSectionRenderers(
             href={url}
             target="_blank"
             rel="noopener noreferrer ugc nofollow"
+            data-track-type="meetup_cta"
+            data-track-url={url}
             className={`flex items-center justify-center gap-2 w-full px-4 sm:px-6 py-3 sm:py-3.5 ${shape.row} font-semibold border-2 touch-manipulation transition-all duration-200 ${theme.linkHover}`}
             style={{ borderColor: theme.accentHex, color: theme.accentHex }}
           >
@@ -809,6 +813,8 @@ export function createSectionRenderers(
             href={url}
             target="_blank"
             rel="noopener noreferrer ugc nofollow"
+            data-track-type="hire_cta"
+            data-track-url={url}
             className={`flex items-center justify-center gap-2 w-full px-4 sm:px-6 py-3.5 sm:py-4 ${shape.row} font-semibold text-white touch-manipulation transition-all duration-200 ${theme.linkHover}`}
             style={{ backgroundColor: theme.accentHex }}
           >
@@ -892,6 +898,8 @@ export function createSectionRenderers(
             href={link.url}
             target="_blank"
             rel="noopener noreferrer ugc nofollow"
+            data-track-type="link"
+            data-track-url={link.url}
             className={baseClass}
             style={buttonStyle?.style}
           >
@@ -931,6 +939,8 @@ export function createSectionRenderers(
             href={link.url}
             target="_blank"
             rel="noopener noreferrer ugc nofollow"
+            data-track-type="link"
+            data-track-url={link.url}
             aria-label={label}
             title={label}
             className={`inline-flex items-center justify-center w-12 h-12 ${shape.chip} ${theme.linkHover} ${theme.linkRow} transition-all duration-200 hover:scale-110 touch-manipulation`}
