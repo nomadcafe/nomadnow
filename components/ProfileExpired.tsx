@@ -3,10 +3,11 @@ import { useTranslations } from 'next-intl'
 import { Logo } from './Logo'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
-// Rendered at /{handle} when the owner's subscription was canceled and the
-// paid period has elapsed. Distinct from ProfileNotFound's "available" state
-// because the handle is still reserved for the prior owner (30-day window),
-// so we don't offer it as claimable here.
+// Rendered at /{handle} whenever the owner has no active paid plan — either
+// they never subscribed, or the subscription was canceled and the paid period
+// has elapsed (paid-only model; see the isActive gate in [handle]/page.tsx).
+// Distinct from ProfileNotFound's "available" state because the handle is still
+// reserved for its owner, so we don't offer it as claimable here.
 export function ProfileExpired({ handle }: { handle: string }) {
   const t = useTranslations('profileExpired')
 

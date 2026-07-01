@@ -35,6 +35,18 @@ export async function generateMetadata({
   }
 
   const { user } = profileData
+
+  // Paid-only model: an inactive card renders the "resting" state, not the
+  // card. Keep it out of the index so Google doesn't surface a page that only
+  // shows a paywall CTA (mirrors the render gate in ProfilePage below).
+  const billing = await getBillingState(user.id)
+  if (!billing.isActive) {
+    return {
+      title: `${user.display_name || user.handle} — Nomad.now`,
+      robots: { index: false, follow: false },
+    }
+  }
+
   const name = user.display_name || user.handle
   const title = `${name} — Nomad.now`
   const description =
@@ -115,13 +127,14 @@ export default async function ProfilePage({
 
   const { user, settings, nomadLinks, nomadStays, nomadBlurbs, nomadFeaturedWorks } = profileData
 
-  // Subscription gate. If the owner canceled and the paid period has elapsed,
-  // we hide the card entirely — keeps the paid-only model honest. Active and
-  // past_due subs render normally (we accept past_due as grace).
+  // Subscription gate for the paid-only model: the card is public ONLY while
+  // the owner has an active paid plan (basic or pro, within the paid period).
+  // This covers both "never subscribed" and "canceled + lapsed" — an unpaid
+  // card is never displayed. past_due is accepted as grace (see isActive).
   // Billing state goes through the admin client (see lib/billing.ts) so the
   // raw subscription_status / current_period_end never leave the server.
   const billing = await getBillingState(user.id)
-  if (billing.isExpired) {
+  if (!billing.isActive) {
     return <ProfileExpired handle={handle} />
   }
 

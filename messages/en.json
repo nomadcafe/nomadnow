@@ -828,8 +828,8 @@
     "backToMap": "← Back to the global map"
   },
   "profileExpired": {
-    "title": "This card is no longer available.",
-    "body": "The owner's subscription ended. The handle is held for 30 days in case they come back.",
+    "title": "This card is resting.",
+    "body": "It isn't active right now — Nomad cards need an active plan to stay live. The handle is held for its owner.",
     "cta": "Claim your own card",
     "browse": "Browse other nomads"
   },
