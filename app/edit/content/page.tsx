@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
-import { isPro, getBillingState } from '@/lib/billing'
+import { isPro } from '@/lib/billing'
 import CreateCardForm, { type InitialCardData } from '@/app/create-card/CreateCardForm'
 import type { CardLook } from '@/components/LiveCardPreview'
 
@@ -50,13 +50,10 @@ export default async function EditContentPage() {
     redirect('/create-card')
   }
 
-  // Paid-only model: editing an existing card requires an active plan. Checked
-  // after the "card exists" gate so a user with no card is funneled to
-  // /create-card (open, pre-paywall) rather than straight to pricing.
-  // /edit/account is intentionally NOT gated so a lapsed user can still reach
-  // billing / delete their account.
-  const billing = await getBillingState(user.id)
-  if (!billing.isActive) redirect('/pricing?from=edit')
+  // Freemium: editing is open to every signed-in owner — the card is live
+  // regardless of plan, so the editor must be reachable to keep it current.
+  // Pro-only look controls (accent / image bg) are gated inside the form via
+  // ownerIsPro below, and enforced again at the /api/settings save boundary.
 
   const initial: InitialCardData = {
     handle: profile.handle as string,

@@ -6,7 +6,6 @@ import { bumpProfileCacheByUserId } from '@/lib/revalidate'
 import { DECORATION_KEYS, AVATAR_STYLE_KEYS, BIO_QUOTE_STYLE_KEYS } from '@/lib/themes'
 import { NOMAD_DEFAULT_ORDER } from '@/lib/sections'
 import { isPro } from '@/lib/billing'
-import { requireActivePlan } from '@/lib/billing-guard'
 import { getEnvSafe } from '@/lib/env'
 
 // Settings the user can actually change today. Dropped fields (visibility,
@@ -80,10 +79,10 @@ const updateSettingsSchema = z.object({
 
 export async function PUT(request: NextRequest) {
   try {
-    // Paid-only model: saving look settings requires an active plan. Onboarding
-    // never touches /api/settings (see useSubmitCard), so gating here can't
-    // block first-time card creation.
-    const { supabase, user } = await requireActivePlan()
+    // Freemium: saving look settings only requires being signed in. The two
+    // Pro-only look features (image background, custom accent) are enforced
+    // individually below via isPro — everything else is free.
+    const { supabase, user } = await requireUser()
     const body = await request.json()
     const validation = updateSettingsSchema.safeParse(body)
 

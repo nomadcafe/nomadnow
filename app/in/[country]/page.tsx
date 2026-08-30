@@ -44,6 +44,9 @@ async function getNomadsInCountry(code: string): Promise<Nomad[]> {
       .from('users')
       .select('id, handle, display_name, avatar_url, bio, role, current_city, country, visited_countries')
       .eq('suspended', false)
+      // Freemium: only paid cards are listed in the country directory (see the
+      // /explore query). Free cards stay reachable by direct link, just unlisted.
+      .not('plan', 'is', null)
       .contains('visited_countries', [code])
       .order('created_at', { ascending: false })
       .limit(60)

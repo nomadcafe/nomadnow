@@ -2,15 +2,16 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { CONTACT_EMAIL, toLegalSections } from '@/lib/legal'
 
-// Privacy stub. Intentionally minimal — the body text is i18n-driven so
-// it's easy to swap in real reviewed copy without touching layout. The
-// "draft" amber notice is on purpose: it makes clear to anyone landing
-// here that this page hasn't been through legal review yet, and to the
-// owner that it still needs to be replaced before launch.
+// Privacy policy. Content is i18n-driven: an intro paragraph plus a list of
+// { h, p } sections read via tLegal.raw('privacy.sections') and shape-checked by
+// toLegalSections. Keep the copy in messages/{en,zh,ja}.json in sync across
+// locales.
 export default async function PrivacyPage() {
   const tNav = await getTranslations('nav')
   const tLegal = await getTranslations('legal')
+  const sections = toLegalSections(tLegal.raw('privacy.sections'))
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
@@ -30,19 +31,33 @@ export default async function PrivacyPage() {
       </nav>
 
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16">
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
           {tNav('privacy')}
         </h1>
+        <p className="text-sm text-gray-400 mb-8">{tLegal('lastUpdated')}</p>
 
-        <div className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-          {tLegal('draftNotice')}
+        <p className="text-base leading-relaxed text-gray-700 mb-10">
+          {tLegal('privacy.intro')}
+        </p>
+
+        <div className="space-y-8">
+          {sections.map((section, i) => (
+            <section key={i}>
+              <h2 className="text-lg font-semibold tracking-tight mb-2">{section.h}</h2>
+              <p className="text-[15px] leading-relaxed text-gray-700">{section.p}</p>
+            </section>
+          ))}
         </div>
 
-        <p className="text-base leading-relaxed text-gray-700 mb-6">
-          {tLegal('privacyBody')}
+        <p className="mt-10 text-sm text-gray-500">
+          {tLegal.rich('contactPrompt', {
+            email: (chunks) => (
+              <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-gray-900">
+                {chunks}
+              </a>
+            ),
+          })}
         </p>
-        <p className="text-sm text-gray-500">{tLegal('contactPrompt')}</p>
       </main>
     </div>
   )

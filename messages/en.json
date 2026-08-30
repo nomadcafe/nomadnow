@@ -29,7 +29,6 @@
     "account": "Account",
     "settings": "Settings",
     "getCard": "Get your card",
-    "finishSetup": "Finish setup",
     "myCard": "My card",
     "viewProfile": "View profile",
     "privacy": "Privacy",
@@ -37,11 +36,40 @@
     "back": "Back"
   },
   "legal": {
-    "draftNotice": "This page is still being drafted before launch.",
-    "privacyBody": "We collect only what's needed to render your public card — your handle, the profile fields you enter, and (for paid plans) the customer ID Stripe returns to us. We don't run ads, sell data, or load tracking pixels.",
-    "termsBody": "Don't impersonate other people, don't post anything illegal, and don't try to break the service. We can take down handles that violate this. Subscriptions can be canceled any time from /settings.",
-    "contactPrompt": "Questions in the meantime? Reach out and we'll update this page with whatever's still unclear.",
-    "abuseContact": "Report abuse — phishing, malware, or impersonation on a card — at <email>abuse@nomad.now</email>, or use the “Report this page” link on any card."
+    "lastUpdated": "Last updated: August 30, 2026",
+    "contactPrompt": "Questions about this page? Email us at <email>hello@nomad.now</email> and we'll help.",
+    "abuseContact": "Report abuse — phishing, malware, or impersonation on a card — at <email>abuse@nomad.now</email>, or use the “Report this page” link on any card.",
+    "privacy": {
+      "intro": "This Privacy Policy explains what Nomad.now collects, why, and the control you have over it. It's written in plain language and isn't a substitute for legal advice.",
+      "sections": [
+        { "h": "Information we collect", "p": "Account: the email address you sign in with (we use passwordless magic links, so we don't store a password). Profile content: everything you put on your card — handle, name, role, bio, links, cities, travel history, and any photos you upload. Payments: if you subscribe, Stripe returns customer and subscription identifiers we store to manage your plan; your full card number is handled by Stripe and never reaches our servers." },
+        { "h": "Analytics", "p": "We run our own privacy-preserving analytics — page views and link clicks on your card. Visitors are counted using a daily-rotated, salted hash rather than a persistent identifier, so we can't track anyone across sites or over time. We don't use advertising cookies, tracking pixels, or third-party analytics SDKs." },
+        { "h": "How we use your information", "p": "To render and serve your public card, operate your account and sign-in, process subscriptions, show you aggregate analytics for your own card, and detect and prevent abuse (spam, phishing, impersonation). We do not sell your data or share it for advertising." },
+        { "h": "Cookies", "p": "We set only the essential cookies needed to keep you signed in. There are no advertising or cross-site tracking cookies." },
+        { "h": "Service providers", "p": "We rely on a small number of processors to run the service: Stripe (payment processing), Supabase (database, authentication, and file storage), and our hosting/CDN provider. They process data only to provide these functions. We may also disclose information where required by law." },
+        { "h": "Your card is public", "p": "By design, your card and everything on it is published at your public URL. Please don't put anything on it you wouldn't want to be publicly visible." },
+        { "h": "Data retention", "p": "We keep your data for as long as your account exists. You can export everything (profile, links, visited countries) as JSON from your account tab at any time. Canceling a paid plan doesn't delete anything — your card reverts to the free tier and stays live. Deleting your account removes your card and makes the underlying data eligible for deletion." },
+        { "h": "Your rights", "p": "You can access and export your data, correct it by editing your card, and delete it by deleting your account. Depending on where you live (e.g. under GDPR or CCPA), you may have additional rights; email us to exercise them." },
+        { "h": "International transfers", "p": "Nomad.now serves a global audience, and your data may be processed in countries other than your own. Where required, we rely on our providers' standard safeguards for such transfers." },
+        { "h": "Children", "p": "Nomad.now is not intended for anyone under 16, and we don't knowingly collect data from them." },
+        { "h": "Changes", "p": "If we update this policy, we'll change the date at the top of this page and, for material changes, take reasonable steps to let you know." }
+      ]
+    },
+    "terms": {
+      "intro": "These Terms govern your use of Nomad.now. By creating a card or using the service, you agree to them. They're written in plain language and aren't a substitute for legal advice.",
+      "sections": [
+        { "h": "Your account and handle", "p": "You're responsible for activity on your account and for keeping access to your sign-in email. Your handle (nomad.now/yourname) is reserved for you while your account exists, but you don't own it — we may reclaim handles that impersonate others, are reserved for system use, or infringe someone's rights." },
+        { "h": "Acceptable use", "p": "Don't impersonate other people or brands, post illegal content, distribute malware or phishing links, spam, scrape the service, or attempt to break, overload, or circumvent it. We may suspend or remove cards that violate this." },
+        { "h": "Your content", "p": "You keep ownership of everything you put on your card. You grant us the limited license needed to host, display, and share your card so the service can function. You're responsible for having the rights to the content you upload, including any images." },
+        { "h": "Free tier and paid plans", "p": "Every card is free to create and stays live on its direct link with a small \"Made with Nomad.now\" footer. Paid plans add discovery (search indexing and the /map and /in directory), remove the footer, and unlock customization and deeper analytics. Feature availability may change as the product evolves." },
+        { "h": "Subscriptions and billing", "p": "Paid plans are billed on a recurring basis (monthly or yearly) through Stripe until canceled. Prices are shown at checkout and may change with advance notice; taxes may apply depending on your location." },
+        { "h": "Cancellation and refunds", "p": "You can cancel any time from your account. Paid features remain active until the end of the current billing period; after that your card reverts to the free tier and stays live. Payments are generally non-refundable except where required by law." },
+        { "h": "Moderation and termination", "p": "We may suspend or remove cards that break these Terms, and we may discontinue the service. You can delete your account at any time. Suspended or moderated cards stop rendering publicly." },
+        { "h": "Disclaimer", "p": "The service is provided \"as is\" and \"as available,\" without warranties of any kind. We don't guarantee it will be uninterrupted, error-free, or that it will meet your specific needs." },
+        { "h": "Limitation of liability", "p": "To the maximum extent permitted by law, Nomad.now is not liable for indirect, incidental, or consequential damages, and our total liability is limited to the amount you paid us in the twelve months before the claim." },
+        { "h": "Changes to these Terms", "p": "We may update these Terms; we'll change the date at the top of this page and, for material changes, take reasonable steps to notify you. Continuing to use the service after changes take effect means you accept them." }
+      ]
+    }
   },
   "report": {
     "trigger": "Report this page",
@@ -75,7 +103,7 @@
     "description": "Where you are. When you're open. The work you carry. One link for people who work across borders.",
     "ogDescription": "Where you are. When you're open. The work you carry.",
     "pricingTitle": "Pricing — Nomad.now",
-    "pricingDescription": "Straightforward pricing for your nomad card. Two plans, no free tier, no ads, no transaction fees."
+    "pricingDescription": "Free to create, live on a direct link. Paid plans add discovery and drop the footer. No ads, no transaction fees."
   },
   "home": {
     "eyebrow": "The bio link that's always now",
@@ -83,7 +111,7 @@
     "heroLine2": "When you're open.",
     "heroLine3": "The work you carry.",
     "heroSub": "One link for people who work across borders — your live local time, where you are now, and what you're open to. At <handle>nomad.now/yourhandle</handle>.",
-    "heroPriceNote": "From $1.98 / month",
+    "heroPriceNote": "Free to create · $1.98 / month to get discovered",
     "heroSetupNote": "1 minute to set up",
     "themeStrip": "7 themes — pick yours",
     "live": {
@@ -140,7 +168,7 @@
       "line2": "Wherever you are.",
       "body": "Set it up in a minute. Carry it forever.",
       "cta": "Get your card",
-      "note": "From $1.98 / month · Cancel any time"
+      "note": "Free to create · Upgrade any time · Cancel any time"
     },
     "previewCard": {
       "verified": "Verified"
@@ -150,11 +178,11 @@
     "currentPlanLabel": "Current plan",
     "manageSubscription": "Manage subscription",
     "comingMore": "More features rolling out regularly.",
-    "headline": "Two plans. No ads. No fees.",
-    "subhead": "We don't offer a free tier — it's how we keep the platform clean, ad-free, and built for nomads instead of advertisers.",
+    "headline": "Start free. Upgrade to get discovered.",
+    "subhead": "Every card is free to create and stays live on its own link — with a small Nomad.now footer. Paid plans get you discovered, drop the footer, and unlock customization. No ads, ever.",
     "almostThere": {
-      "title": "<mono>nomad.now/{handle}</mono> is reserved for you.",
-      "subtitle": "Pick a plan below to publish your card."
+      "title": "<mono>nomad.now/{handle}</mono> is live.",
+      "subtitle": "Upgrade any time to get discovered and drop the footer."
     },
     "mostPopular": "Most popular",
     "perMonth": "/mo",
@@ -167,7 +195,7 @@
     },
     "basic": {
       "label": "Basic",
-      "tagline": "Get on the map. Everything you need for a public nomad card.",
+      "tagline": "Get discovered — listed on the map, indexed by search, and no Nomad.now footer.",
       "cta": "Start with Basic"
     },
     "pro": {
@@ -175,10 +203,11 @@
       "tagline": "Own your nomad brand. Custom accent color, verified badge, deeper analytics.",
       "cta": "Go Pro"
     },
-    "footnote": "Prices in USD. Cancel any time — your card stays live to the end of the current period.",
+    "footnote": "Prices in USD. Cancel any time — paid features stay active to the end of the current period, then your card reverts to the free tier (it stays live).",
     "compareTitle": "Compare plans",
     "compare": {
       "feature": "Feature",
+      "free": "Free",
       "basic": "Basic",
       "pro": "Pro"
     },
@@ -205,9 +234,9 @@
       "linksLabel": "Brand-icon links (11 platforms)",
       "embeds": "Inline YouTube / Spotify / Vimeo embeds",
       "verifiedBadge": "Verified badge",
-      "footerLabel": "\"Made on nomad.now\" footer",
-      "footerOptional": "Optional",
+      "footerLabel": "No \"Made with Nomad.now\" footer",
       "listingFeatured": "Featured placement",
+      "searchIndexed": "Indexed by search engines",
       "listingDefault": "Listed on /map and /in/{country}",
       "embedBasic": "With branding",
       "embedPro": "No branding",
@@ -233,7 +262,8 @@
       "travelStats": "Travel stats — countries · cities · days on the road",
       "analytics": "Basic analytics",
       "ogImage": "Auto-generated share image",
-      "footer": "Optional \"Made on nomad.now\" footer"
+      "footer": "No \"Made with Nomad.now\" footer",
+      "discovery": "Listed on /explore, /map and /in/{country} — and indexed by search"
     },
     "proBullets": {
       "everythingInBasic": "Everything in Basic",
@@ -252,16 +282,16 @@
     "faqTitle": "Common questions",
     "faq": {
       "noFree": {
-        "q": "Why is there no free plan?",
-        "a": "A free plan would force us to put ads or transaction fees somewhere — neither feels right for a profile you'd share to your network. $1.98 keeps the lights on without compromising the product."
+        "q": "Is there a free plan?",
+        "a": "Yes. Every card is free to create and stays live on its direct link, with a small Nomad.now footer. Paid plans add discovery (search + the /map and /in directory), remove the footer, and unlock customization. We never run ads or take transaction fees."
       },
       "cancel": {
         "q": "Can I cancel any time?",
-        "a": "Yes. Your card stays live until the end of the current billing period. After that the page returns a 'no longer available' notice — your handle is held for 30 days in case you change your mind."
+        "a": "Yes. Paid features stay active until the end of the current billing period. After that your card simply reverts to the free tier — still live on its direct link, just unlisted and with the footer back. Nothing is deleted."
       },
       "data": {
         "q": "What happens to my data if I cancel?",
-        "a": "Export everything (profile, links, visited countries) as JSON from your account tab before cancelling. We keep your data for 90 days after cancellation in case you resubscribe."
+        "a": "Nothing is deleted. Canceling only reverts your card to the free tier — it stays live on its direct link. You can export everything (profile, links, visited countries) as JSON from your account tab at any time, and deleting your account removes the card for good."
       },
       "switch": {
         "q": "Can I switch between Basic and Pro?",
@@ -439,7 +469,7 @@
     "nomadSinceHint": "One month picker — drives the “X years on the road” stat. Skip if you'd rather log individual stays below.",
     "submit": "Claim my card",
     "submitting": "Claiming…",
-    "submitNote": "From $1.98 / month. Cancel any time — your card stays live to the end of the period.",
+    "submitNote": "Free — your card goes live the moment you save it. Upgrade any time to get discovered and drop the footer.",
     "successToast": "Card created! Redirecting…",
     "errorHandle": "Please pick an available handle",
     "errorName": "Name is required",
@@ -670,6 +700,7 @@
     "shareLinkedin": "Share on LinkedIn",
     "copyLink": "Copy link",
     "copied": "Link copied",
+    "upgrade": "Get discovered →",
     "dismiss": "Dismiss",
     "tweetTemplate": "Just made my nomad card on @nomadnow — check it out: {url}"
   },
@@ -719,6 +750,7 @@
     "shareTitle": "Share this card",
     "copyLink": "Copy link",
     "copied": "Copied!",
+    "poweredBy": "Made with Nomad.now",
     "travelTitle": "Travel",
     "countryOne": "country",
     "countryMany": "countries",
@@ -828,18 +860,12 @@
     "emptyBody": "Add {country} to your visited countries and you'll show up here for everyone searching for \"{country}\".",
     "backToMap": "← Back to the global map"
   },
-  "profileExpired": {
-    "title": "This card is resting.",
-    "body": "It isn't active right now — Nomad cards need an active plan to stay live. The handle is held for its owner.",
-    "cta": "Claim your own card",
-    "browse": "Browse other nomads"
-  },
   "profileNotFound": {
     "availableBadge": "Available",
     "reservedBadge": "Reserved",
     "availableBody": "Nobody's claimed this handle yet. Take it before someone else does.",
     "availableCta": "Claim @{handle}",
-    "availableNote": "From $1.98 / month · 1 minute to set up",
+    "availableNote": "Free to create · 1 minute to set up",
     "reservedBody": "This handle is reserved — usually because it collides with a system page or a brand-protected name.",
     "reservedCta": "Pick a different handle",
     "invalidTitle": "Not a valid handle",

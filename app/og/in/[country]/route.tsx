@@ -18,6 +18,10 @@ async function countNomadsInCountry(code: string): Promise<number> {
     const { count } = await supabase
       .from('users')
       .select('id', { count: 'exact', head: true })
+      // Must match getNomadsInCountry() in app/in/[country]/page.tsx exactly,
+      // or the share image advertises a headcount the page doesn't show.
+      .eq('suspended', false)
+      .not('plan', 'is', null)
       .contains('visited_countries', [code])
     return count ?? 0
   } catch {

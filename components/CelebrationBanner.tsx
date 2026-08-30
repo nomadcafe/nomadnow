@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 // Celebratory share banner shown right after /create-card finishes. The
@@ -9,7 +10,20 @@ import { useTranslations } from 'next-intl'
 // visitors never download the bundle.
 //
 // Auto-dismisses after 8 seconds and can be closed manually.
-export function CelebrationBanner({ handle }: { handle: string }) {
+//
+// `showUpgrade` adds the one upsell that belongs at this moment: the card is
+// live on its direct link, and getting it into search + the directories is
+// what a paid plan buys. Deliberately a muted text link rather than a fourth
+// button — sharing is the higher-value action here, and the /edit/overview
+// upsell catches the owner again later with real numbers behind it. The
+// parent passes it only for an owner on a free plan (see /[handle]).
+export function CelebrationBanner({
+  handle,
+  showUpgrade = false,
+}: {
+  handle: string
+  showUpgrade?: boolean
+}) {
   const t = useTranslations('celebrate')
   const [visible, setVisible] = useState(true)
   const [copied, setCopied] = useState(false)
@@ -96,6 +110,14 @@ export function CelebrationBanner({ handle }: { handle: string }) {
                 </>
               )}
             </button>
+            {showUpgrade && (
+              <Link
+                href="/pricing?from=create"
+                className="text-xs font-medium text-amber-800 underline underline-offset-2 hover:text-amber-900 transition px-1"
+              >
+                {t('upgrade')}
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setVisible(false)}

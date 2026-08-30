@@ -48,6 +48,13 @@ async function getAggregate(): Promise<Aggregate> {
       .from('users')
       .select('visited_countries')
       .not('visited_countries', 'is', null)
+      // Same population as the /in/{country} listings this map links into:
+      // moderated cards are excluded, and only paid cards get directory
+      // placement (freemium — see the /explore query). Without both filters
+      // the heat weights and the "N nomads" counter promise more than the
+      // country pages actually list.
+      .eq('suspended', false)
+      .not('plan', 'is', null)
 
     if (error) throw error
 

@@ -40,9 +40,10 @@ interface UseSubmitCardResult {
 // row via user_id, and in create mode the row doesn't exist until the
 // first call returns. The redirect target differs by mode:
 //   - Edit: back to /{handle}, no celebration
-//   - Create + paid: /{handle}?celebrate=1 so the celebration banner shows
-//   - Create + unpaid: /pricing?from=create (paywall before the public card
-//     goes live)
+//   - Create: /{handle}?celebrate=1 — freemium means the card is live the
+//     moment it's saved, on every plan, so a new owner always lands on their
+//     own card. Upgrade prompts belong after that moment (celebration banner,
+//     /edit/overview), never in front of it.
 export function useSubmitCard({
   initial,
   formData,
@@ -273,13 +274,7 @@ export function useSubmitCard({
 
       clearDraft()
       const handleSlug = (initial?.handle ?? formData.handle).trim().toLowerCase()
-      let nextPath: string
-      if (isEdit) {
-        nextPath = `/${handleSlug}`
-      } else {
-        const claimedPlan = data?.user?.plan as 'basic' | 'pro' | null | undefined
-        nextPath = claimedPlan ? `/${handleSlug}?celebrate=1` : '/pricing?from=create'
-      }
+      const nextPath = isEdit ? `/${handleSlug}` : `/${handleSlug}?celebrate=1`
       router.push(nextPath)
       router.refresh()
     } catch (error) {

@@ -22,9 +22,6 @@ export interface BillingState {
   // True when the user can use paid features right now. Combines `plan` and
   // `subscription_status` and `current_period_end`.
   isActive: boolean
-  // True when subscription was canceled AND the paid period has ended. Used to
-  // hard-gate the public profile to "no longer available".
-  isExpired: boolean
 }
 
 interface BillingRow {
@@ -35,20 +32,13 @@ interface BillingRow {
 
 export function deriveBillingState(row: BillingRow | null | undefined): BillingState {
   if (!row) {
-    return { plan: null, status: null, isActive: false, isExpired: false }
+    return { plan: null, status: null, isActive: false }
   }
 
   const plan = (row.plan as Plan | null) ?? null
   const status = row.subscription_status ?? null
   const periodEnd = row.current_period_end ? new Date(row.current_period_end).getTime() : null
   const now = Date.now()
-
-  // Expired: the subscription was canceled and the paid period has lapsed.
-  // We can't gate this on `plan` because the webhook clears `plan` to null
-  // once the period ends — then this would be indistinguishable from a user
-  // who never subscribed at all. `subscription_status` is the source of truth
-  // for "was once a customer".
-  const isExpired = status === 'canceled' && periodEnd !== null && periodEnd <= now
 
   // Active: a plan is set AND status indicates payment is current AND the
   // paid period hasn't ended yet. past_due is intentionally accepted as a
@@ -58,16 +48,16 @@ export function deriveBillingState(row: BillingRow | null | undefined): BillingS
   const isActive =
     !!plan && withinPeriod && (status === null || ACTIVE_STATUSES.has(status))
 
-  return { plan, status, isActive, isExpired }
+  return { plan, status, isActive }
 }
 
 // Fetches billing state for a user from the DB. Uses the admin (service_role)
 // client because end-user roles (anon, authenticated) had SELECT on the
 // billing columns revoked in migration 0007 — see lib/db-columns.ts. Only
-// the derived state (plan, status, isActive, isExpired) is returned to the
-// caller, so it's safe to call on behalf of any visitor (e.g. to gate a
-// public profile page on the OWNER's subscription) without leaking the
-// raw Stripe identifiers.
+// the derived state (plan, status, isActive) is returned to the caller, so
+// it's safe to call on behalf of any visitor (e.g. to decide whether a public
+// card carries the free-tier footer) without leaking the raw Stripe
+// identifiers.
 export async function getBillingState(userId: string): Promise<BillingState> {
   // Cached across requests so the public profile read doesn't hit the admin
   // client on every view. Billing only changes via the Stripe webhook, which
@@ -82,7 +72,7 @@ export async function getBillingState(userId: string): Promise<BillingState> {
   return cached()
 }
 
-const NO_BILLING: BillingState = { plan: null, status: null, isActive: false, isExpired: false }
+const NO_BILLING: BillingState = { plan: null, status: null, isActive: false }
 
 async function fetchBillingState(userId: string): Promise<BillingState> {
   try {

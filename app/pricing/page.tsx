@@ -29,6 +29,13 @@ type Feature = {
   // Key into the pricing.features namespace. Keys are stable; the actual
   // translated string is fetched at render time.
   key: string
+  // Freemium: the table has three columns because the product has three
+  // tiers. Free is the honest baseline — most of "Your card" is in it, which
+  // is the point: the paid tiers sell distribution and personalization, not
+  // access. Leaving it out made Basic look like a wall of checkmarks that
+  // bought nothing.
+  free: Cell
+  freeKey?: string
   basic: Cell
   // When basic value is a string, this is the i18n key for that label.
   basicKey?: string
@@ -42,62 +49,71 @@ const FEATURE_ROWS: { sectionKey: string; items: Feature[] }[] = [
   {
     sectionKey: 'yourCard',
     items: [
-      { key: 'publicProfile', basic: true, pro: true },
-      // Handles per account. Basic = 1 card; Pro = up to 5 (multi-card
+      { key: 'publicProfile', free: true, basic: true, pro: true },
+      // Handles per account. Free and Basic = 1 card; Pro = up to 5 (multi-card
       // workspace, lets one account own e.g. designer/writer/photographer
       // cards). Multi-handle is the Pro flagship — schema split lands in a
       // follow-up commit, so this row carries `soon`.
-      { key: 'handles', basic: 'handlesBasic', basicKey: 'handlesBasic', pro: 'handlesPro', proKey: 'handlesPro', soon: true },
-      { key: 'worldMap', basic: true, pro: true },
-      { key: 'liveTimezone', basic: true, pro: true },
-      { key: 'stays', basic: true, pro: true },
-      { key: 'travelStats', basic: true, pro: true },
-      { key: 'ogImage', basic: true, pro: true },
+      { key: 'handles', free: 'handlesBasic', freeKey: 'handlesBasic', basic: 'handlesBasic', basicKey: 'handlesBasic', pro: 'handlesPro', proKey: 'handlesPro', soon: true },
+      { key: 'worldMap', free: true, basic: true, pro: true },
+      { key: 'liveTimezone', free: true, basic: true, pro: true },
+      { key: 'stays', free: true, basic: true, pro: true },
+      { key: 'travelStats', free: true, basic: true, pro: true },
+      { key: 'ogImage', free: true, basic: true, pro: true },
       // Customization: themes / button shape / background / font / per-axis
       // overrides are all available on every plan. Custom hex accent is the
       // one Pro-gated knob — see `accentCustom` below — because it's the
       // most-visible "personalize my brand" signal.
-      { key: 'themes', basic: true, pro: true },
-      { key: 'customization', basic: true, pro: true },
-      { key: 'accentCustom', basic: false, pro: true },
-      { key: 'linksLabel', basic: true, pro: true },
-      { key: 'embeds', basic: true, pro: true },
-      { key: 'verifiedBadge', basic: false, pro: true },
-      { key: 'footerLabel', basic: 'footerOptional', basicKey: 'footerOptional', pro: 'footerOptional', proKey: 'footerOptional' },
+      { key: 'themes', free: true, basic: true, pro: true },
+      { key: 'customization', free: true, basic: true, pro: true },
+      { key: 'accentCustom', free: false, basic: false, pro: true },
+      { key: 'linksLabel', free: true, basic: true, pro: true },
+      { key: 'embeds', free: true, basic: true, pro: true },
+      { key: 'verifiedBadge', free: false, basic: false, pro: true },
+      // Freemium: the "Made with Nomad.now" footer rides on free cards and is
+      // dropped on both paid tiers — so the row reads as a Free-column dash.
+      { key: 'footerLabel', free: false, basic: true, pro: true },
     ],
   },
   {
     sectionKey: 'distribution',
     items: [
+      // The whole distribution block is what a paid plan actually buys. Free
+      // cards render in full on their direct link but carry `noindex` and are
+      // filtered out of every directory query — see app/[handle]/page.tsx and
+      // the /explore, /in/{country}, /map and sitemap filters.
+      { key: 'searchIndexed', free: false, basic: true, pro: true },
       // Featured placement is roadmap — /explore today sorts by recency only.
-      { key: 'listingDefault', basic: true, pro: 'listingFeatured', proKey: 'listingFeatured', soon: true },
-      { key: 'embed', basic: 'embedBasic', basicKey: 'embedBasic', pro: 'embedPro', proKey: 'embedPro', soon: true },
-      { key: 'customDomain', basic: false, pro: true, soon: true },
+      { key: 'listingDefault', free: false, basic: true, pro: 'listingFeatured', proKey: 'listingFeatured', soon: true },
+      { key: 'embed', free: false, basic: 'embedBasic', basicKey: 'embedBasic', pro: 'embedPro', proKey: 'embedPro', soon: true },
+      { key: 'customDomain', free: false, basic: false, pro: true, soon: true },
     ],
   },
   {
     sectionKey: 'insights',
     items: [
-      { key: 'viewsClicks', basic: true, pro: true },
+      // Free gets the same headline totals as Basic (/api/stats only branches
+      // on isPro) — the tier line here is depth, not access.
+      { key: 'viewsClicks', free: true, basic: true, pro: true },
       // Live Pro depth today (app/api/stats): daily trend, unique visitors,
       // per-target click breakdown. Distinct from the still-roadmap geo +
       // referrers row below, which stays `soon`.
-      { key: 'proAnalytics', basic: false, pro: true },
-      { key: 'visitorAnalytics', basic: false, pro: true, soon: true },
-      { key: 'funnel', basic: false, pro: true, soon: true },
+      { key: 'proAnalytics', free: false, basic: false, pro: true },
+      { key: 'visitorAnalytics', free: false, basic: false, pro: true, soon: true },
+      { key: 'funnel', free: false, basic: false, pro: true, soon: true },
     ],
   },
   {
     sectionKey: 'automation',
     items: [
-      { key: 'drafts', basic: false, pro: true, soon: true },
-      { key: 'autoSync', basic: false, pro: true, soon: true },
+      { key: 'drafts', free: false, basic: false, pro: true, soon: true },
+      { key: 'autoSync', free: false, basic: false, pro: true, soon: true },
     ],
   },
   {
     sectionKey: 'support',
     items: [
-      { key: 'emailLabel', basic: 'emailBasic', basicKey: 'emailBasic', pro: 'emailPro', proKey: 'emailPro' },
+      { key: 'emailLabel', free: false, basic: 'emailBasic', basicKey: 'emailBasic', pro: 'emailPro', proKey: 'emailPro' },
     ],
   },
 ]
@@ -185,11 +201,11 @@ export default async function PricingPage({
     searchParams,
   ])
 
-  // /create-card submit hands off here with ?from=create when the user has no
-  // active plan. The form has already POSTed /api/users, so the handle row
-  // exists and accountInitial.handle is populated — we use that to close the
-  // loop ("your handle is reserved") before showing the paywall. Skip the
-  // banner if someone hit /pricing?from=create directly without a handle.
+  // Reassurance banner for an owner arriving from the just-created moment:
+  // /create-card now lands them on their live card, and the celebration
+  // banner's "Get discovered" link brings them here with ?from=create. It
+  // closes the loop ("nomad.now/you is live") before the plans instead of
+  // opening with a price. Skipped if someone hits the URL without a handle.
   const showCreateHandoff =
     params.from === 'create' &&
     accountInitial.status === 'signedIn' &&
@@ -272,15 +288,16 @@ export default async function PricingPage({
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left text-sm font-medium text-gray-500 px-5 sm:px-6 py-4">{t('compare.feature')}</th>
-                <th className="text-center text-sm font-medium text-gray-500 px-3 py-4 w-28 sm:w-36">{t('compare.basic')}</th>
-                <th className="text-center text-sm font-medium text-gray-900 px-3 py-4 w-28 sm:w-36">{t('compare.pro')}</th>
+                <th className="text-center text-sm font-medium text-gray-400 px-3 py-4 w-20 sm:w-28">{t('compare.free')}</th>
+                <th className="text-center text-sm font-medium text-gray-500 px-3 py-4 w-24 sm:w-32">{t('compare.basic')}</th>
+                <th className="text-center text-sm font-medium text-gray-900 px-3 py-4 w-24 sm:w-32">{t('compare.pro')}</th>
               </tr>
             </thead>
             <tbody>
               {FEATURE_ROWS.map((section, sIdx) => (
                 <React.Fragment key={section.sectionKey}>
                   <tr className="border-t border-gray-200">
-                    <td colSpan={3} className="bg-gray-50/50 px-5 sm:px-6 py-2.5 text-xs font-medium uppercase tracking-wide text-gray-500">
+                    <td colSpan={4} className="bg-gray-50/50 px-5 sm:px-6 py-2.5 text-xs font-medium uppercase tracking-wide text-gray-500">
                       {t(`sections.${section.sectionKey}`)}
                     </td>
                   </tr>
@@ -290,6 +307,15 @@ export default async function PricingPage({
                       className={iIdx === section.items.length - 1 && sIdx === FEATURE_ROWS.length - 1 ? '' : 'border-t border-gray-100'}
                     >
                       <td className="px-5 sm:px-6 py-3.5 text-[15px] text-gray-800">{t(`features.${item.key}`)}</td>
+                      <td className="px-3 py-3.5 text-center">
+                        <span className="inline-flex justify-center">
+                          <CellValue
+                            value={item.free}
+                            label={item.freeKey ? t(`features.${item.freeKey}`) : undefined}
+                            soonLabel={soonLabel}
+                          />
+                        </span>
+                      </td>
                       <td className="px-3 py-3.5 text-center">
                         <span className="inline-flex justify-center">
                           <CellValue

@@ -1,7 +1,6 @@
 import React from 'react'
 import { NomadCardServer } from '@/components/NomadCardServer'
 import { ProfileNotFound } from '@/components/ProfileNotFound'
-import { ProfileExpired } from '@/components/ProfileExpired'
 import { CelebrationBanner } from '@/components/CelebrationBanner'
 import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
@@ -36,16 +35,15 @@ export async function generateMetadata({
 
   const { user } = profileData
 
-  // Paid-only model: an inactive card renders the "resting" state, not the
-  // card. Keep it out of the index so Google doesn't surface a page that only
-  // shows a paywall CTA (mirrors the render gate in ProfilePage below).
+  // Freemium: a free card renders in full and is meant to be shared on its
+  // direct link — so it keeps the whole OG/Twitter payload (a bare link with
+  // no preview card is exactly what the free tier promises NOT to be). What
+  // it doesn't get is search placement: discovery is the paid tier's value,
+  // so an inactive plan means noindex. Everything below is shared; only
+  // `robots` and `alternates` differ (a noindex page shouldn't advertise a
+  // canonical either).
   const billing = await getBillingState(user.id)
-  if (!billing.isActive) {
-    return {
-      title: `${user.display_name || user.handle} — Nomad.now`,
-      robots: { index: false, follow: false },
-    }
-  }
+  const isPaid = billing.isActive
 
   const name = user.display_name || user.handle
   const title = `${name} — Nomad.now`
@@ -64,7 +62,9 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: url },
+    ...(isPaid
+      ? { alternates: { canonical: url } }
+      : { robots: { index: false, follow: false } }),
     openGraph: {
       title,
       description,
@@ -127,16 +127,16 @@ export default async function ProfilePage({
 
   const { user, settings, nomadLinks, nomadStays, nomadBlurbs, nomadFeaturedWorks } = profileData
 
-  // Subscription gate for the paid-only model: the card is public ONLY while
-  // the owner has an active paid plan (basic or pro, within the paid period).
-  // This covers both "never subscribed" and "canceled + lapsed" — an unpaid
-  // card is never displayed. past_due is accepted as grace (see isActive).
+  // Freemium: the card is ALWAYS public. Billing only changes what the card
+  // gets, not whether it renders. An inactive plan (free / never-subscribed /
+  // lapsed) still shows the card, but carries the "Made with Nomad.now"
+  // footer, stays out of search (noindex — see generateMetadata) and out of
+  // the /explore directory (plan filter in app/explore). A paid plan drops the
+  // footer and gains discoverability; Pro adds accent / verified / image bg.
   // Billing state goes through the admin client (see lib/billing.ts) so the
   // raw subscription_status / current_period_end never leave the server.
   const billing = await getBillingState(user.id)
-  if (!billing.isActive) {
-    return <ProfileExpired handle={handle} />
-  }
+  const isPaid = billing.isActive
 
   const isOwner = viewerResult.data.user?.id === user.id
 
@@ -163,8 +163,13 @@ export default async function ProfilePage({
       />
 
       {/* Mounted only when the user just landed from /create-card. Gating at
-          the server means the banner's JS doesn't ship to repeat visitors. */}
-      {showCelebration && <CelebrationBanner handle={handle} />}
+          the server means the banner's JS doesn't ship to repeat visitors.
+          The upgrade link inside is owner-and-free-only — a visitor who lands
+          on someone else's ?celebrate=1 link shouldn't be sold an upgrade to
+          a card that isn't theirs. */}
+      {showCelebration && (
+        <CelebrationBanner handle={handle} showUpgrade={isOwner && !isPaid} />
+      )}
 
       <NomadCardServer
         user={effectiveUser}
@@ -186,6 +191,7 @@ export default async function ProfilePage({
         enabledSections={settings?.enabled_sections}
         sectionOrder={settings?.section_order}
         isOwner={isOwner}
+        showBranding={!isPaid}
       />
     </>
   )

@@ -3,6 +3,7 @@ import type Stripe from 'stripe'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { logError } from '@/lib/errors'
+import { deriveBillingState } from '@/lib/billing'
 import { bumpBillingCache, bumpProfileCache } from '@/lib/revalidate'
 
 // Stripe webhooks need the raw body bytes to verify the HMAC signature.
@@ -52,13 +53,21 @@ async function syncSubscription(sub: Stripe.Subscription) {
     ? new Date(currentPeriodEndSeconds * 1000).toISOString()
     : null
 
-  // canceled+period-passed gets cleared from `plan` so app gating can use the
-  // single flag. We keep subscription_status='canceled' so /[handle] can show
-  // the "expired" page distinctly from "never subscribed".
-  const periodInFuture = currentPeriodEndSeconds
-    ? currentPeriodEndSeconds * 1000 > Date.now()
-    : false
-  const keepPlan = sub.status !== 'canceled' || periodInFuture
+  // `plan` is cleared the moment the subscription stops being active, so the
+  // column is a faithful "has paid features right now" flag. That matters
+  // because the public directory queries (/explore, /in/{country}, /map) can
+  // only filter on `plan` — the billing columns aren't readable by anon (see
+  // migration 0007) — while the card's own branding + noindex go through
+  // getBillingState().isActive. Deriving both from deriveBillingState keeps
+  // the two in lockstep instead of letting a status like `unpaid` list a card
+  // the profile page has already demoted to free. Residual drift is only
+  // time-based (a period lapsing with no event), which Stripe's own
+  // subscription events close out.
+  const keepPlan = deriveBillingState({
+    plan,
+    subscription_status: sub.status,
+    current_period_end: currentPeriodEndIso,
+  }).isActive
 
   const updates: Record<string, unknown> = {
     subscription_id: sub.id,

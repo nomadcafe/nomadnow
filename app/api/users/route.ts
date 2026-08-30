@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
-import { requireActivePlan } from '@/lib/billing-guard'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
@@ -281,10 +280,11 @@ async function recoverOrphanSubscription(userId: string): Promise<unknown | null
 
 export async function PUT(request: NextRequest) {
   try {
-    // Paid-only model: editing an existing profile requires an active plan.
-    // The POST create path stays on requireUser so a brand-new user can still
-    // claim a handle / seed their card before paying (see useSubmitCard).
-    const { supabase, user } = await requireActivePlan()
+    // Freemium: editing a profile only requires being signed in — the card is
+    // live regardless of plan. Pro-only fields are gated at their own save
+    // boundaries (accent / image bg live in /api/settings); nothing here is
+    // plan-restricted.
+    const { supabase, user } = await requireUser()
     const body = await request.json()
 
     const validation = updateUserSchema.safeParse(body)
