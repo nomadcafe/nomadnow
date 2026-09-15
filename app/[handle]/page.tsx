@@ -5,10 +5,12 @@ import { CelebrationBanner } from '@/components/CelebrationBanner'
 import type { Metadata } from 'next'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { getBillingState, isPro } from '@/lib/billing'
+import { gateProBackground } from '@/lib/card-background'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { getProfileByHandle } from '@/lib/profile'
 import { buildProfileJsonLd, buildProfileBreadcrumbJsonLd } from '@/lib/seo/profile-jsonld'
 import { serializeJsonLd } from '@/lib/seo/json-ld'
+import { siteUrl } from '@/lib/seo/site-url'
 
 export async function generateMetadata({
   params,
@@ -53,9 +55,7 @@ export async function generateMetadata({
       .filter(Boolean)
       .join(' · ') ||
     `${name}'s nomad card`
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://nomad.now')
+  const baseUrl = siteUrl()
   const url = `${baseUrl}/${user.handle}`
   const ogImage = `${baseUrl}/og/${user.handle}`
 
@@ -146,6 +146,14 @@ export default async function ProfilePage({
   const ownerIsPro = isPro(billing.plan)
   const effectiveUser = ownerIsPro ? user : { ...user, verified: false }
   const effectiveAccent = ownerIsPro ? settings?.accent_color : null
+  // Image backgrounds are Pro-gated the same way. Without this a Pro owner who
+  // downgrades keeps painting a Pro-only background forever, because the saved
+  // mode/value stay in profile_settings (deliberately — see gateProBackground).
+  const effectiveBackground = gateProBackground(
+    ownerIsPro,
+    settings?.background_mode,
+    settings?.background_value,
+  )
 
   const jsonLd = buildProfileJsonLd(user, nomadStays || [])
   const breadcrumbJsonLd = buildProfileBreadcrumbJsonLd(user)
@@ -180,8 +188,8 @@ export default async function ProfilePage({
         themeKey={settings?.theme_color}
         buttonShape={settings?.button_shape}
         buttonStyle={settings?.button_style}
-        backgroundMode={settings?.background_mode}
-        backgroundValue={settings?.background_value}
+        backgroundMode={effectiveBackground.mode}
+        backgroundValue={effectiveBackground.value}
         fontFamily={settings?.font_family}
         accentColor={effectiveAccent}
         decorationOverride={settings?.decoration_override}

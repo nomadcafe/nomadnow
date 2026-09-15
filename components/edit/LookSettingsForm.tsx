@@ -29,6 +29,7 @@ import {
 import {
   BACKGROUND_MODE_KEYS,
   GRADIENT_PRESETS,
+  gateProBackground,
   resolveBackgroundCss,
   type BackgroundMode,
 } from '@/lib/card-background'
@@ -138,6 +139,15 @@ export function LookSettingsForm() {
   // keep the input responsive by rendering the preview with a slightly
   // stale settings snapshot that catches up when the user pauses.
   const deferredSettings = useDeferredValue(settings)
+
+  // The preview must promise exactly what /[handle] will paint. Accent is
+  // gated inline at the <NomadCard> below; the background needs the same gate
+  // because a downgraded Pro owner's row still carries their image background.
+  const previewBackground = gateProBackground(
+    ownerIsPro,
+    deferredSettings.background_mode,
+    deferredSettings.background_value,
+  )
 
   useEffect(() => {
     async function load() {
@@ -286,12 +296,28 @@ export function LookSettingsForm() {
         throw new Error(data.error || 'Failed to save settings')
       }
 
+      // The save boundary silently DROPS the two Pro-only fields for a non-Pro
+      // owner rather than failing the whole request (see /api/settings for
+      // why), so reconcile them back from what was actually stored. Without
+      // this the form would keep claiming an image background / custom accent
+      // the row doesn't carry, and report itself as saved-and-clean.
+      const stored = data.settings as ProfileSettings | undefined
+      const persisted: ProfileSettings = stored
+        ? {
+            ...settings,
+            background_mode: stored.background_mode ?? 'theme',
+            background_value: stored.background_value ?? null,
+            accent_color: stored.accent_color ?? null,
+          }
+        : settings
+      setSettings(persisted)
+
       // Stay on the page after save — the previous behaviour bounced the
       // user to /{handle} after 1.2s which was disorienting (they often
       // wanted to keep tweaking). The toast confirms the save; a separate
       // "View live card" link is always visible if they want to switch.
       showSuccess(t('saved'))
-      setSavedSerialized(JSON.stringify(settings))
+      setSavedSerialized(JSON.stringify(persisted))
     } catch (error) {
       console.error('Error saving settings:', error)
       showError(error instanceof Error ? error.message : t('saveError'))
@@ -476,7 +502,11 @@ export function LookSettingsForm() {
               {(() => {
                 const mode = settings.background_mode ?? 'theme'
                 const bgValue = settings.background_value ?? null
-                const previewCss = resolveBackgroundCss(mode, bgValue)
+                // Swatch goes through the Pro gate too, so a non-Pro owner
+                // sitting on a saved image background sees the theme fallback
+                // their live card actually renders, not the locked image.
+                const gatedBg = gateProBackground(ownerIsPro, mode, bgValue)
+                const previewCss = resolveBackgroundCss(gatedBg.mode, gatedBg.value)
                 const gradient =
                   bgValue && 'from' in bgValue
                     ? bgValue
@@ -1046,8 +1076,8 @@ export function LookSettingsForm() {
                     themeKey={deferredSettings.theme_color}
                     buttonShape={deferredSettings.button_shape}
                     buttonStyle={deferredSettings.button_style}
-                    backgroundMode={deferredSettings.background_mode}
-                    backgroundValue={deferredSettings.background_value}
+                    backgroundMode={previewBackground.mode}
+                    backgroundValue={previewBackground.value}
                     fontFamily={deferredSettings.font_family}
                     accentColor={ownerIsPro ? deferredSettings.accent_color : null}
                     decorationOverride={deferredSettings.decoration_override}

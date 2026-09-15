@@ -94,38 +94,42 @@ export async function PUT(request: NextRequest) {
       Object.entries(validation.data).filter(([, v]) => v !== undefined)
     )
 
-    // Image backgrounds are a Pro feature (they carry a storage cost and are a
-    // flagship visual). Enforce server-side, not just in the Look UI, so a
-    // direct PATCH can't set one for free. Only pay for the plan lookup when
-    // the request actually tries to switch into image mode.
-    if (cleanData.background_mode === 'image') {
+    // Pro-only look settings: image background and custom accent. Both are
+    // enforced here, not just in the Look UI, so a direct PUT can't set one
+    // for free. The render paths refuse to paint either for a non-Pro owner
+    // too (gateProBackground + effectiveAccent in app/[handle]/page.tsx) —
+    // this is the save-boundary half of the same gate.
+    //
+    // A non-Pro request carrying one of these is DROPPED, not rejected, and
+    // that distinction matters: the Look form PUTs the whole settings object
+    // on every save, and a downgraded Pro owner's row still holds their accent
+    // and image background (kept on purpose so re-upgrading restores them).
+    // Rejecting would mean that owner can never save ANY look change again —
+    // theme, font, button shape, all of it — and the UI shows them a paywall
+    // card rather than an input, so they'd have no way to clear the offending
+    // value either. Dropping the key leaves the stored value untouched and
+    // lets the rest of the save through.
+    //
+    // Clearing accent to null is always allowed, so a Pro owner can drop it on
+    // the way out. One plan lookup covers both checks, and only when the
+    // request actually carries a Pro-gated value.
+    const wantsProAccent = cleanData.accent_color != null
+    const wantsProBackground = cleanData.background_mode === 'image'
+    if (wantsProAccent || wantsProBackground) {
       const { data: planRow } = await supabase
         .from('users')
         .select('plan')
         .eq('id', user.id)
         .maybeSingle()
       if (!isPro((planRow as { plan?: string | null } | null)?.plan)) {
-        throw new ValidationError('Image backgrounds are a Pro feature', {
-          background_mode: 'Upgrade to Pro to use an image background',
-        })
-      }
-    }
-
-    // Custom accent color is a Pro feature. Enforce server-side so a direct
-    // PATCH can't set one for free (the render path already ignores it for
-    // non-Pro accounts, but keep authorization at the save boundary too).
-    // Clearing to null is always allowed. Only pay for the plan lookup when a
-    // non-null accent is being set.
-    if (cleanData.accent_color != null) {
-      const { data: planRow } = await supabase
-        .from('users')
-        .select('plan')
-        .eq('id', user.id)
-        .maybeSingle()
-      if (!isPro((planRow as { plan?: string | null } | null)?.plan)) {
-        throw new ValidationError('Custom accent color is a Pro feature', {
-          accent_color: 'Upgrade to Pro to use a custom accent color',
-        })
+        if (wantsProAccent) delete cleanData.accent_color
+        if (wantsProBackground) {
+          // Drop the paired value with the mode — background_value's shape is
+          // mode-dependent, so writing a `{ url }` under a mode we're not
+          // writing would leave a row the resolver can't make sense of.
+          delete cleanData.background_mode
+          delete cleanData.background_value
+        }
       }
     }
 

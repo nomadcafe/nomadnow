@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
-import { createPublicSupabase } from '@/lib/supabase/public'
+import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getEnvSafe } from '@/lib/env'
+import { deriveBillingState } from '@/lib/billing'
 import { countries, slugForCountry } from '@/lib/countries'
 import { siteUrl } from '@/lib/seo/site-url'
 
@@ -24,28 +25,55 @@ interface CardRow {
   visited_countries: string[] | null
 }
 
+interface BillingCols {
+  plan: string | null
+  subscription_status: string | null
+  current_period_end: string | null
+}
+
+// Unlike /explore, /in/{country} and /map — which run on the anon client and
+// can therefore only filter on `plan`, the one billing column anon may read
+// (migration 0007) — the sitemap reads through the service-role client and
+// applies the SAME `isActive` predicate that app/[handle] uses to decide
+// `noindex`. That closes the one drift case the `plan` filter can't see: a
+// billing period that has lapsed without a Stripe event yet still leaves
+// `plan` set, so the card is already serving `noindex` while the row still
+// looks paid. Submitting a URL we tell Google not to index burns crawl budget
+// on a page that can never rank, and this file is regenerated hourly, which
+// would hold that mismatch open far longer than the drift itself lasts.
+// Nothing but the handle escapes this function, so the wider read is safe.
 async function fetchIndexableCards(): Promise<CardRow[]> {
   try {
     const env = getEnvSafe()
     if (env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) return []
 
-    const supabase = createPublicSupabase()
+    const supabase = createAdminSupabase()
     const { data, error } = await supabase
       .from('users')
-      .select('handle, updated_at, visited_countries')
-      // Same population as /explore and /in/{country}: moderated cards are out,
-      // and `plan` is non-null exactly while paid features are live (the Stripe
-      // webhook clears it the moment they aren't — see app/api/billing/webhook).
+      .select(
+        'handle, updated_at, visited_countries, plan, subscription_status, current_period_end',
+      )
+      // Moderated cards are out, same as every other directory surface.
       .eq('suspended', false)
+      // Cheap pre-filter so the row cap isn't spent on never-paid cards; the
+      // authoritative check is deriveBillingState below.
       .not('plan', 'is', null)
       .order('updated_at', { ascending: false })
       .limit(MAX_CARDS)
 
     if (error) throw error
-    return (data ?? []) as CardRow[]
+    return ((data ?? []) as (CardRow & BillingCols)[])
+      .filter((row) => deriveBillingState(row).isActive)
+      .map(({ handle, updated_at, visited_countries }) => ({
+        handle,
+        updated_at,
+        visited_countries,
+      }))
   } catch {
     // A sitemap that 500s gets the whole file dropped from Search Console. The
     // static routes below are always correct, so degrade to those instead.
+    // createAdminSupabase() also throws when the service-role key is unset,
+    // which lands here rather than breaking the build.
     return []
   }
 }

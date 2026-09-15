@@ -8,6 +8,7 @@ import { Logo } from '@/components/Logo'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { OptimizedImage } from '@/components/OptimizedImage'
 import { serializeJsonLd } from '@/lib/seo/json-ld'
+import { siteUrl } from '@/lib/seo/site-url'
 import {
   codeForSlug,
   slugForCountry,
@@ -71,14 +72,12 @@ export async function generateMetadata({
   }
   const name = getCountryName(code)
   const flag = getCountryFlag(code)
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://nomad.now')
+  const baseUrl = siteUrl()
   const ogImage = `${baseUrl}/og/in/${slug}`
   return {
     title: t('metaTitle', { country: name }),
     description: t('metaDescription', { country: name, flag }),
-    alternates: { canonical: `https://nomad.now/in/${slug}` },
+    alternates: { canonical: `${baseUrl}/in/${slug}` },
     openGraph: {
       title: t('metaOgTitle', { country: name, flag }),
       description: t('metaOgDescription', { country: name }),
@@ -143,7 +142,7 @@ export default async function InCountryPage({
         item: {
           '@type': 'Person',
           name: n.display_name || n.handle,
-          url: `https://nomad.now/${n.handle}`,
+          url: `${siteUrl()}/${n.handle}`,
         },
       })),
     },

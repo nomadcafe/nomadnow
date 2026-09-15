@@ -90,3 +90,24 @@ export function resolveBackgroundCss(
   }
   return null
 }
+
+/**
+ * Pro gate for image backgrounds, applied at every site that renders a card.
+ *
+ * Image backgrounds are Pro-only. A downgraded owner KEEPS `background_mode:
+ * 'image'` and its URL in `profile_settings` on purpose — re-upgrading then
+ * restores the background without them re-uploading anything — which means
+ * every render path has to drop it explicitly, exactly like `accent_color` and
+ * the verified badge do in app/[handle]/page.tsx. Falls back to the theme
+ * background, never to a half-applied image.
+ *
+ * Returns the mode/value the renderer should actually use.
+ */
+export function gateProBackground(
+  isProOwner: boolean,
+  mode: string | null | undefined,
+  value: unknown,
+): { mode: string | null | undefined; value: unknown } {
+  if (isProOwner || mode !== 'image') return { mode, value }
+  return { mode: 'theme', value: null }
+}

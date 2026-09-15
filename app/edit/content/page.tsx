@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
 import { isPro } from '@/lib/billing'
+import { gateProBackground } from '@/lib/card-background'
 import CreateCardForm, { type InitialCardData } from '@/app/create-card/CreateCardForm'
 import type { CardLook } from '@/components/LiveCardPreview'
 
@@ -108,13 +109,21 @@ export default async function EditContentPage() {
   // plan won't actually render. settings may be null (no row yet) → undefined
   // fields fall back to the theme default in the preview.
   const ownerIsPro = isPro((profile as { plan?: string | null }).plan)
+  // Image background is Pro-gated identically (gateProBackground), so a
+  // downgraded owner's preview shows the theme background the live card
+  // actually paints rather than the Pro image still sitting in their row.
+  const previewBackground = gateProBackground(
+    ownerIsPro,
+    settings?.background_mode as string | null | undefined,
+    settings?.background_value,
+  )
   const look: CardLook = {
     themeKey: (settings?.theme_color as string | null) ?? null,
     buttonShape: (settings?.button_shape as string | null) ?? null,
     buttonStyle: (settings?.button_style as string | null) ?? null,
     accentColor: ownerIsPro ? ((settings?.accent_color as string | null) ?? null) : null,
-    backgroundMode: (settings?.background_mode as string | null) ?? null,
-    backgroundValue: settings?.background_value ?? null,
+    backgroundMode: (previewBackground.mode as string | null) ?? null,
+    backgroundValue: previewBackground.value ?? null,
     fontFamily: (settings?.font_family as string | null) ?? null,
     decorationOverride: (settings?.decoration_override as string | null) ?? null,
     avatarStyleOverride: (settings?.avatar_style_override as string | null) ?? null,

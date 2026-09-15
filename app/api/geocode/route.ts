@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         // Required by Nominatim's policy. Identifies the app and a
         // contact route so they can email us if we misbehave instead
         // of silently rate-limiting.
-        'User-Agent': 'NomadNow/0.1 (https://www.nomad.now)',
+        'User-Agent': 'NomadNow/0.1 (https://nomad.now)',
         Accept: 'application/json',
       },
       // Cache identical queries at the edge so we don't hammer Nominatim
