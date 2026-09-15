@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isAllowedImageUrl } from './image-hosts'
 
 // Handle validation — must match the UI rules in app/create-card/page.tsx
 // (2-50 chars, letters/numbers/_/- only). Single-character handles are reserved
@@ -27,3 +28,16 @@ export const safeLinkUrlSchema = z
       return false
     }
   }, 'URL must use http, https, mailto, or tel')
+
+// Avatar URLs are rendered as an <img src> on the public card and in the
+// /explore directory, so unlike a link (which only fires on a click) they make
+// every visitor's browser reach the host on page load. Restrict them to the
+// hosts we actually serve images from — see lib/image-hosts for why the
+// next.config optimizer allow-list can't do this job. Rejecting at the write
+// boundary keeps the DB clean; OptimizedImage re-checks at render as a
+// backstop for rows written before this existed.
+export const avatarUrlSchema = z
+  .string()
+  .url('Invalid URL')
+  .max(2048, 'URL is too long')
+  .refine(isAllowedImageUrl, 'Avatar must be an uploaded image')

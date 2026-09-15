@@ -10,6 +10,12 @@ const nextConfig = {
     // address (e.g. https://169.254.169.254/...) and have the optimizer fetch
     // it server-side on every visit — SSRF. User uploads live on Supabase
     // Storage (*.supabase.co); Google avatars from OAuth on googleusercontent.
+    //
+    // This covers the OPTIMIZER only, which in practice means relative paths:
+    // every stored image is an absolute URL and takes OptimizedImage's plain
+    // <img> branch, which the optimizer never sees. Keep this list in sync
+    // with lib/image-hosts — that's what actually gates remote images, at both
+    // the write boundary and render.
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.googleusercontent.com' },

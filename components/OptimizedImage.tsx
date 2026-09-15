@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
+import { isAllowedImageUrl } from '@/lib/image-hosts'
 
 interface OptimizedImageProps {
   src: string
@@ -26,9 +27,17 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
   const [imageError, setImageError] = useState(false)
 
-  // For external URLs, use regular img tag with lazy loading and error handling
+  // For external URLs, use regular img tag with lazy loading and error handling.
+  //
+  // NB: this branch, not the <Image> one below, is what every stored image
+  // actually takes — avatars, backgrounds and stay photos are all absolute
+  // Supabase Storage URLs, and only relative paths fall through to next/image.
+  // That means next.config's `images.remotePatterns` never sees them, so the
+  // host check has to happen here. A URL on any other host renders the
+  // placeholder and issues NO request: an <img> pointed at an arbitrary host
+  // reports every viewer's IP, User-Agent and Referer to whoever owns it.
   if (src.startsWith('http')) {
-    if (imageError) {
+    if (imageError || !isAllowedImageUrl(src)) {
       return (
         <div
           className={`bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center ${className}`}
