@@ -1,7 +1,8 @@
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 import { createPublicSupabase } from './supabase/public'
-import { handleSchema } from './validation'
+import { handleSchema, isSafeLinkUrl } from './validation'
+import { isAllowedImageUrl } from './image-hosts'
 import { logError } from './errors'
 import { findUnsafeUrls } from './safe-browsing'
 import type {
@@ -116,8 +117,24 @@ async function fetchPublicProfile(handle: string): Promise<PublicProfile | null>
       ])
 
     const typedUser = user as unknown as User
-    const nomadLinks = (linksResult.data ?? []) as NomadLink[]
-    const nomadFeaturedWorks = (featuredWorksResult.data ?? []) as NomadFeaturedWork[]
+
+    // Scheme / host scrub. The API routes validate every URL with Zod, but
+    // RLS + column grants let an authenticated owner write their own rows
+    // directly through PostgREST (the anon key is public), skipping that
+    // validation. So re-apply the same rules here, on the one read path every
+    // public render goes through: links/CTAs must be http/https/mailto/tel
+    // (no `javascript:` / `data:` hrefs on a stranger's screen), featured
+    // works http/https, stay photos on an allowed image host.
+    const nomadLinks = ((linksResult.data ?? []) as NomadLink[]).filter((l) => isSafeLinkUrl(l.url))
+    const nomadFeaturedWorks = ((featuredWorksResult.data ?? []) as NomadFeaturedWork[]).filter(
+      (w) => isSafeLinkUrl(w.url) && /^https?:/i.test(w.url),
+    )
+    const nomadStays = ((staysResult.data ?? []) as NomadStay[]).map((s) =>
+      Array.isArray(s.photo_urls) ? { ...s, photo_urls: s.photo_urls.filter(isAllowedImageUrl) } : s,
+    )
+    if (typedUser.website && !isSafeLinkUrl(typedUser.website)) typedUser.website = undefined
+    if (typedUser.hire_cta_url && !isSafeLinkUrl(typedUser.hire_cta_url)) typedUser.hire_cta_url = null
+    if (typedUser.meetup_cta_url && !isSafeLinkUrl(typedUser.meetup_cta_url)) typedUser.meetup_cta_url = null
 
     // Safe Browsing scrub. The save-time check (in the link API routes) is the
     // first gate, but it can't catch a link that was clean when saved and
@@ -151,7 +168,7 @@ async function fetchPublicProfile(handle: string): Promise<PublicProfile | null>
       user: typedUser,
       settings: (settingsResult.data ?? undefined) as ProfileSettings | undefined,
       nomadLinks: nomadLinks.filter((l) => !unsafe.has(l.url)),
-      nomadStays: (staysResult.data ?? []) as NomadStay[],
+      nomadStays,
       nomadBlurbs: (blurbsResult.data ?? []) as NomadBlurb[],
       nomadFeaturedWorks: nomadFeaturedWorks.filter((w) => !unsafe.has(w.url)),
     }

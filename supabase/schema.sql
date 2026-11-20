@@ -368,3 +368,14 @@ CREATE POLICY "nomad_featured_works_insert_self" ON nomad_featured_works FOR INS
 CREATE POLICY "nomad_featured_works_update_self" ON nomad_featured_works FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "nomad_featured_works_delete_self" ON nomad_featured_works FOR DELETE USING (auth.uid() = user_id);
 
+
+-- URL scheme / handle format backstops (migration 0034). Owners can write
+-- their own rows straight through PostgREST, bypassing the API's Zod checks.
+ALTER TABLE nomad_links ADD CONSTRAINT nomad_links_url_scheme CHECK (url ~* '^(https?|mailto|tel):');
+ALTER TABLE nomad_featured_works ADD CONSTRAINT nomad_featured_works_url_scheme CHECK (url ~* '^https?://');
+ALTER TABLE users
+  ADD CONSTRAINT users_website_scheme CHECK (website IS NULL OR website ~* '^(https?|mailto|tel):'),
+  ADD CONSTRAINT users_hire_cta_url_scheme CHECK (hire_cta_url IS NULL OR hire_cta_url ~* '^(https?|mailto|tel):'),
+  ADD CONSTRAINT users_meetup_cta_url_scheme CHECK (meetup_cta_url IS NULL OR meetup_cta_url ~* '^(https?|mailto|tel):'),
+  ADD CONSTRAINT users_handle_format CHECK (handle ~ '^[a-z0-9_-]{1,50}$'),
+  ADD CONSTRAINT users_avatar_url_https CHECK (avatar_url IS NULL OR avatar_url ~* '^https://');

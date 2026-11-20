@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createServerSupabase, requireUser } from '@/lib/supabase/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { bumpProfileCacheByUserId } from '@/lib/revalidate'
+import { isAllowedImageUrl } from '@/lib/image-hosts'
 
 // Replace-all semantics (same approach as PUT /api/nomad-links): the form
 // always submits the full desired stays list, server wipes existing and
@@ -39,21 +40,12 @@ const replaceStaysSchema = z.object({
               .string()
               .url()
               .max(2048)
-              .refine((value) => {
-                try {
-                  const u = new URL(value)
-                  // https + Supabase Storage host only. Stay photos are
-                  // uploaded through /api/stays/photo/upload (Supabase Storage),
-                  // so a non-Supabase URL is either a mistake or an attempt to
-                  // make a visitor's browser fetch an arbitrary/internal host.
-                  // This IS the primary control: next.config's optimizer
-                  // allow-list never sees an absolute URL (see lib/image-hosts),
-                  // so nothing downstream would catch it.
-                  return u.protocol === 'https:' && u.hostname.endsWith('.supabase.co')
-                } catch {
-                  return false
-                }
-              }, 'Photo URL must be an https Supabase Storage URL'),
+              // https + our own Storage host only (lib/image-hosts). Stay
+              // photos are uploaded through /api/stays/photo/upload, so any
+              // other host is a mistake or an attempt to make a visitor's
+              // browser fetch an arbitrary host — including another Supabase
+              // project whose logs the card owner can read.
+              .refine(isAllowedImageUrl, 'Photo URL must be an uploaded image'),
           )
           .max(6)
           .optional()

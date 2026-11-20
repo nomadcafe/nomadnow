@@ -124,6 +124,12 @@ export async function POST(request: NextRequest) {
       throw new ValidationError('Invalid user data', validation.error.errors)
     }
 
+    // Normalise server-side: the form lowercases, but a direct POST could
+    // otherwise claim `Alice` beside an existing `alice` (UNIQUE is
+    // case-sensitive) — an unreachable look-alike, since every lookup
+    // lowercases.
+    validation.data.handle = validation.data.handle.toLowerCase()
+
     if (isReservedHandle(validation.data.handle)) {
       throw new ValidationError('Handle is reserved', { handle: 'This handle is reserved' })
     }

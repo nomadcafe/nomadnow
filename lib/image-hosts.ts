@@ -8,8 +8,8 @@
 // optimizer allow-list never actually sees them, so it can't be the control it
 // looks like. This is.
 //
-// The two entries mirror remotePatterns exactly:
-//   *.supabase.co         — our Storage bucket; every avatar / background /
+// Allowed sources (next.config remotePatterns is the broader optimizer list):
+//   <project>.supabase.co — our Storage bucket; every avatar / background /
 //                           stay photo uploaded through the app lands here
 //   *.googleusercontent.com — profile pictures from Google OAuth, the only
 //                           OAuth provider wired up (app/login)
@@ -22,7 +22,15 @@
 // it hands the card's owner the IP, User-Agent and Referer of every visitor,
 // which is exactly what the analytics design (migration 0033) refuses to
 // collect for them.
-const ALLOWED_IMAGE_HOST_SUFFIXES = ['.supabase.co', '.googleusercontent.com'] as const
+//
+// Supabase is matched by EXACT host (this project's own Storage), not the
+// `*.supabase.co` suffix: anyone can create a free Supabase project and read
+// its request logs, so the suffix let a card owner host an "avatar" on their
+// own project and harvest every visitor's IP/UA — the exact tracking pixel
+// this file exists to stop. The suffix is only a fallback when
+// NEXT_PUBLIC_SUPABASE_URL is unset (UI-only local dev).
+const ALLOWED_IMAGE_HOST_SUFFIXES = ['.googleusercontent.com'] as const
+const SUPABASE_SUFFIX_FALLBACK = '.supabase.co'
 
 // The project's own Storage host, read from the public env var rather than
 // assumed. `*.supabase.co` covers hosted Supabase, but a project on a custom
@@ -52,6 +60,11 @@ export function isAllowedImageUrl(raw: string | null | undefined): boolean {
     return false
   }
   if (url.protocol !== 'https:') return false
-  if (url.hostname === storageHost()) return true
+  const ownHost = storageHost()
+  if (ownHost) {
+    if (url.hostname === ownHost) return true
+  } else if (url.hostname.endsWith(SUPABASE_SUFFIX_FALLBACK)) {
+    return true
+  }
   return ALLOWED_IMAGE_HOST_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix))
 }
