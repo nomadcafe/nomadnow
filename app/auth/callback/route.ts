@@ -44,14 +44,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`)
   }
 
-  // Honour proxy headers — when Vercel sits behind a custom domain, `origin`
-  // from request.url is correct, but defensively prefer x-forwarded-host so
-  // a future deployment behind a different proxy still produces the right
-  // public URL. Falls back to origin when the header is absent.
-  const forwardedHost = request.headers.get('x-forwarded-host')
-  const proto = request.headers.get('x-forwarded-proto') || 'https'
-  const isLocal = process.env.NODE_ENV === 'development'
-  const base = isLocal || !forwardedHost ? origin : `${proto}://${forwardedHost}`
+  // Redirect base is the request's own origin. Deliberately NOT built from
+  // x-forwarded-host: behind a proxy that passes that header through, an
+  // attacker-chosen host would turn this login redirect (which carries fresh
+  // session cookies) into an open redirect. Same fix as
+  // /api/billing/checkout/success.
+  const base = origin
 
   const response = NextResponse.redirect(`${base}${next}`)
   const env = getEnvSafe()

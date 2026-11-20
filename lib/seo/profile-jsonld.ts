@@ -1,14 +1,19 @@
 import type { User, NomadStay } from '@/types/database'
 import { mergedVisitedCodes, splitStays } from '@/lib/stays'
 import { getCountryName } from '@/lib/countries'
+import { siteUrl } from '@/lib/seo/site-url'
 
-const SITE_ORIGIN = 'https://nomad.now'
+// Origin comes from the shared helper (lib/seo/site-url) so a preview deploy's
+// JSON-LD doesn't claim canonical production URLs. Read per call rather than
+// once at module scope — a module-level const would freeze whatever the env
+// looked like when the bundle was first imported.
 
 // schema.org Person for a public nomad card. Nomad-flavored only — Creator
 // Profile was deprecated. Upcoming stays are intentionally excluded from
 // `additionalProperty: Visited countries` since a place a user hasn't gone
 // to yet shouldn't bump rich-result counts.
 export function buildProfileJsonLd(user: User, stays: NomadStay[]) {
+  const SITE_ORIGIN = siteUrl()
   // user.location is a deprecated read-only legacy fallback (migration 0030).
   const currentLocation = user.current_city || user.location
   const buckets = splitStays(stays)
@@ -48,6 +53,7 @@ export function buildProfileJsonLd(user: User, stays: NomadStay[]) {
 }
 
 export function buildProfileBreadcrumbJsonLd(user: User) {
+  const SITE_ORIGIN = siteUrl()
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

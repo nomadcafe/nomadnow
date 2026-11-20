@@ -16,18 +16,23 @@ import { bumpBillingCache, bumpProfileCache } from '@/lib/revalidate'
 // We do the same DB write the webhook would do, idempotently. If the webhook
 // already ran, this is a no-op overwrite with identical values.
 
-function getBaseUrl(request: NextRequest): string {
-  const forwardedHost = request.headers.get('x-forwarded-host')
-  const proto = request.headers.get('x-forwarded-proto') || 'https'
-  if (forwardedHost && process.env.NODE_ENV !== 'development') {
-    return `${proto}://${forwardedHost}`
-  }
-  return process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+// Every branch of this route ends in a redirect, so the base URL is a redirect
+// target and must come from configuration only. It previously preferred the
+// request's own `x-forwarded-host` / `x-forwarded-proto`, which is a classic
+// host-header injection: behind any proxy that forwards those headers instead
+// of overwriting them, an attacker-chosen Host turns this endpoint into an open
+// redirect off the site. Config covers the cases the header was there for —
+// NEXT_PUBLIC_BASE_URL for a custom domain, VERCEL_URL for preview deploys —
+// and matches how /api/billing/checkout builds the URLs it hands Stripe.
+function getBaseUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_BASE_URL
+  if (explicit) return explicit
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
 }
 
 export async function GET(request: NextRequest) {
-  const baseUrl = getBaseUrl(request)
+  const baseUrl = getBaseUrl()
   const { searchParams } = new URL(request.url)
   const sessionId = searchParams.get('session_id')
 

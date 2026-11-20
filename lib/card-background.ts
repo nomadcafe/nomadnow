@@ -8,6 +8,8 @@
 // the theme default rather than throwing — keeps a corrupted row from
 // breaking the public card render.
 
+import { isAllowedImageUrl } from './image-hosts'
+
 export type BackgroundMode = 'theme' | 'solid' | 'gradient' | 'image'
 export const BACKGROUND_MODE_KEYS = ['theme', 'solid', 'gradient', 'image'] as const
 
@@ -32,6 +34,13 @@ export type BackgroundValue = BackgroundSolid | BackgroundGradient | BackgroundI
 // `url("…")` token. Pairs with the write-time host check in the settings API —
 // this is the render-time backstop so a hand-crafted DB row can't inject CSS.
 const SAFE_IMAGE_URL_RE = /^https:\/\/[^\s"')]+$/
+
+// CSS safety is only half of it: the browser fetches whatever host this points
+// at, so an off-allow-list URL is a tracking pixel on a public card even when
+// it's perfectly well-formed. Same control as the <img> path (lib/image-hosts).
+function isSafeBackgroundImageUrl(url: string): boolean {
+  return SAFE_IMAGE_URL_RE.test(url) && isAllowedImageUrl(url)
+}
 
 // Six picks meant to look polished out of the box — sunsets, jungles,
 // graphite. Users who want something specific can edit the two-color
@@ -81,7 +90,7 @@ export function resolveBackgroundCss(
   }
   if (mode === 'image') {
     const v = value as Partial<BackgroundImage> | null
-    if (v && typeof v.url === 'string' && SAFE_IMAGE_URL_RE.test(v.url)) {
+    if (v && typeof v.url === 'string' && isSafeBackgroundImageUrl(v.url)) {
       // cover/center so any aspect ratio fills the page; no-repeat so a small
       // image doesn't tile. The card surface sits on top and keeps text legible.
       return `url("${v.url}") center / cover no-repeat`
@@ -89,4 +98,25 @@ export function resolveBackgroundCss(
     return null
   }
   return null
+}
+
+/**
+ * Pro gate for image backgrounds, applied at every site that renders a card.
+ *
+ * Image backgrounds are Pro-only. A downgraded owner KEEPS `background_mode:
+ * 'image'` and its URL in `profile_settings` on purpose — re-upgrading then
+ * restores the background without them re-uploading anything — which means
+ * every render path has to drop it explicitly, exactly like `accent_color` and
+ * the verified badge do in app/[handle]/page.tsx. Falls back to the theme
+ * background, never to a half-applied image.
+ *
+ * Returns the mode/value the renderer should actually use.
+ */
+export function gateProBackground(
+  isProOwner: boolean,
+  mode: string | null | undefined,
+  value: unknown,
+): { mode: string | null | undefined; value: unknown } {
+  if (isProOwner || mode !== 'image') return { mode, value }
+  return { mode: 'theme', value: null }
 }

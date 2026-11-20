@@ -26,13 +26,27 @@ const STORAGE_BUCKET = 'avatars'
 // Public storage URLs look like
 // https://<proj>.supabase.co/storage/v1/object/public/avatars/<path>. Pull the
 // object path (everything after the bucket segment) so it can be removed.
-function storagePathFromUrl(url: unknown): string | null {
+//
+// The URLs come from the user's own rows, i.e. they're user-controlled: any
+// URL in our bucket passes the avatar / photo validation, including one that
+// points at SOMEONE ELSE's file. Since the removal runs with the service-role
+// client, only paths inside the caller's own `${userId}/` folder (where
+// lib/storage writes every upload) are returned — otherwise deleting your
+// account would delete whichever files you'd pointed your avatar at.
+function storagePathFromUrl(url: unknown, userId: string): string | null {
   if (typeof url !== 'string') return null
   const marker = `/object/public/${STORAGE_BUCKET}/`
   const idx = url.indexOf(marker)
   if (idx === -1) return null
-  const path = url.slice(idx + marker.length)
-  return path ? decodeURIComponent(path) : null
+  let path: string
+  try {
+    path = decodeURIComponent(url.slice(idx + marker.length).split(/[?#]/)[0])
+  } catch {
+    return null
+  }
+  if (!path.startsWith(`${userId}/`)) return null
+  if (path.split('/').some((seg) => seg === '..' || seg === '.' || seg === '')) return null
+  return path
 }
 
 export async function DELETE() {
@@ -50,11 +64,12 @@ export async function DELETE() {
 
     const paths = new Set<string>()
     const add = (u: unknown) => {
-      const p = storagePathFromUrl(u)
+      const p = storagePathFromUrl(u, user.id)
       if (p) paths.add(p)
     }
     add(profile?.avatar_url)
-    if (settings?.background_mode === 'image') add(settings?.background_value)
+    // background_value is JSONB `{ url }` in image mode, not a bare string.
+    add((settings?.background_value as { url?: unknown } | null)?.url)
     for (const stay of stays ?? []) {
       const photos = (stay as { photo_urls?: unknown }).photo_urls
       if (Array.isArray(photos)) photos.forEach(add)

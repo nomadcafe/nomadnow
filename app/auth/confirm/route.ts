@@ -50,11 +50,12 @@ export async function GET(request: NextRequest) {
   const rawType = searchParams.get('type')
   const next = safeNextPath(searchParams.get('next'))
 
-  // Same proxy-aware base-URL handling as /auth/callback.
-  const forwardedHost = request.headers.get('x-forwarded-host')
-  const proto = request.headers.get('x-forwarded-proto') || 'https'
-  const isLocal = process.env.NODE_ENV === 'development'
-  const base = isLocal || !forwardedHost ? origin : `${proto}://${forwardedHost}`
+  // Redirect base is the request's own origin. Deliberately NOT built from
+  // x-forwarded-host: behind a proxy that passes that header through, an
+  // attacker-chosen host would turn this login redirect (which carries fresh
+  // session cookies) into an open redirect. Same fix as
+  // /api/billing/checkout/success.
+  const base = origin
 
   if (!tokenHash || !rawType || !VALID_TYPES.has(rawType)) {
     return NextResponse.redirect(`${base}/login?error=invalid_link`)

@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireUser } from '@/lib/supabase/server'
-import { requireActivePlan } from '@/lib/billing-guard'
 import { createAdminSupabase } from '@/lib/supabase/admin'
 import { getStripe, isStripeConfigured, planForPriceId, type Plan } from '@/lib/stripe/server'
 import { ValidationError, formatErrorResponse, logError } from '@/lib/errors'
 import { isReservedHandle } from '@/lib/reserved-handles'
 import { bumpProfileCache, bumpBillingCache, bumpExploreCache } from '@/lib/revalidate'
 import { SAFE_USER_COLUMNS } from '@/lib/db-columns'
-import { safeLinkUrlSchema } from '@/lib/validation'
+import { avatarUrlSchema, safeLinkUrlSchema } from '@/lib/validation'
 import { assertUrlsSafe } from '@/lib/safe-browsing'
 
 // Reused on both create and update — keep them in lockstep so the form can
@@ -53,9 +52,12 @@ const nomadSinceSchema = z
 const createUserSchema = z.object({
   handle: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Handle can only contain letters, numbers, underscores, and hyphens'),
   display_name: z.string().max(100).optional(),
-  // safeLinkUrlSchema (not bare .url()) so a javascript:/data: URL can't be
-  // stored and later fed into an <img src> or the JSON-LD `image` field.
-  avatar_url: safeLinkUrlSchema.optional().or(z.literal('')),
+  // avatarUrlSchema (not safeLinkUrlSchema) so this can't be pointed at an
+  // arbitrary host: the card loads it as an <img src> for every visitor, which
+  // would turn a public card into a tracking pixel for its owner. The upload
+  // UI only ever produces Supabase Storage URLs; this closes the direct-API
+  // path. See lib/image-hosts.
+  avatar_url: avatarUrlSchema.optional().or(z.literal('')),
   country: z.string().max(100).optional(),
   bio: z.string().max(500).optional(),
   // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
@@ -82,9 +84,12 @@ const createUserSchema = z.object({
 
 const updateUserSchema = z.object({
   display_name: z.string().max(100).optional(),
-  // safeLinkUrlSchema (not bare .url()) so a javascript:/data: URL can't be
-  // stored and later fed into an <img src> or the JSON-LD `image` field.
-  avatar_url: safeLinkUrlSchema.optional().or(z.literal('')),
+  // avatarUrlSchema (not safeLinkUrlSchema) so this can't be pointed at an
+  // arbitrary host: the card loads it as an <img src> for every visitor, which
+  // would turn a public card into a tracking pixel for its owner. The upload
+  // UI only ever produces Supabase Storage URLs; this closes the direct-API
+  // path. See lib/image-hosts.
+  avatar_url: avatarUrlSchema.optional().or(z.literal('')),
   country: z.string().max(100).optional(),
   bio: z.string().max(500).optional(),
   // safeLinkUrlSchema (not bare .url()) so a `javascript:`/`data:` website
@@ -118,6 +123,12 @@ export async function POST(request: NextRequest) {
     if (!validation.success) {
       throw new ValidationError('Invalid user data', validation.error.errors)
     }
+
+    // Normalise server-side: the form lowercases, but a direct POST could
+    // otherwise claim `Alice` beside an existing `alice` (UNIQUE is
+    // case-sensitive) — an unreachable look-alike, since every lookup
+    // lowercases.
+    validation.data.handle = validation.data.handle.toLowerCase()
 
     if (isReservedHandle(validation.data.handle)) {
       throw new ValidationError('Handle is reserved', { handle: 'This handle is reserved' })
@@ -281,10 +292,11 @@ async function recoverOrphanSubscription(userId: string): Promise<unknown | null
 
 export async function PUT(request: NextRequest) {
   try {
-    // Paid-only model: editing an existing profile requires an active plan.
-    // The POST create path stays on requireUser so a brand-new user can still
-    // claim a handle / seed their card before paying (see useSubmitCard).
-    const { supabase, user } = await requireActivePlan()
+    // Freemium: editing a profile only requires being signed in — the card is
+    // live regardless of plan. Pro-only fields are gated at their own save
+    // boundaries (accent / image bg live in /api/settings); nothing here is
+    // plan-restricted.
+    const { supabase, user } = await requireUser()
     const body = await request.json()
 
     const validation = updateUserSchema.safeParse(body)

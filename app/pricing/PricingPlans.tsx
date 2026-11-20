@@ -17,6 +17,11 @@ interface Props {
 }
 
 const BASIC_BULLET_KEYS = [
+  // Lead with what Basic adds over the free tier: discovery + no footer.
+  // The remaining bullets describe what every card can do (also free) —
+  // kept so the plan reads as complete, not as a stack of removals.
+  'discovery',
+  'footer',
   'premiumDomain',
   'worldMap',
   'liveTimezone',
@@ -26,7 +31,6 @@ const BASIC_BULLET_KEYS = [
   'travelStats',
   'analytics',
   'ogImage',
-  'footer',
 ] as const
 
 // Pro bullets — order is by "what's live today first, roadmap after" so the

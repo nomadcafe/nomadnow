@@ -58,6 +58,10 @@ interface NomadCardServerProps {
   // hero preview). Drops the full-screen page wrapper and floating CTAs
   // so the card fits a constrained container.
   embedded?: boolean
+  // Freemium: free (unpaid) cards carry a subtle "Made with Nomad.now"
+  // footer that links back to the marketing home. Paid plans pass false to
+  // drop it. Never shown on the owner's own preview-embedded views.
+  showBranding?: boolean
 }
 
 // Server-component sibling of NomadCard. Used by the static read paths
@@ -87,6 +91,7 @@ export async function NomadCardServer({
   hideMakeYoursCTA = false,
   isOwner = false,
   embedded = false,
+  showBranding = false,
 }: NomadCardServerProps) {
   const [t, tStays, tStatus, tFeaturedWork, tRole, tLinkTypes, locale] = await Promise.all([
     getTranslations('card'),
@@ -217,6 +222,15 @@ export async function NomadCardServer({
                   card is noise) and not in embedded previews. */}
               {!isOwner && !embedded && (
                 <ReportLink handle={user.handle} mutedClass={theme.textMuted} />
+              )}
+              {/* Freemium footer — every free card is a link back to the
+                  product. Dropped for paid plans (showBranding=false). */}
+              {showBranding && (
+                <p className={`mt-4 text-xs ${theme.textMuted}`}>
+                  <a href="/" className="hover:underline">
+                    {t('poweredBy')}
+                  </a>
+                </p>
               )}
             </div>
           </div>

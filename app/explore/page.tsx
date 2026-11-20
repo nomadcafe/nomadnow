@@ -94,6 +94,13 @@ async function fetchNomads(
       // Keep moderated (suspended) cards out of the public directory — their
       // /[handle] page already 404s, so listing them would link to nowhere.
       .eq('suspended', false)
+      // Freemium: only paid cards get directory placement. `plan` is non-null
+      // exactly while a subscription is live — the Stripe webhook clears it to
+      // null when the paid period lapses (see lib/billing.ts). Free cards are
+      // still reachable by direct link; they just aren't listed or indexed.
+      // (`plan` is one of the anon-readable columns from migration 0007; the
+      // authoritative isActive check still governs on-card branding + noindex.)
+      .not('plan', 'is', null)
 
     if (filters?.search) {
       // Strip characters that have meaning in PostgREST's `or` filter

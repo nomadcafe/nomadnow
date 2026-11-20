@@ -9,19 +9,20 @@ import { createBrowserSupabase } from '@/lib/supabase/browser'
 // viewer's state, so a logged-in user with an active card never sees a
 // button that asks them to "get" something they already have.
 //
-// State matrix:
-//   guest                       → /pricing       · "Get your card"
+// State matrix (freemium — creating a card is free, so the CTA never routes
+// a first-timer through pricing; upgrade prompts live after the card exists):
+//   guest                       → /create-card   · "Get your card"
 //   logged in, no handle        → /create-card   · "Get your card"
-//   logged in, handle, no plan  → /pricing       · "Finish setup"
-//   logged in, handle + plan    → /{handle}      · "My card"
+//   logged in, handle           → /{handle}      · "My card"
+// `plan` no longer affects the destination — an unpaid card is live too.
 //
 // Optional `showArrow` renders a right-arrow inside the button so the same
 // component works for both terse nav use and the marketing-y hero / dark
 // CTA buttons that wanted an arrow before.
 type Resolved =
-  | { href: string; labelKey: 'getCard' | 'finishSetup' | 'myCard' }
+  | { href: string; labelKey: 'getCard' | 'myCard' }
 
-const DEFAULT_RESOLVED: Resolved = { href: '/pricing', labelKey: 'getCard' }
+const DEFAULT_RESOLVED: Resolved = { href: '/create-card', labelKey: 'getCard' }
 
 export function GetYourCardButton({
   className,
@@ -46,24 +47,21 @@ export function GetYourCardButton({
       if (!mounted) return
 
       if (!user) {
-        setResolved({ href: '/pricing', labelKey: 'getCard' })
+        setResolved({ href: '/create-card', labelKey: 'getCard' })
         return
       }
 
       const { data: profile } = await supabase
         .from('users')
-        .select('handle, plan')
+        .select('handle')
         .eq('id', user.id)
         .maybeSingle()
       if (!mounted) return
 
       const handle = (profile?.handle as string | undefined) ?? null
-      const plan = (profile?.plan as string | undefined) ?? null
 
       if (!handle) {
         setResolved({ href: '/create-card', labelKey: 'getCard' })
-      } else if (!plan) {
-        setResolved({ href: '/pricing', labelKey: 'finishSetup' })
       } else {
         setResolved({ href: `/${handle}`, labelKey: 'myCard' })
       }
